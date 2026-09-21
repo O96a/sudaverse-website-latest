@@ -1,0 +1,547 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import ProductArt from '@/components/products/ProductArt.astro';
+import ProductRow from '@/components/products/ProductRow.astro';
+import ProductScreens from '@/components/products/ProductScreens.astro';
+import ProductTopics from '@/components/products/ProductTopics.astro';
+import CtaBand from '@/components/products/CtaBand.astro';
+import { products, type Product } from '@/data/products';
+import { solutions } from '@/data/solutions';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { locales, pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) => products.map((product) => ({ params: { lang, slug: product.slug }, props: { product } })));
+}
+const locale = Astro.params.lang as Locale;
+const { product } = Astro.props as { product: Product };
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: {
+    siteName: 'Sudaverse',
+    openSite: 'Open product site',
+    repo: 'View on GitHub',
+    capabilities: 'Capabilities',
+    status: 'Status',
+    facts: 'Product facts',
+    solutions: 'Related solutions',
+    others: 'Other products',
+    liveAfter: ' is live.',
+    devAfter: ' is in development. Technical details, demos and pilots are discussed in a briefing.',
+    otherAfter: ' is not yet generally available. Technical details are discussed in a briefing.',
+    langs: { ar: 'Arabic', en: 'English' } as Record<string, string>,
+    cta: { h2: 'Want a closer look?', body: 'Request a briefing and our engineering team will go through the details with you.' },
+  },
+  ar: {
+    siteName: 'سودافيرس',
+    openSite: 'افتح موقع المنتج',
+    repo: 'عرض على GitHub',
+    capabilities: 'القدرات',
+    status: 'الحالة',
+    facts: 'بيانات المنتج',
+    solutions: 'حلول ذات صلة',
+    others: 'منتجات أخرى',
+    liveAfter: ' متاح.',
+    devAfter: ' قيد التطوير. تُناقَش التفاصيل التقنية والعروض التوضيحية والتشغيل التجريبي في جلسة تعريفية.',
+    otherAfter: ' لم يُتح للجميع بعد. تُناقَش التفاصيل التقنية في جلسة تعريفية.',
+    langs: { ar: 'العربية', en: 'الإنجليزية' } as Record<string, string>,
+    cta: { h2: 'تريد نظرة أقرب؟', body: 'اطلب عرضًا تعريفيًا وسيستعرض معك فريقنا الهندسي التفاصيل.' },
+  },
+}[locale];
+
+const tagline = L(product.tagline);
+const summary = L(product.summary);
+
+/** Meta description: the summary, cut at a sentence boundary if it runs long. */
+function metaDescription(text: string) {
+  if (text.length <= 160) return text;
+  let out = '';
+  for (const s of text.match(/[^.]+\.?/g) ?? [text]) {
+    if ((out + s).trim().length > 160) break;
+    out += s;
+  }
+  return (out || text.slice(0, 157) + '...').trim();
+}
+// Title: name plus tagline; falls back to the category when the tagline would run too long.
+const fullTitle = `${product.name}: ${tagline.replace(/\.$/, '')} | ${copy.siteName}`;
+const title =
+  fullTitle.length <= 80 ? fullTitle : `${product.name}: ${t(locale, `category.${product.category}` as const)} | ${copy.siteName}`;
+const description = metaDescription(summary);
+
+const statusAfter = product.stage === 'live' ? copy.liveAfter : product.stage === 'development' ? copy.devAfter : copy.otherAfter;
+const langNames = (product.languages ?? []).map((l) => copy.langs[l]).filter(Boolean);
+const languages = langNames.length ? new Intl.ListFormat(locale, { style: 'long', type: 'conjunction' }).format(langNames) : '';
+
+const briefingHref = `${localePath(locale, 'contact')}?topic=product&product=${product.slug}`;
+const productsHref = localePath(locale, 'products');
+const relatedSolutions = solutions.filter((s) => s.products.includes(product.slug));
+const others = [
+  ...products.filter((p) => p.slug !== product.slug && p.category === product.category),
+  ...products.filter((p) => p.slug !== product.slug && p.category !== product.category),
+].slice(0, 3);
+
+const abs = (path: string) => `${site.origin}${path}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.products'), item: abs(productsHref) },
+      { '@type': 'ListItem', position: 3, name: product.name, item: abs(localePath(locale, `products/${product.slug}`)) },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name: product.name,
+    description: summary,
+    applicationCategory: product.slug === 'sudatutor' ? 'EducationalApplication' : 'BusinessApplication',
+    ...(product.languages?.length ? { inLanguage: product.languages } : {}),
+    ...(product.url ? { url: product.url } : {}),
+    publisher: { '@type': 'Organization', name: site.name, url: `${site.origin}/` },
+  },
+];
+
+const externals = [
+  product.url && { href: product.url, label: copy.openSite },
+  product.docs && { href: product.docs, label: copy.repo },
+].filter(Boolean) as { href: string; label: string }[];
+---
+
+<Base title={title} description={description} nav="products" jsonLd={jsonLd}>
+  <!-- Hero: what it is, where it stands, what to do next -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <nav class="crumbs" aria-label={t(locale, 'a11y.breadcrumb')}>
+          <ol role="list">
+            <li><a href={localePath(locale)}>{t(locale, 'misc.home')}</a></li>
+            <li><a href={productsHref}>{t(locale, 'nav.products')}</a></li>
+            <li aria-current="page" translate="no">{product.name}</li>
+          </ol>
+        </nav>
+        <div class="hero__head">
+          <h1 id="hero-h" translate="no">{product.name}</h1>
+          <StageBadge stage={product.stage} locale={locale} />
+        </div>
+        <p class="hero__tag">{tagline}</p>
+        <p class="hero__sum">{summary}</p>
+        <div class="cluster hero__cta">
+          <Button href={briefingHref} variant="primary" arrow>{t(locale, 'cta.requestBriefing')}</Button>
+          {
+            externals.map((e) => (
+              <a class="ext" href={e.href} target="_blank" rel="noopener noreferrer">
+                {e.label}
+                <Icon name="external" size={16} />
+                <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+              </a>
+            ))
+          }
+        </div>
+      </div>
+      <div class="hero__art">
+        <ProductArt slug={product.slug} bare />
+      </div>
+    </div>
+  </section>
+
+  <!-- Overview: audience, capabilities, honest status, facts -->
+  <div class="overview">
+    <div class="container overview__grid">
+      <div class="spec">
+        {
+          product.audience && (
+            <section class="spec__row" aria-labelledby="aud-h" data-reveal>
+              <h2 id="aud-h" class="spec__k">{t(locale, 'misc.audience')}</h2>
+              <div class="spec__v">
+                <p class="spec__lead">{L(product.audience)}</p>
+              </div>
+            </section>
+          )
+        }
+        {
+          product.capabilities && product.capabilities.length > 0 && (
+            <section class="spec__row" aria-labelledby="caps-h" data-reveal>
+              <h2 id="caps-h" class="spec__k">{copy.capabilities}</h2>
+              <div class="spec__v">
+                <ul role="list" class="caps">
+                  {product.capabilities.map((c) => (
+                    <li>
+                      <Icon name="check" size={18} />
+                      <span>{L(c)}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </section>
+          )
+        }
+        <section class="spec__row" aria-labelledby="status-h" data-reveal>
+          <h2 id="status-h" class="spec__k">{copy.status}</h2>
+          <div class="spec__v">
+            <p class="spec__lead"><span translate="no">{product.name}</span>{statusAfter}</p>
+            {
+              product.stage === 'live' && externals.length > 0 && (
+                <p class="status__links">
+                  {externals.map((e) => (
+                    <a class="ext" href={e.href} target="_blank" rel="noopener noreferrer">
+                      {e.label}
+                      <Icon name="external" size={16} />
+                      <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                    </a>
+                  ))}
+                </p>
+              )
+            }
+          </div>
+        </section>
+      </div>
+
+      <section class="facts" aria-labelledby="facts-h" data-reveal>
+        <h2 id="facts-h" class="facts__h">{copy.facts}</h2>
+        <dl class="facts__list">
+          <div class="facts__row">
+            <dt>{t(locale, 'misc.category')}</dt>
+            <dd>{t(locale, `category.${product.category}` as const)}</dd>
+          </div>
+          <div class="facts__row">
+            <dt>{t(locale, 'misc.stage')}</dt>
+            <dd><StageBadge stage={product.stage} locale={locale} /></dd>
+          </div>
+          {
+            languages && (
+              <div class="facts__row">
+                <dt>{t(locale, 'misc.languages')}</dt>
+                <dd>{languages}</dd>
+              </div>
+            )
+          }
+        </dl>
+      </section>
+    </div>
+  </div>
+
+  <!-- Optional real product visuals; renders nothing when the product has none -->
+  <ProductScreens product={product} locale={locale} />
+  <ProductTopics product={product} locale={locale} />
+
+  <!-- Related solutions -->
+  {
+    relatedSolutions.length > 0 && (
+      <section class="section section--alt rel" aria-labelledby="rel-h">
+        <div class="container rel__grid">
+          <h2 id="rel-h" data-reveal>{copy.solutions}</h2>
+          <ul role="list" class="rel__list" data-reveal>
+            {relatedSolutions.map((s) => (
+              <li>
+                <a class="rel__row" href={`${localePath(locale, 'solutions')}#${s.slug}`}>
+                  <span class="rel__title">{L(s.title)}</span>
+                  <span class="rel__need">{L(s.need)}</span>
+                  <Icon name="arrow" size={20} directional class="rel__arrow" />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <!-- Other products -->
+  {
+    others.length > 0 && (
+      <section class="section section--tight more" aria-labelledby="more-h">
+        <div class="container">
+          <h2 id="more-h" data-reveal>{copy.others}</h2>
+          <ul role="list" class="more__list" data-reveal>
+            {others.map((p) => (
+              <li>
+                <ProductRow product={p} locale={locale} compact />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <CtaBand
+    id="product-cta-h"
+    heading={copy.cta.h2}
+    body={copy.cta.body}
+    primary={{ href: briefingHref, label: t(locale, 'cta.requestBriefing') }}
+    secondary={{ href: productsHref, label: t(locale, 'cta.seeAllProducts') }}
+    seed={product.slug.length * 7 + 3}
+  />
+</Base>
+
+<style>
+  .ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .ext:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* ---- Hero ---- */
+  .hero {
+    padding-block: clamp(1.5rem, 0.75rem + 3vw, 3rem) var(--section-y-tight);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+    align-content: center;
+  }
+  .crumbs {
+    margin-block-end: var(--s-4);
+  }
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-2);
+    padding: 0;
+    font-size: var(--fs-200);
+    color: var(--color-text-meta);
+  }
+  .crumbs li + li::before {
+    content: '/';
+    content: '/' / '';
+    margin-inline-end: var(--s-2);
+    color: var(--color-border-strong);
+  }
+  .crumbs a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    color: var(--color-text-muted);
+  }
+  .crumbs li[aria-current] {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    color: var(--color-text);
+  }
+  .hero__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-4);
+  }
+  .hero__tag {
+    font-size: var(--fs-400);
+    line-height: 1.4;
+    font-weight: 560;
+    max-inline-size: 30ch;
+  }
+  .hero__sum {
+    color: var(--color-text-muted);
+    max-inline-size: 54ch;
+  }
+  .hero__cta {
+    margin-block-start: var(--s-3);
+    gap: var(--s-2) var(--s-5);
+  }
+  .hero__art {
+    position: relative;
+    display: grid;
+    place-items: center;
+    min-inline-size: 0;
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+      column-gap: var(--s-8);
+    }
+  }
+
+  /* ---- Overview ---- */
+  .overview {
+    padding-block: 0 var(--section-y-tight);
+  }
+  .overview__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .spec {
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .spec__row {
+    display: grid;
+    gap: var(--s-2) var(--s-6);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .spec__k {
+    font-size: var(--fs-300);
+    line-height: var(--lh-snug);
+    font-weight: 650;
+    letter-spacing: 0;
+  }
+  .spec__v {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+  }
+  .spec__lead {
+    font-size: var(--fs-400);
+    line-height: 1.5;
+    font-weight: 500;
+    max-inline-size: 42ch;
+  }
+  .caps {
+    display: grid;
+    gap: var(--s-3);
+    padding: 0;
+  }
+  .caps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.7rem;
+    align-items: start;
+    max-inline-size: 56ch;
+  }
+  .caps :global(svg) {
+    color: var(--sage-600);
+    margin-block-start: 0.28em;
+  }
+  .status__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-5);
+    max-inline-size: none;
+  }
+  .facts__h {
+    font-size: var(--fs-300);
+    line-height: var(--lh-snug);
+    font-weight: 650;
+    letter-spacing: 0;
+    padding-block-end: var(--s-3);
+  }
+  .facts__list {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .facts__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: var(--s-4);
+    align-items: center;
+    padding-block: var(--s-3);
+    min-block-size: 3.25rem;
+    border-block-end: 1px solid var(--color-border);
+  }
+  .facts__row dt {
+    font-size: var(--fs-200);
+    color: var(--color-text-meta);
+  }
+  .facts__row dd {
+    margin: 0;
+    font-weight: 560;
+  }
+  @media (min-width: 48rem) {
+    .spec__row {
+      grid-template-columns: minmax(0, 3fr) minmax(0, 8fr);
+    }
+  }
+  @media (min-width: 64rem) {
+    .overview__grid {
+      grid-template-columns: minmax(0, 8fr) minmax(0, 4fr);
+      column-gap: var(--s-9);
+    }
+  }
+
+  /* ---- Related solutions ---- */
+  .rel__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .rel h2 {
+    font-size: var(--fs-500);
+    line-height: var(--lh-heading);
+    max-inline-size: 14ch;
+  }
+  .rel__list {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .rel__row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s-1) var(--s-5);
+    align-items: center;
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border-strong);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .rel__row:hover {
+    background: color-mix(in srgb, var(--paper) 60%, transparent);
+    color: var(--ink);
+  }
+  .rel__title {
+    font-size: var(--fs-400);
+    font-weight: 620;
+    line-height: var(--lh-snug);
+  }
+  .rel__need {
+    grid-column: 1;
+    color: var(--color-text-muted);
+    max-inline-size: 52ch;
+  }
+  .rel__row :global(.rel__arrow) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--nile-700);
+  }
+  @media (min-width: 64rem) {
+    .rel__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--s-8);
+    }
+  }
+
+  /* ---- Other products ---- */
+  .more h2 {
+    margin-block-end: var(--s-6);
+    font-size: var(--fs-500);
+    line-height: var(--lh-heading);
+  }
+  .more__list {
+    display: grid;
+    gap: 0 var(--s-7);
+    padding: 0;
+  }
+  .more__list > li {
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  @media (min-width: 48rem) {
+    .more__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .more__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

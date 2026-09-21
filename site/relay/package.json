@@ -1,0 +1,22 @@
+{
+  "name": "sudaverse-contact-relay",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Small contact-form relay for the Sudaverse website: validates a JSON POST and delivers it by SMTP email, Telegram and optionally Signal.",
+  "type": "module",
+  "main": "server.mjs",
+  "engines": {
+    "node": ">=22.9"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "dev": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test \"test/**/*.test.mjs\""
+  },
+  "dependencies": {
+    "nodemailer": "^10.0.10"
+  },
+  "devDependencies": {
+    "smtp-server": "^3.19.13"
+  }
+}

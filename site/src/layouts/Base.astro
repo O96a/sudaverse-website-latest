@@ -1,0 +1,110 @@
+---
+import '@/styles/fonts.css';
+import '@/styles/base.css';
+import '@/styles/tokens.css';
+
+import Seo from '@/components/Seo.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+import ChatLauncher from '@/components/ChatLauncher.astro';
+import { site } from '@/config/site';
+import { localeMeta, defaultLocale, isLocale, type Locale } from '@/i18n/config';
+import { t } from '@/i18n/utils';
+import { withBase } from '@/i18n/base';
+import type { NavKey } from '@/config/nav';
+
+// Critical font files, preloaded per language so first paint uses the final face.
+import latinFont from '@fontsource-variable/schibsted-grotesk/files/schibsted-grotesk-latin-wght-normal.woff2?url';
+import arabicFont400 from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
+import arabicFont600 from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-600-normal.woff2?url';
+
+
+interface Props {
+  title: string;
+  description: string;
+  nav?: NavKey;
+  image?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  /** Extra schema.org objects for this page (BreadcrumbList, SoftwareApplication, ...). */
+  jsonLd?: Record<string, unknown>[];
+  /** Hide the WhatsApp launcher on this page. */
+  noChat?: boolean;
+}
+const { title, description, nav = '', image, ogType, noindex, jsonLd = [], noChat = false } = Astro.props;
+
+const lang = Astro.params.lang;
+const locale: Locale = isLocale(lang) ? lang : defaultLocale;
+const meta = localeMeta[locale];
+
+const organization = {
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: site.name,
+  url: `${site.origin}/`,
+  logo: `${site.origin}/icon-512.png`,
+  description: 'Sudanese AI and digital systems company building applied technology for institutions and communities.',
+  email: site.contact.email,
+  sameAs: Object.values(site.social),
+  contactPoint: [
+    {
+      '@type': 'ContactPoint',
+      contactType: 'General inquiries',
+      email: site.contact.email,
+      availableLanguage: ['English', 'Arabic'],
+    },
+  ],
+};
+const website = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  url: `${site.origin}/`,
+  inLanguage: ['en', 'ar'],
+};
+const graph = [organization, website, ...jsonLd];
+---
+
+<!doctype html>
+<html lang={meta.htmlLang} dir={meta.dir}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+    <meta name="theme-color" content="#f3f4ef" />
+    <meta name="color-scheme" content="light" />
+
+    <Seo title={title} description={description} locale={locale} pathname={Astro.url.pathname} image={image} type={ogType} noindex={noindex} />
+
+    <link rel="icon" href={withBase('/favicon.ico')} sizes="48x48" />
+    <link rel="icon" href={withBase('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
+
+    {locale === 'ar'
+      ? (
+        <>
+          <link rel="preload" href={arabicFont400} as="font" type="font/woff2" crossorigin />
+          <link rel="preload" href={arabicFont600} as="font" type="font/woff2" crossorigin />
+        </>
+      )
+      : <link rel="preload" href={latinFont} as="font" type="font/woff2" crossorigin />}
+
+    {graph.map((obj) => <script type="application/ld+json" set:html={JSON.stringify(obj)} />)}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t(locale, 'a11y.skip')}</a>
+    <Header locale={locale} current={nav} />
+    <main id="main" tabindex="-1">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+    {!noChat && <ChatLauncher locale={locale} />}
+  </body>
+</html>
+
+<style is:global>
+  #main:focus {
+    outline: none;
+  }
+</style>

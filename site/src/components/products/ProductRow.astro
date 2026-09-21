@@ -1,0 +1,161 @@
+---
+import Icon from '@/components/Icon.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import ProductArt from './ProductArt.astro';
+import type { Product } from '@/data/products';
+import { localePath, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  product: Product;
+  locale: Locale;
+  /** Stacked layout for the "other products" strip on a product page. */
+  compact?: boolean;
+}
+const { product, locale, compact = false } = Astro.props;
+const href = localePath(locale, `products/${product.slug}`);
+---
+
+<article class:list={['row', { 'row--compact': compact }]}>
+  <ProductArt slug={product.slug} class="row__art" />
+  <div class="row__body">
+    <div class="row__head">
+      <h3 class="row__name"><a class="row__link" href={href} translate="no">{product.name}</a></h3>
+      <StageBadge stage={product.stage} locale={locale} />
+    </div>
+    <p class="row__tag">{pick(product.tagline, locale)}</p>
+    {
+      !compact && product.audience && (
+        <p class="row__aud">
+          <span class="row__k">{t(locale, 'misc.audience')}</span> {pick(product.audience, locale)}
+        </p>
+      )
+    }
+  </div>
+  <Icon name="arrow" size={22} directional class="row__go" />
+</article>
+
+<style>
+  .row {
+    position: relative;
+    display: grid;
+    gap: var(--s-4) var(--s-6);
+    padding-block: var(--s-6);
+    align-items: center;
+    transition: background-color var(--dur-2) var(--ease-out);
+  }
+  .row:hover {
+    background: color-mix(in srgb, var(--white) 45%, transparent);
+  }
+  .row:has(.row__link:focus-visible) {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+  .row__link {
+    color: inherit;
+    text-decoration: none;
+  }
+  .row__link:focus-visible {
+    outline: none;
+  }
+  /* The name is the link; its hit area stretches over the whole row. */
+  .row__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .row__art {
+    max-inline-size: 30rem;
+  }
+  .row__body {
+    display: grid;
+    gap: var(--s-2);
+    align-content: center;
+    min-inline-size: 0;
+  }
+  .row__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+  }
+  .row__name {
+    font-size: var(--fs-600);
+    line-height: var(--lh-tight);
+    font-weight: 680;
+    letter-spacing: var(--tracking-h2);
+  }
+  .row__tag {
+    font-size: var(--fs-400);
+    line-height: 1.4;
+    font-weight: 560;
+    max-inline-size: 34ch;
+  }
+  .row__aud {
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+    max-inline-size: 46ch;
+  }
+  .row__k {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--color-text-meta);
+    margin-inline-end: 0.4rem;
+  }
+  .row :global(.row__go) {
+    display: none;
+    color: var(--nile-700);
+    transition: translate var(--dur-2) var(--ease-out);
+  }
+  @media (min-width: 40rem) {
+    .row:not(.row--compact) {
+      grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 64rem) {
+    .row:not(.row--compact) {
+      grid-template-columns: minmax(0, 19rem) minmax(0, 1fr) auto;
+      column-gap: var(--s-7);
+    }
+    .row:not(.row--compact) :global(.row__go) {
+      display: block;
+    }
+    .row:hover :global(.row__go) {
+      translate: 4px 0;
+    }
+    :global([dir='rtl']) .row:hover :global(.row__go) {
+      translate: -4px 0;
+    }
+  }
+
+  /* Compact: a stacked entry used in the "other products" strip. */
+  .row--compact {
+    padding-block: var(--s-5) var(--s-4);
+    align-items: start;
+    align-content: start;
+    gap: var(--s-4);
+  }
+  .row--compact .row__art {
+    max-inline-size: none;
+    aspect-ratio: 800 / 340;
+  }
+  .row--compact .row__name {
+    font-size: var(--fs-500);
+  }
+  .row--compact .row__tag {
+    font-size: var(--fs-300);
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .row,
+    .row :global(.row__go) {
+      transition-duration: 0.01ms;
+    }
+    .row:hover :global(.row__go) {
+      translate: none;
+    }
+  }
+</style>

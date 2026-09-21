@@ -1,0 +1,176 @@
+---
+import Base from '@/layouts/Base.astro';
+import ProductRow from '@/components/products/ProductRow.astro';
+import CtaBand from '@/components/products/CtaBand.astro';
+import { categoryOrder, productsByCategory, type CategoryId } from '@/data/products';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+
+const copy = {
+  en: {
+    title: 'Products: Arabic-first AI and open tools | Sudaverse',
+    description:
+      'AI products and open tools built around Arabic language, local context and domain workflows, from education and agriculture to security and geospatial monitoring.',
+    h1: 'Products',
+    lead: 'Sudaverse builds AI products and open tools around Arabic language, local context and the workflows of specific domains.',
+    note: 'Every product page says plainly what the product does and who it is built for.',
+    cats: {
+      'ai-products': 'AI products for education and agriculture, built to work in Arabic.',
+      'data-intelligence': 'Geospatial platforms for situational awareness and flood early warning.',
+      'secure-ai': 'Security systems that apply AI to defending networks.',
+      'language-research': 'Open tooling for Arabic language models and their training data.',
+    } as Record<CategoryId, string>,
+    cta: {
+      h2: 'Start with a briefing.',
+      body: 'Ask about a product, an integration or a wider project. You will talk with our engineering team.',
+    },
+  },
+  ar: {
+    title: 'المنتجات: ذكاء اصطناعي عربي أولاً وأدوات مفتوحة | سودافيرس',
+    description:
+      'منتجات ذكاء اصطناعي وأدوات مفتوحة مبنية حول اللغة العربية والسياق المحلي وسير العمل في المجالات المتخصصة، من التعليم والزراعة إلى الأمن والمراقبة الجغرافية.',
+    h1: 'المنتجات',
+    lead: 'تبني سودافيرس منتجات ذكاء اصطناعي وأدوات مفتوحة حول اللغة العربية والسياق المحلي وسير العمل في مجالات متخصصة.',
+    note: 'تبيّن كل صفحة منتج بوضوح ما يقدّمه المنتج ولمن صُمّم.',
+    cats: {
+      'ai-products': 'منتجات ذكاء اصطناعي للتعليم والزراعة، مبنية لتعمل بالعربية.',
+      'data-intelligence': 'منصات جغرافية مكانية للوعي بالموقف والإنذار المبكر من الفيضانات.',
+      'secure-ai': 'أنظمة أمنية تطبّق الذكاء الاصطناعي على حماية الشبكات.',
+      'language-research': 'أدوات مفتوحة للنماذج اللغوية العربية وبيانات تدريبها.',
+    } as Record<CategoryId, string>,
+    cta: {
+      h2: 'ابدأ بجلسة تعريفية.',
+      body: 'اسأل عن منتج أو تكامل أو مشروع أوسع، وستتحدث مع فريقنا الهندسي.',
+    },
+  },
+}[locale];
+
+const groups = categoryOrder
+  .map((id) => ({ id, items: productsByCategory(id) }))
+  .filter((g) => g.items.length > 0);
+
+const abs = (path: string) => `${site.origin}${path}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: copy.h1, item: abs(localePath(locale, 'products')) },
+    ],
+  },
+];
+---
+
+<Base title={copy.title} description={copy.description} nav="products" jsonLd={jsonLd}>
+  <section class="head" aria-labelledby="products-h">
+    <div class="container head__grid">
+      <h1 id="products-h">{copy.h1}</h1>
+      <div class="head__text">
+        <p class="t-lead">{copy.lead}</p>
+        <p class="t-small t-muted">{copy.note}</p>
+      </div>
+    </div>
+  </section>
+
+  {
+    groups.map((g, i) => (
+      <section class:list={['cat', { 'cat--alt': i % 2 === 1 }]} aria-labelledby={`cat-${g.id}`}>
+        <div class="container cat__grid">
+          <div class="cat__head" data-reveal>
+            <h2 id={`cat-${g.id}`}>{t(locale, `category.${g.id}` as const)}</h2>
+            <p class="cat__desc">{copy.cats[g.id]}</p>
+          </div>
+          <ul role="list" class="cat__list" data-reveal>
+            {g.items.map((p) => (
+              <li>
+                <ProductRow product={p} locale={locale} />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    ))
+  }
+
+  <CtaBand
+    id="products-cta-h"
+    heading={copy.cta.h2}
+    body={copy.cta.body}
+    primary={{ href: `${localePath(locale, 'contact')}?topic=product`, label: t(locale, 'cta.talk') }}
+    secondary={{ href: localePath(locale, 'solutions'), label: t(locale, 'cta.seeAllSolutions') }}
+    seed={12}
+  />
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(2.5rem, 1.25rem + 5vw, 5.5rem) var(--section-y-tight);
+  }
+  .head__grid {
+    display: grid;
+    gap: var(--s-5);
+    align-items: end;
+  }
+  .head__text {
+    display: grid;
+    gap: var(--s-3);
+  }
+  @media (min-width: 64rem) {
+    .head__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: var(--s-9);
+    }
+  }
+
+  .cat {
+    padding-block: var(--section-y-tight);
+  }
+  .cat--alt {
+    background: var(--color-bg-alt);
+  }
+  .cat__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .cat__head {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .cat__head h2 {
+    font-size: var(--fs-500);
+    line-height: var(--lh-heading);
+    max-inline-size: 16ch;
+  }
+  .cat__desc {
+    color: var(--color-text-muted);
+    max-inline-size: 34ch;
+  }
+  .cat__list {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .cat__list > li {
+    border-block-end: 1px solid var(--color-border);
+  }
+  .cat__list > li:last-child {
+    border-block-end-color: var(--color-border-strong);
+  }
+  @media (min-width: 64rem) {
+    .cat__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--s-8);
+    }
+    .cat__head {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--s-6));
+    }
+  }
+</style>

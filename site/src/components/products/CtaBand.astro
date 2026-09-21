@@ -1,0 +1,64 @@
+---
+import Button from '@/components/Button.astro';
+import TraceArt from '@/components/TraceArt.astro';
+
+interface Action {
+  href: string;
+  label: string;
+}
+interface Props {
+  id: string;
+  heading: string;
+  body: string;
+  primary: Action;
+  secondary?: Action;
+  seed?: number;
+}
+const { id, heading, body, primary, secondary, seed = 5 } = Astro.props;
+---
+
+<section class="section section--deep on-deep cta" aria-labelledby={id}>
+  <div class="cta__art" aria-hidden="true"><TraceArt seed={seed} tone="deep" traces={7} leaves={8} /></div>
+  <div class="container cta__inner">
+    <h2 id={id}>{heading}</h2>
+    <p class="t-lead cta__body">{body}</p>
+    <div class="cluster">
+      <Button href={primary.href} variant="light" arrow>{primary.label}</Button>
+      {secondary && <Button href={secondary.href} variant="outline-deep">{secondary.label}</Button>}
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .cta__art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(60%, 46rem);
+    opacity: 0.55;
+    z-index: -1;
+    mask-image: linear-gradient(to left, #000 30%, transparent);
+  }
+  :global([dir='rtl']) .cta__art {
+    mask-image: linear-gradient(to right, #000 30%, transparent);
+  }
+  .cta__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .cta h2 {
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 3.75rem);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 16ch;
+  }
+  .cta__body {
+    color: var(--color-text-on-deep-muted);
+    max-inline-size: 52ch;
+  }
+</style>

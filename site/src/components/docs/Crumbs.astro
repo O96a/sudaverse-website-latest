@@ -1,0 +1,65 @@
+---
+import { localePath, t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+/** Visible breadcrumb trail. Home is added first; the last item is the current page. */
+interface Props {
+  locale: Locale;
+  items: { label: string; href?: string }[];
+}
+const { locale, items } = Astro.props;
+const trail = [{ label: t(locale, 'misc.home'), href: localePath(locale) }, ...items];
+---
+
+<nav class="crumbs" aria-label={t(locale, 'a11y.breadcrumb')}>
+  <ol role="list">
+    {
+      trail.map((item, i) => {
+        const current = i === trail.length - 1;
+        return (
+          <li>
+            {current || !item.href ? <span aria-current={current ? 'page' : undefined}>{item.label}</span> : <a href={item.href}>{item.label}</a>}
+          </li>
+        );
+      })
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--s-3);
+    margin: 0;
+    padding: 0;
+    font-size: var(--fs-200);
+  }
+  .crumbs li {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-block-size: 2.75rem;
+  }
+  /* A hairline slash between items: no glyph, so it needs no mirroring in RTL. */
+  .crumbs li + li::before {
+    content: '';
+    inline-size: 1px;
+    block-size: 0.95em;
+    background: var(--color-border-strong);
+    transform: rotate(18deg);
+  }
+  .crumbs a {
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .crumbs a:hover {
+    color: var(--ink);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .crumbs [aria-current='page'] {
+    color: var(--color-text-meta);
+  }
+</style>

@@ -1,0 +1,61 @@
+# Sudaverse contact relay.
+#
+#   cp .env.example .env        # then fill in the values (never commit .env)
+#   docker compose up -d --build
+#
+# With the optional Signal gateway as well:
+#   docker compose --profile signal up -d --build
+
+name: sudaverse-contact-relay
+
+services:
+  relay:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      # The container always listens on 8787; change the host side of `ports` instead.
+      PORT: "8787"
+    ports:
+      # Loopback only: put a TLS-terminating reverse proxy (Caddy, nginx, Traefik) in front and
+      # point it at 127.0.0.1:8787. Use "8787:8787" only if TLS is handled elsewhere.
+      - "127.0.0.1:8787:8787"
+    init: true
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+  # Optional Signal gateway (community project "signal-cli-rest-api"). Enable with
+  # `--profile signal`, then set in .env:
+  #   SIGNAL_API_URL=http://signal:8080
+  # It has no authentication of its own and can send messages as your Signal number, so it is
+  # deliberately NOT published on any host port: only containers on this compose network (the
+  # relay) can reach it. See README.md ("Signal") for linking a number.
+  signal:
+    profiles: ["signal"]
+    # Consider pinning a version tag from https://hub.docker.com/r/bbernhard/signal-cli-rest-api/tags
+    image: bbernhard/signal-cli-rest-api:latest
+    restart: unless-stopped
+    environment:
+      # json-rpc keeps one signal-cli daemon running, so the linked device keeps receiving in the
+      # background without a schedule (the project's README documents it as the fastest mode;
+      # it uses more memory than normal/native). Alternatives: normal (default), native,
+      # json-rpc-native.
+      MODE: json-rpc
+    volumes:
+      # Keys and registration for the Signal number. Losing this volume means linking again.
+      - signal-state:/home/.local/share/signal-cli
+    expose:
+      - "8080"
+    # Only while linking a device (see README): publish on loopback, use an SSH tunnel to reach it,
+    # and remove it again afterwards.
+    # ports:
+    #   - "127.0.0.1:8080:8080"
+
+volumes:
+  signal-state:

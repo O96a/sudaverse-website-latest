@@ -1,0 +1,223 @@
+---
+import Logo from './Logo.astro';
+import LangSwitch from './LangSwitch.astro';
+import Icon from './Icon.astro';
+import { products } from '@/data/products';
+import { solutions } from '@/data/solutions';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const year = new Date().getFullYear();
+
+const company = [
+  { label: t(locale, 'nav.company'), href: localePath(locale, 'company') },
+  { label: t(locale, 'nav.audience'), href: localePath(locale, 'for') },
+  { label: t(locale, 'nav.news'), href: localePath(locale, 'news') },
+  { label: t(locale, 'nav.rd'), href: localePath(locale, 'research') },
+  { label: t(locale, 'nav.published'), href: localePath(locale, 'research/published') },
+  { label: t(locale, 'nav.resources'), href: localePath(locale, 'resources') },
+  { label: t(locale, 'nav.documentation'), href: localePath(locale, 'resources/documentation') },
+  { label: t(locale, 'nav.faq'), href: localePath(locale, 'resources/faq') },
+  { label: t(locale, 'nav.contact'), href: localePath(locale, 'contact') },
+];
+const social = [
+  { label: 'LinkedIn', href: site.social.linkedin },
+  { label: 'GitHub', href: site.social.github },
+  { label: 'YouTube', href: site.social.youtube },
+  { label: 'X', href: site.social.x },
+  { label: 'Instagram', href: site.social.instagram },
+  { label: 'Facebook', href: site.social.facebook },
+];
+---
+
+<footer class="site-footer on-deep">
+  <div class="container">
+    <div class="grid">
+      <div class="brandcol">
+        <a class="brand" href={localePath(locale)} aria-label={`${site.name}, ${t(locale, 'misc.home')}`}>
+          <Logo onDeep treeHeight={48} wordHeight={16} />
+        </a>
+        <p class="tagline">{t(locale, 'footer.tagline')}</p>
+        <a class="mail" href={`mailto:${site.contact.email}`}>
+          <Icon name="mail" size={18} />
+          <span dir="ltr">{site.contact.email}</span>
+        </a>
+      </div>
+
+      <nav aria-label={t(locale, 'nav.products')}>
+        <h2>{t(locale, 'nav.products')}</h2>
+        <ul role="list">
+          {
+            products.map((p) => (
+              <li>
+                <a href={localePath(locale, `products/${p.slug}`)} translate="no">
+                  {p.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-label={t(locale, 'nav.solutions')}>
+        <h2>{t(locale, 'nav.solutions')}</h2>
+        <ul role="list">
+          {
+            solutions.map((s) => (
+              <li>
+                <a href={`${localePath(locale, 'solutions')}#${s.slug}`}>{pick(s.title, locale)}</a>
+              </li>
+            ))
+          }
+        </ul>
+      </nav>
+
+      <nav aria-label={t(locale, 'nav.company')}>
+        <h2>{t(locale, 'nav.company')}</h2>
+        <ul role="list">
+          {company.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        </ul>
+      </nav>
+    </div>
+
+    <div class="base">
+      <p class="rights">© {year} {t(locale, 'footer.rights')}</p>
+      <ul role="list" class="social" aria-label={t(locale, 'footer.connect')}>
+        {
+          social.map((s) => (
+            <li>
+              <a href={s.href} target="_blank" rel="noopener noreferrer">
+                {s.label}<span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <LangSwitch locale={locale} />
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-bg-deepest);
+    color: var(--color-text-on-deep-muted);
+    padding-block: var(--section-y-tight) var(--s-6);
+  }
+  .grid {
+    display: grid;
+    gap: var(--s-7) var(--s-6);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 40rem) {
+    .grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .brandcol {
+      grid-column: 1 / -1;
+    }
+  }
+  @media (min-width: 64rem) {
+    .grid {
+      grid-template-columns: 1.4fr 1fr 1.3fr 1fr;
+    }
+    .brandcol {
+      grid-column: auto;
+    }
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .brand:hover {
+    color: var(--paper);
+  }
+  .brand__name {
+    font-size: 1.5rem;
+    font-weight: 720;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .tagline {
+    margin-block: var(--s-4);
+    max-inline-size: 32ch;
+    color: var(--color-text-on-deep-muted);
+  }
+  .mail {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    color: var(--paper);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .mail:hover {
+    color: var(--copper-300);
+  }
+  h2 {
+    margin-block-end: var(--s-3);
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--nile-200);
+  }
+  ul {
+    padding: 0;
+  }
+  nav a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.25rem;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  nav a:hover,
+  .social a:hover {
+    color: var(--copper-300);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4) var(--s-6);
+    margin-block-start: var(--s-8);
+    padding-block-start: var(--s-5);
+    border-block-start: 1px solid color-mix(in srgb, var(--nile-200) 22%, transparent);
+    font-size: var(--fs-200);
+  }
+  .rights {
+    max-inline-size: none;
+  }
+  .social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+  }
+  .social a {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.25rem;
+    color: var(--paper);
+    text-decoration: none;
+  }
+  .base :global(.lang) {
+    color: var(--paper);
+  }
+  .base :global(.lang:hover) {
+    background: color-mix(in srgb, var(--paper) 12%, transparent);
+    color: var(--paper);
+  }
+</style>

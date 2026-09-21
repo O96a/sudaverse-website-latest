@@ -1,0 +1,72 @@
+---
+import { Image } from 'astro:assets';
+import TraceArt from '@/components/TraceArt.astro';
+import { productBySlug } from '@/data/products';
+import { artFor } from './art';
+
+/**
+ * The visual for a product. A product with its own logo shows the logo (the owner's request): bare on the
+ * page in a product hero, or on a plain white plate in lists and strips. A product without a logo keeps
+ * its generative circuit art (the copper "live thread" marks live products).
+ */
+interface Props {
+  slug: string;
+  class?: string;
+  /** Logo alone, no plate or frame (used in the product hero). */
+  bare?: boolean;
+}
+const { slug, class: className, bare = false } = Astro.props;
+const product = productBySlug(slug);
+const logo = product?.logo;
+const art = artFor(slug);
+const live = product?.stage === 'live';
+// Never scale a small logo far past its real size.
+const maxPx = logo ? Math.min(440, Math.round(logo.width * 1.5)) : 0;
+---
+
+{
+  logo && bare ? (
+    <Image class:list={['logo-bare', className]} src={logo} alt="" width={Math.min(logo.width, 880)} style={`max-inline-size:${maxPx}px`} loading="eager" />
+  ) : logo ? (
+    <div class:list={['plate', 'plate--logo', className]} aria-hidden="true">
+      <Image src={logo} alt="" width={Math.min(logo.width, 640)} loading="lazy" />
+    </div>
+  ) : (
+    <div class:list={['plate', `plate--${art.plate}`, className]} aria-hidden="true">
+      <TraceArt seed={art.seed} tone={art.tone} traces={art.traces} leaves={art.leaves} graticule={art.graticule} thread={live} />
+    </div>
+  )
+}
+
+<style>
+  .plate {
+    inline-size: 100%;
+    aspect-ratio: 800 / 520;
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+  }
+  .plate--deep {
+    background: var(--nile-950);
+    border-color: color-mix(in srgb, var(--nile-200) 24%, transparent);
+  }
+  .plate--logo {
+    display: grid;
+    place-items: center;
+    background: var(--white);
+  }
+  .plate--logo :global(img) {
+    max-inline-size: 58%;
+    max-block-size: 62%;
+    inline-size: auto;
+    block-size: auto;
+    object-fit: contain;
+  }
+  .logo-bare {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    margin-inline: auto;
+  }
+</style>

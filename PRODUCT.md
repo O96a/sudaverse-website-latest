@@ -1,0 +1,61 @@
+# Product
+
+<!-- impeccable:product-schema 1 -->
+
+## Platform
+
+web
+
+## Stack
+
+Delegated (owner asked for a recommendation, 2026-09-21): Astro + TypeScript static site with English and Arabic routes (`/en/`, `/ar/`), plain CSS with semantic design tokens. React is used only for one lazy-loaded island (React Flow pipeline diagram). The source lives in `site/`; `npm run publish:root` copies the built site to the repository root so a host that serves the repo root shows it. The previous static site is preserved under the git tag `legacy-static-site`. Deploy target is undecided: `CNAME` says `www.sudaverse.com`, but the GitHub Pages API reports no Pages site for this repository.
+
+## Users
+
+Primary: institutional buyers and partners deciding whether Sudaverse is a company they could contact about a project: ministries, enterprises, NGOs, universities, international organizations, investors, technical partners.
+Also: engineers judging technical depth, researchers judging whether the research is real and tied to products, Sudanese visitors, and students and teachers who use SudaTutor.
+
+## Product Purpose
+
+The public website is the digital headquarters of Sudaverse: a Sudanese AI and digital systems company that designs and builds production-oriented AI products and infrastructure. Success is a visitor concluding "these people build real technology" and starting a conversation (product inquiry, institutional partnership, research collaboration, data or model collaboration, technical integration).
+
+## Positioning
+
+Sudaverse builds AI products and digital infrastructure designed around the realities of Sudan and similar underserved markets: Arabic-first and Sudanese-dialect language AI, local and private deployment options where a product supports them, and domain systems, made by a Sudanese-founded, globally connected team. The Sudanese identity is a differentiator and a cultural home, not the sales pitch. Not a nonprofit, community initiative, student project or hackathon portfolio.
+
+## Operating Context
+
+Static marketing site with bilingual routes, product portfolio, solution pages, research, company and documentation. Contact happens by email and a WhatsApp chat link; there is no backend. The current live site (`https://www.sudaverse.com/`) is an HTML5 UP "Spectral" template with About, Mission, Vision, Projects, Research and Documentation pages and one named product, SudaTutor.
+
+## Capabilities and Constraints
+
+Umbrella capabilities (owner-stated): applied AI, data engineering, Arabic and Sudanese language AI, cybersecurity, geospatial intelligence, education technology, agricultural technology, decision-support systems, research and engineering. Present one coherent umbrella, not disconnected business units.
+
+Products presented publicly (owner-approved; stage labels are honest; short descriptions and capability lines taken from the owner's presentation, screenshots only as real captures of the owner's own public product pages, no internals, no performance figures): SudaTutor, Terab, SudaNDR, SudaFlood, Sudan Monitor, Sudata (a Sudanese knowledge atlas, shown as a short general overview only: how it gathers or verifies information is not described), URRI (Sudanese language models), Sudanizer (tokenizer) and LLMCorpusKit (public, MIT, on GitHub). All are Live per the owner on 2026-09-21; the owner will supply each product's public URL and screenshots later, and no product links to a URL until then. Product logos come from the owner's presentation and public sites; never link a product to a personal repository or a third-party domain. Services (Consultations, Training) are described in general terms on the Solutions page. Product logos come from the owner's presentation and public sites; never link a product to a personal repository or a third-party domain.
+
+Further candidate products are on hold pending owner confirmation and are intentionally not named in this public repository.
+
+Hard rules: never invent customers, contracts, deployments, government or ministry relationships, publications, funding, revenue, user numbers, uptime or accuracy figures, awards, partnerships, certifications or case studies. No "TBD" publication rows. Never expose credentials, private URLs, private repository names or visibility, demo credentials or internal architecture. This repository is public.
+
+Open decisions: WhatsApp number (chat launcher is built behind a config value and hidden in production until set); product stage confirmation per product; privacy, terms, security and responsible-AI pages do not exist yet and must not be linked until written; partner and customer strip omitted until relationships are confirmed for public disclosure; native review of Arabic copy.
+
+## Brand Commitments
+
+Name: Sudaverse. Logo: a baobab tree grown from circuit traces with blue and green square "leaves", set over a wide-tracked SUDAVERSE wordmark in navy (master: `site/brand-src/logo.jpg`; transparent, reversed and icon variants are generated by `site/scripts/build-brand-assets.mjs`). The logo is an existing asset and must not be redrawn or replaced. Sudanese identity is expressed subtly (baobab, circuit-trace and weave geometry, Nile cartography, Arabic typography), never through flag colors or nationalist imagery. Bilingual English and Arabic from the architecture level. The old third-party design credit in the footer is retired. Voice: precise, confident, technical, human, concise; avoid cutting-edge, revolutionary, empowering, innovative, transformative, future of AI.
+
+## Evidence on Hand
+
+Real: current site copy, a 12-person team with roles, short bios and LinkedIn profiles (`team.md`, `images/` portraits), photography (`images/pic01`, `pic02`, `pic03`, `pic05`), the SudaTutor public URL, public GitHub repositories under the `sudaverse` organization (LLMCorpusKit and a Sudanese dialect tokenizer benchmark), partner logos currently shown on the live site (SIPAQ, SRF: relationship type unverified), contact `info@sudaverse.com`, social profiles (LinkedIn, GitHub, YouTube, X, Instagram, Facebook).
+Absent, must not be fabricated: customers, case studies, verified publications with citations, certifications, metrics, approved product screenshots, WhatsApp number, legal pages, published datasets or models.
+
+## Product Principles
+
+1. Specificity over volume: show real capabilities and real outputs; three true things beat twelve placeholders.
+2. One umbrella: every product and solution reads as part of one AI and data body of work built for Sudanese realities.
+3. Evidence before claims: label stage honestly (In Development, Beta, Live) and keep unverified relationships off the page.
+4. Arabic is a first-class language, not a mirror of English.
+5. Commercial clarity: a visitor understands what Sudaverse builds and how to contact it within seconds.
+
+## Accessibility & Inclusion
+
+WCAG 2.2 AA target. Keyboard navigation and visible focus, reduced-motion support, correct `lang` and `dir`, logical CSS properties for RTL, contrast at least 4.5:1 for text, semantic landmarks and headings, alt text, usable at 390px, 768px, 1024px and 1440px.

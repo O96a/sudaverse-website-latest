@@ -1,0 +1,106 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '@/components/Icon.astro';
+import { services } from '@/data/services';
+import { localePath } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const copy = {
+  en: {
+    h2: 'Services',
+    lead: 'Alongside its products, Sudaverse works directly with institutions and developers.',
+    discuss: 'Discuss this',
+  },
+  ar: {
+    h2: 'الخدمات',
+    lead: 'إلى جانب المنتجات، تعمل سودافيرس مباشرة مع المؤسسات والمطورين.',
+    discuss: 'ناقش هذا معنا',
+  },
+}[locale];
+const href = `${localePath(locale, 'contact')}?topic=institutional`;
+---
+
+<section class="section section--alt svc" id="services" aria-labelledby="services-h">
+  <div class="container">
+    <div class="svc__head" data-reveal>
+      <h2 id="services-h">{copy.h2}</h2>
+      <p class="t-lead">{copy.lead}</p>
+    </div>
+    <ul role="list" class="svc__list">
+      {
+        services.map((s) => (
+          <li class="svc__item" data-reveal>
+            <div class="svc__logo">
+              <Image src={s.logo} alt="" width={132} loading="lazy" />
+            </div>
+            <div class="svc__body">
+              <h3>{pick(s.name, locale)}</h3>
+              <p>{pick(s.summary, locale)}</p>
+              <a class="textlink" href={href}>
+                {copy.discuss}
+                <Icon name="arrow" size={18} directional />
+              </a>
+            </div>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .svc__head {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-7);
+  }
+  .svc__list {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .svc__item {
+    display: grid;
+    gap: var(--s-5);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .svc__logo {
+    display: grid;
+    place-items: center;
+    inline-size: 9rem;
+    aspect-ratio: 1;
+    background: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-3);
+  }
+  .svc__logo :global(img) {
+    max-inline-size: 82%;
+    block-size: auto;
+    max-block-size: 82%;
+    object-fit: contain;
+  }
+  .svc__body {
+    display: grid;
+    gap: var(--s-3);
+    justify-items: start;
+    max-inline-size: 62ch;
+  }
+  .svc__body h3 {
+    font-size: var(--fs-500);
+  }
+  .svc__body p {
+    color: var(--color-text-muted);
+  }
+  @media (min-width: 48rem) {
+    .svc__item {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      gap: var(--s-7);
+      align-items: start;
+    }
+  }
+</style>

@@ -1,0 +1,7 @@
+# Local tooling state (not part of the website)
+.claude/
+.kilo/
+.serena/
+.impeccable/
+skills-lock.json
+.DS_Store

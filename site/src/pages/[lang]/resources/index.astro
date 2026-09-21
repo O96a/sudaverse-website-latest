@@ -1,0 +1,222 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import { openWork } from '@/data/research';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: {
+    title: 'Resources',
+    description:
+      'Documentation and open-source code from the Sudaverse engineering team: LLMCorpusKit, a Sudanese Arabic normalization toolkit and a Sudanese dialect tokenizer benchmark.',
+    lead: 'Documentation and open-source code from the Sudaverse engineering team.',
+    docs: {
+      h2: 'Documentation',
+      body: 'Guides for the public open-source toolkit: installing and using LLMCorpusKit, the stages of a pipeline from raw text to a deployed model, development setup and contribution guidelines.',
+    },
+    faq: {
+      h2: 'Frequently asked questions',
+      body: 'Answers about what Sudaverse builds, which products are available today, deployment options, research and how to work with the team.',
+      cta: 'Read the FAQ',
+    },
+    oss: {
+      h2: 'Open source on GitHub',
+      body: 'Public repositories under the Sudaverse organization. Each one links straight to its source.',
+      org: 'github.com/sudaverse',
+      license: 'License',
+      repo: 'View on GitHub',
+    },
+  },
+  ar: {
+    title: 'الموارد | سودافيرس',
+    description:
+      'توثيق وشيفرة مفتوحة المصدر من الفريق الهندسي في سودافيرس: LLMCorpusKit، وحزمة أدوات لتطبيع النصوص العربية السودانية، ومعيار قياس لأدوات تجزئة النص السوداني العامّي.',
+    lead: 'توثيق وشيفرة مفتوحة المصدر من الفريق الهندسي في سودافيرس.',
+    docs: {
+      h2: 'التوثيق',
+      body: 'أدلة للحزمة المفتوحة المصدر العلنية: تثبيت LLMCorpusKit واستخدامه، ومراحل خط المعالجة من النص الخام إلى النموذج المنشور، وإعداد بيئة التطوير، وإرشادات المساهمة.',
+    },
+    faq: {
+      h2: 'الأسئلة الشائعة',
+      body: 'إجابات عن ما تبنيه سودافيرس، والمنتجات المتاحة اليوم، وخيارات النشر، والبحث، وكيفية العمل مع الفريق.',
+      cta: 'اقرأ الأسئلة الشائعة',
+    },
+    oss: {
+      h2: 'مفتوح المصدر على GitHub',
+      body: 'مستودعات علنية ضمن مؤسسة سودافيرس. يرتبط كل منها مباشرة بشيفرته المصدرية.',
+      org: 'github.com/sudaverse',
+      license: 'الترخيص',
+      repo: 'عرض على GitHub',
+    },
+  },
+}[locale];
+
+const externalNote = t(locale, 'a11y.external');
+const pageUrl = new URL(localePath(locale, 'resources'), site.origin).toString();
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: new URL(localePath(locale), site.origin).toString() },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.resources'), item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={copy.title} description={copy.description} nav="resources" jsonLd={jsonLd}>
+  <div class="container">
+    <Crumbs locale={locale} items={[{ label: t(locale, 'nav.resources') }]} />
+    <header class="head">
+      <h1 id="resources-h">{t(locale, 'nav.resources')}</h1>
+      <p class="t-lead">{copy.lead}</p>
+    </header>
+  </div>
+
+  <section class="block" aria-labelledby="docs-h">
+    <div class="container block__grid">
+      <div class="block__intro">
+        <h2 id="docs-h">{copy.docs.h2}</h2>
+        <p class="t-muted">{copy.docs.body}</p>
+      </div>
+      <div class="block__action">
+        <Button href={localePath(locale, 'resources/documentation')} variant="primary" arrow>{t(locale, 'cta.readDocs')}</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="faq-h">
+    <div class="container block__grid">
+      <div class="block__intro">
+        <h2 id="faq-h">{copy.faq.h2}</h2>
+        <p class="t-muted">{copy.faq.body}</p>
+      </div>
+      <div class="block__action">
+        <Button href={localePath(locale, 'resources/faq')} variant="secondary" arrow>{copy.faq.cta}</Button>
+      </div>
+    </div>
+  </section>
+
+  <section class="block block--alt" aria-labelledby="oss-h">
+    <div class="container block__grid block__grid--list">
+      <div class="block__intro">
+        <h2 id="oss-h">{copy.oss.h2}</h2>
+        <p class="t-muted">{copy.oss.body}</p>
+        <a class="textlink" href={site.social.github} target="_blank" rel="noopener noreferrer">
+          <span dir="ltr">{copy.oss.org}</span>
+          <Icon name="external" size={16} />
+          <span class="sr-only"> ({externalNote})</span>
+        </a>
+      </div>
+      <ul role="list" class="repos">
+        {
+          openWork.map((w) => (
+            <li class="repo">
+              <div class="repo__meta">
+                <span class="t-meta">{L(w.kind)}</span>
+                {w.license && <span class="t-meta">{copy.oss.license}: {w.license}</span>}
+              </div>
+              <h3 class="repo__name" translate="no">{w.name}</h3>
+              <p class="repo__desc">{L(w.description)}</p>
+              <a class="textlink" href={w.href} target="_blank" rel="noopener noreferrer">
+                {copy.oss.repo}
+                <Icon name="external" size={16} />
+                <span class="sr-only"> ({externalNote})</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--s-4);
+    padding-block: var(--s-6) var(--section-y-tight);
+  }
+  .head h1 {
+    max-inline-size: 14ch;
+  }
+  .block {
+    padding-block: var(--section-y-tight);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .block--alt {
+    background: var(--color-bg-alt);
+  }
+  .block__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .block__intro {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+  .block__intro h2 {
+    max-inline-size: 16ch;
+  }
+  .textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .textlink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .repos {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .repo {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border-strong);
+  }
+  .repo__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+  }
+  .repo__name {
+    font-size: var(--fs-500);
+    font-weight: 650;
+  }
+  .repo__desc {
+    color: var(--color-text-muted);
+    max-inline-size: 60ch;
+  }
+  @media (min-width: 64rem) {
+    .block__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+    }
+    .block__grid:not(.block__grid--list) {
+      align-items: center;
+    }
+    .block__action {
+      justify-self: start;
+    }
+  }
+</style>

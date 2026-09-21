@@ -1,0 +1,226 @@
+import type { Locale } from './config';
+
+/**
+ * Shared interface strings (navigation, buttons, forms, chrome).
+ * Page copy lives next to each page. Arabic is a first draft written for the
+ * architecture; have a native editor review it before launch.
+ */
+const en = {
+  // navigation
+  'nav.products': 'Products',
+  'nav.solutions': 'Solutions',
+  'nav.research': 'Research',
+  'nav.company': 'Company',
+  'nav.resources': 'Resources',
+  'nav.contact': 'Contact',
+  'nav.documentation': 'Documentation',
+  'nav.faq': 'FAQ',
+  'nav.allProducts': 'All products',
+  'nav.rd': 'R&D',
+  'nav.published': 'Published research',
+  'nav.collaborate': 'Collaborate with us',
+  'nav.rdDesc': 'Our research directions and how they become products.',
+  'nav.publishedDesc': 'Our open-source releases and benchmarks, and papers as they are published.',
+  'nav.collaborateDesc': 'Propose joint research with our team.',
+  'nav.allResearch': 'All research',
+  'nav.audience': 'Who we serve',
+  'nav.allAudiences': 'All audiences',
+  'nav.news': 'News',
+  'nav.resourcesDesc': 'Documentation and open-source code from the Sudaverse engineering team.',
+  'nav.faqDesc': 'Straight answers about products, deployment and working with us.',
+  'nav.allSolutions': 'All solutions',
+
+  // calls to action
+  'cta.talk': 'Talk to Us',
+  'cta.talkToSudaverse': 'Talk to Sudaverse',
+  'cta.exploreProducts': 'Explore Products',
+  'cta.researchEngineering': 'Research & Engineering',
+  'cta.exploreProduct': 'Explore product',
+  'cta.readDocs': 'Read the documentation',
+  'cta.requestBriefing': 'Request a briefing',
+  'cta.meetTeam': 'Meet the team',
+  'cta.seeAllProducts': 'See all products',
+  'cta.seeAllSolutions': 'See all solutions',
+
+  // accessibility
+  'a11y.skip': 'Skip to content',
+  'a11y.menu': 'Menu',
+  'a11y.closeMenu': 'Close menu',
+  'a11y.language': 'Language',
+  'a11y.mainNav': 'Main navigation',
+  'a11y.footerNav': 'Footer navigation',
+  'a11y.breadcrumb': 'Breadcrumb',
+  'a11y.external': 'opens in a new tab',
+
+  // product stages
+  'stage.live': 'Live',
+  'stage.beta': 'Beta',
+  'stage.pilot': 'Pilot',
+  'stage.development': 'In Development',
+  'stage.research': 'Research',
+
+  // product categories
+  'category.ai-products': 'AI Products',
+  'category.data-intelligence': 'Data & Insights',
+  'category.secure-ai': 'Secure AI Systems',
+  'category.language-research': 'Research & Language Technology',
+
+  // footer
+  'footer.tagline': 'Applied AI and digital systems built around the realities of Sudan.',
+  'footer.connect': 'Connect',
+  'footer.rights': 'Sudaverse. All rights reserved.',
+  'footer.legalNote': 'Privacy, terms and security pages will be published here.',
+
+  // contact
+  'contact.title': 'Talk to Us',
+  'contact.name': 'Full name',
+  'contact.organization': 'Organization',
+  'contact.email': 'Work email',
+  'contact.topic': 'What is this about?',
+  'contact.message': 'How can we help?',
+  'contact.send': 'Send message',
+  'contact.sending': 'Sending…',
+  'contact.sent': 'Thank you. Your message was sent and the team will reply by email.',
+  'contact.mailto': 'Your email app will open with the message ready to send.',
+  'contact.error': 'The message could not be sent. Email info@sudaverse.com instead.',
+  'contact.required': 'This field is required.',
+  'contact.invalidEmail': 'Enter a valid email address.',
+  'topic.product': 'Product inquiry',
+  'topic.institutional': 'Institutional partnership',
+  'topic.research': 'Research collaboration',
+  'topic.data': 'Data or model collaboration',
+  'topic.integration': 'Technical integration',
+  'topic.other': 'Other',
+
+  // whatsapp
+  'chat.open': 'Chat with us',
+  'chat.body': 'Choose the app you already use. Your message goes to the Sudaverse team.',
+  'chat.email': 'Prefer email? Use the contact form.',
+  'chat.unconfigured': 'Preview only: set PUBLIC_WHATSAPP_NUMBER, PUBLIC_SIGNAL_NUMBER or PUBLIC_TELEGRAM_HANDLE to enable a channel.',
+  'wa.open': 'Chat on WhatsApp',
+  'wa.close': 'Close chat',
+  'wa.title': 'Chat with Sudaverse',
+  'wa.body': 'Choose a topic and continue the conversation on WhatsApp.',
+  'wa.unconfigured': 'Preview only: set PUBLIC_WHATSAPP_NUMBER to enable this chat.',
+  'wa.prefill': 'Hello Sudaverse, I would like to talk about: ',
+
+  // 404
+  '404.title': 'Page not found',
+  '404.body': 'The page you are looking for does not exist or has moved.',
+  '404.home': 'Back to the homepage',
+
+  // misc
+  'misc.stage': 'Stage',
+  'misc.category': 'Category',
+  'misc.languages': 'Languages',
+  'misc.deployment': 'Deployment',
+  'misc.audience': 'Built for',
+  'misc.home': 'Home',
+} as const;
+
+export type UiKey = keyof typeof en;
+
+const ar: Record<UiKey, string> = {
+  'nav.products': 'المنتجات',
+  'nav.solutions': 'الحلول',
+  'nav.research': 'الأبحاث',
+  'nav.company': 'الشركة',
+  'nav.resources': 'الموارد',
+  'nav.contact': 'اتصل بنا',
+  'nav.documentation': 'التوثيق',
+  'nav.faq': 'الأسئلة الشائعة',
+  'nav.allProducts': 'كل المنتجات',
+  'nav.rd': 'البحث والتطوير',
+  'nav.published': 'الأبحاث المنشورة',
+  'nav.collaborate': 'تعاون معنا في البحث',
+  'nav.rdDesc': 'اتجاهاتنا البحثية وكيف تتحول إلى منتجات.',
+  'nav.publishedDesc': 'إصداراتنا المفتوحة المصدر ومعايير القياس، والأوراق البحثية عند نشرها.',
+  'nav.collaborateDesc': 'اقترح بحثًا مشتركًا مع فريقنا.',
+  'nav.allResearch': 'كل الأبحاث',
+  'nav.audience': 'من نخدم',
+  'nav.allAudiences': 'كل الفئات',
+  'nav.news': 'الأخبار',
+  'nav.resourcesDesc': 'توثيق وشيفرة مفتوحة المصدر من الفريق الهندسي في سودافيرس.',
+  'nav.faqDesc': 'إجابات مباشرة عن المنتجات والنشر والعمل معنا.',
+  'nav.allSolutions': 'كل الحلول',
+
+  'cta.talk': 'تواصل معنا',
+  'cta.talkToSudaverse': 'تحدّث مع سودافيرس',
+  'cta.exploreProducts': 'استكشف المنتجات',
+  'cta.researchEngineering': 'البحث والهندسة',
+  'cta.exploreProduct': 'استكشف المنتج',
+  'cta.readDocs': 'اقرأ التوثيق',
+  'cta.requestBriefing': 'اطلب عرضًا تعريفيًا',
+  'cta.meetTeam': 'تعرّف على الفريق',
+  'cta.seeAllProducts': 'عرض كل المنتجات',
+  'cta.seeAllSolutions': 'عرض كل الحلول',
+
+  'a11y.skip': 'انتقل إلى المحتوى',
+  'a11y.menu': 'القائمة',
+  'a11y.closeMenu': 'إغلاق القائمة',
+  'a11y.language': 'اللغة',
+  'a11y.mainNav': 'التنقل الرئيسي',
+  'a11y.footerNav': 'تنقل التذييل',
+  'a11y.breadcrumb': 'مسار التنقل',
+  'a11y.external': 'يفتح في علامة تبويب جديدة',
+
+  'stage.live': 'متاح',
+  'stage.beta': 'تجريبي',
+  'stage.pilot': 'تشغيل تجريبي',
+  'stage.development': 'قيد التطوير',
+  'stage.research': 'بحثي',
+
+  'category.ai-products': 'منتجات الذكاء الاصطناعي',
+  'category.data-intelligence': 'البيانات والتحليلات',
+  'category.secure-ai': 'أنظمة الذكاء الاصطناعي الآمنة',
+  'category.language-research': 'البحث وتقنيات اللغة',
+
+  'footer.tagline': 'ذكاء اصطناعي تطبيقي وأنظمة رقمية مبنية على واقع السودان.',
+  'footer.connect': 'تواصل',
+  'footer.rights': 'سودافيرس. جميع الحقوق محفوظة.',
+  'footer.legalNote': 'ستُنشر هنا صفحات الخصوصية والشروط والأمان.',
+
+  'contact.title': 'تواصل معنا',
+  'contact.name': 'الاسم الكامل',
+  'contact.organization': 'الجهة',
+  'contact.email': 'البريد الإلكتروني للعمل',
+  'contact.topic': 'موضوع الرسالة',
+  'contact.message': 'كيف يمكننا مساعدتك؟',
+  'contact.send': 'إرسال الرسالة',
+  'contact.sending': 'جارٍ الإرسال…',
+  'contact.sent': 'شكرًا لك. تم إرسال رسالتك وسيردّ عليك الفريق عبر البريد الإلكتروني.',
+  'contact.mailto': 'سيُفتح تطبيق البريد لديك والرسالة جاهزة للإرسال.',
+  'contact.error': 'تعذّر إرسال الرسالة. راسلنا على info@sudaverse.com.',
+  'contact.required': 'هذا الحقل مطلوب.',
+  'contact.invalidEmail': 'أدخل بريدًا إلكترونيًا صحيحًا.',
+  'topic.product': 'استفسار عن منتج',
+  'topic.institutional': 'شراكة مؤسسية',
+  'topic.research': 'تعاون بحثي',
+  'topic.data': 'تعاون في البيانات أو النماذج',
+  'topic.integration': 'تكامل تقني',
+  'topic.other': 'أخرى',
+
+  'chat.open': 'تحدّث معنا',
+  'chat.body': 'اختر التطبيق الذي تستخدمه. تصل رسالتك إلى فريق سودافيرس.',
+  'chat.email': 'تفضّل البريد؟ استخدم نموذج التواصل.',
+  'chat.unconfigured': 'للمعاينة فقط: عيّن PUBLIC_WHATSAPP_NUMBER أو PUBLIC_SIGNAL_NUMBER أو PUBLIC_TELEGRAM_HANDLE لتفعيل قناة.',
+  'wa.open': 'تحدّث عبر واتساب',
+  'wa.close': 'إغلاق المحادثة',
+  'wa.title': 'تحدّث مع سودافيرس',
+  'wa.body': 'اختر موضوعًا وتابع المحادثة على واتساب.',
+  'wa.unconfigured': 'للمعاينة فقط: عيّن PUBLIC_WHATSAPP_NUMBER لتفعيل هذه المحادثة.',
+  'wa.prefill': 'مرحبًا سودافيرس، أودّ التحدث بخصوص: ',
+
+  '404.title': 'الصفحة غير موجودة',
+  '404.body': 'الصفحة التي تبحث عنها غير موجودة أو تم نقلها.',
+  '404.home': 'العودة إلى الصفحة الرئيسية',
+
+  'misc.stage': 'المرحلة',
+  'misc.category': 'الفئة',
+  'misc.languages': 'اللغات',
+  'misc.deployment': 'النشر',
+  'misc.audience': 'موجّه إلى',
+  'misc.home': 'الرئيسية',
+};
+
+export const ui: Record<Locale, Record<UiKey, string>> = { en, ar };

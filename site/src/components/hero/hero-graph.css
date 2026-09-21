@@ -1,0 +1,413 @@
+/*
+ * Hero graph (React Flow). Cards are frosted glass over the stage's colour backdrop (see the glass
+ * tokens); wires are neutral hairlines until a capability is active. Sizing comes from the Astro wrapper
+ * (HeroStage.astro). The scene is a fixed physical layout: it mirrors for Arabic in code, so this file
+ * uses a few physical offsets on purpose.
+ */
+.hg {
+  position: absolute;
+  inset: 0;
+  direction: ltr;
+}
+.hg-flow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.7s var(--ease-out);
+}
+.hg-flow.is-ready {
+  opacity: 1;
+}
+.hg .react-flow {
+  --xy-background-color: transparent;
+  --xy-background-color-default: transparent;
+  --xy-node-border-default: none;
+  background: transparent;
+  font-family: var(--font-sans);
+}
+:root:lang(ar) .hg .react-flow {
+  font-family: var(--font-sans-ar);
+}
+.hg .react-flow__pane,
+.hg .react-flow__node {
+  cursor: default;
+}
+/* The pane is touch-action:none by default, which traps a finger that starts on the graph and stops the
+   page scrolling. Nothing here pans or zooms, so leave touch to the page. */
+.hg .react-flow__pane {
+  touch-action: auto;
+}
+/* React Flow marks nodes pointer-events:none when nothing is draggable or selectable, which would also
+   disable the switches and links inside them. Re-enable, and undo the site-wide svg reset
+   (max-width:100%) that collapses React Flow's zero-width edge layer. */
+.hg .react-flow__node {
+  pointer-events: auto !important;
+}
+.hg svg {
+  max-width: none;
+}
+.hg .react-flow__attribution {
+  background: transparent;
+  font-size: 12px;
+  margin: 0;
+  padding: 2px 6px;
+}
+.hg .react-flow__attribution a {
+  color: var(--ink-3);
+  text-decoration: none;
+}
+
+/* ---------- capability card ---------- */
+.hg-cap {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.hg-cap__btn {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  inline-size: 100%;
+  block-size: 100%;
+  padding: 0 16px;
+  text-align: start;
+  color: var(--ink);
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  box-shadow: var(--glass-shadow);
+  cursor: pointer;
+  transition: box-shadow 0.35s var(--ease-out);
+}
+.hg-cap__btn:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.hg-cap__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.hg-cap__dot {
+  flex: none;
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 50%;
+  background: var(--c);
+}
+.hg-cap__label {
+  unicode-bidi: plaintext;
+}
+.hg-cap__body {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.hg-cap__hint {
+  font-size: 13px;
+  line-height: 1.3;
+  color: var(--ink-3);
+  unicode-bidi: plaintext;
+}
+.hg-switch {
+  --dx: 16px;
+  position: relative;
+  flex: none;
+  inline-size: 38px;
+  block-size: 22px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ink-3) 78%, white);
+  transition: background-color 0.35s var(--ease-out);
+}
+.hg [dir='rtl'] .hg-switch {
+  --dx: -16px;
+}
+.hg-switch i {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-start: 3px;
+  inline-size: 16px;
+  block-size: 16px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgb(6 26 44 / 0.3);
+  transition: transform 0.35s var(--ease-out);
+}
+.hg-cap--strong .hg-switch,
+.hg-cap.is-on .hg-switch {
+  background: var(--c);
+}
+.hg-cap--strong .hg-switch i,
+.hg-cap.is-on .hg-switch i {
+  transform: translateX(var(--dx));
+}
+.hg-cap--strong .hg-cap__btn,
+.hg-cap.is-on .hg-cap__btn {
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85), 0 0 0 1.5px var(--c), 0 20px 34px -20px color-mix(in srgb, var(--c) 60%, transparent);
+}
+
+.hg-handle {
+  inline-size: 9px;
+  block-size: 9px;
+  min-inline-size: 0;
+  min-block-size: 0;
+  border: 2px solid #fff;
+  background: var(--c);
+  pointer-events: none;
+}
+
+/* ---------- output card ---------- */
+.hg-out {
+  position: relative;
+  inline-size: 100%;
+  block-size: 100%;
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow);
+}
+/* The clip lives on an inner wrapper so the wire handles can sit on the card's outer edge. */
+.hg-out__clip {
+  display: flex;
+  flex-direction: column;
+  block-size: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.hg-out__head {
+  flex: none;
+  padding: 12px 18px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--ink);
+  border-block-end: 1px solid var(--glass-edge);
+  unicode-bidi: plaintext;
+}
+.hg-canopy {
+  position: relative;
+  flex: none;
+  border-block-end: 1px solid var(--glass-edge);
+}
+.hg-leaf {
+  position: absolute;
+  display: block;
+  border: 2px solid;
+  border-radius: 2px;
+  background: transparent;
+  transition: border-color 0.6s var(--ease-out);
+}
+.hg-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 4px 8px 8px;
+  list-style: none;
+}
+.hg-list li {
+  flex: 1;
+  min-block-size: 0;
+}
+.hg-list li + li {
+  border-block-start: 1px solid var(--glass-edge);
+}
+.hg-row {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  block-size: 100%;
+  padding-inline: 4px 6px;
+  border-radius: 10px;
+  transition: background-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+/* The row is a real selector (button, aria-pressed); the arrow beside it is the link to the product page. */
+.hg-row__pick {
+  appearance: none;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-inline-size: 0;
+  block-size: 100%;
+  padding-inline: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: 16px;
+  text-align: start;
+  cursor: pointer;
+}
+.hg-row__pick:focus-visible,
+.hg-row__open:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+.hg-row__open {
+  flex: none;
+  display: grid;
+  place-items: center;
+  inline-size: 2rem;
+  block-size: 2rem;
+  border-radius: 50%;
+  color: var(--ink-3);
+  text-decoration: none;
+  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
+}
+.hg-row__open:hover {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+}
+.hg [dir='rtl'] .hg-row__open svg {
+  transform: scaleX(-1);
+}
+/* Hover, selection and "this product uses the active capability" share one soft highlight, so clicking
+   feels like hovering: the row simply stays lit. */
+.hg-row:hover,
+.hg-list.is-focused li.is-lit .hg-row,
+.hg-list li.is-selected .hg-row {
+  background: color-mix(in srgb, var(--viz-sky) 15%, transparent);
+}
+.hg-row__name {
+  font-weight: 680;
+  letter-spacing: -0.01em;
+}
+/* Chips repeat the capability colours, so the row matches the wires that feed it. */
+.hg-row__chips {
+  display: inline-flex;
+  gap: 4px;
+}
+.hg-row__chips i {
+  inline-size: 9px;
+  block-size: 9px;
+  border-radius: 50%;
+  background: var(--c);
+}
+/* De-emphasise by colour only; text never drops below AA contrast. */
+.hg-list li.is-dim .hg-row__name {
+  color: var(--ink-3);
+  font-weight: 600;
+}
+.hg-row__stage {
+  margin-inline-start: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.3;
+  white-space: nowrap;
+  background: var(--color-stage-dev-bg);
+  color: var(--color-stage-dev);
+}
+.hg-row__stage--live {
+  background: var(--color-stage-live-bg);
+  color: var(--color-stage-live);
+}
+
+/* ---------- wires: each in its capability colour, soft until active ---------- */
+.hg-wire__line {
+  fill: none;
+  stroke: color-mix(in srgb, var(--c) 58%, transparent);
+  stroke-width: 1.75;
+  stroke-dasharray: 5 6;
+  stroke-linecap: round;
+  transition: stroke 0.4s var(--ease-out);
+}
+.hg-wire--off .hg-wire__line {
+  stroke: color-mix(in srgb, var(--c) 24%, transparent);
+  stroke-width: 1.25;
+  stroke-dasharray: 2 6;
+}
+.hg-wire--strong .hg-wire__line {
+  stroke: var(--c);
+  stroke-width: 2.5;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .hg-wire__line.is-flowing {
+    animation: hg-dash 1.1s linear infinite;
+  }
+}
+@keyframes hg-dash {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+/* ---------- pause control (WCAG 2.2.2) ---------- */
+.hg-pause {
+  position: absolute;
+  inset-block-end: 2px;
+  left: 0;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-block-size: 2.75rem;
+  padding-inline: 12px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 560;
+  cursor: pointer;
+}
+.hg[data-rtl] .hg-pause {
+  left: auto;
+  right: 0;
+}
+.hg-pause:hover {
+  color: var(--ink);
+}
+.hg-pause:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hg-flow,
+  .hg-cap__btn,
+  .hg-switch,
+  .hg-switch i,
+  .hg-wire__line,
+  .hg-row,
+  .hg-row__open {
+    transition-duration: 0.01ms;
+  }
+}
+
+/* ---------- narrow layout ---------- */
+.hg-flow[data-layout='narrow'] .hg-cap__btn {
+  padding: 0 12px;
+  gap: 8px;
+}
+.hg-flow[data-layout='narrow'] .hg-cap__head {
+  font-size: 13px;
+}
+.hg-flow[data-layout='narrow'] .hg-out__head {
+  padding: 9px 12px;
+  font-size: 13px;
+}
+.hg-flow[data-layout='narrow'] .hg-row__pick {
+  padding-inline: 6px;
+  gap: 6px;
+  font-size: 14px;
+}
+.hg-flow[data-layout='narrow'] .hg-row__open {
+  inline-size: 1.5rem;
+  block-size: 1.5rem;
+}
+.hg-flow[data-layout='narrow'] .hg-row__chips i {
+  inline-size: 7px;
+  block-size: 7px;
+}

@@ -1,0 +1,64 @@
+---
+import { Picture } from 'astro:assets';
+import type { Product } from '@/data/products';
+import { pick, type Locale } from '@/i18n/config';
+
+/** Owner-supplied campaign graphics for a product's topic. Renders nothing when a product has none. */
+interface Props {
+  product: Product;
+  locale: Locale;
+}
+const { product, locale } = Astro.props;
+const topics = product.topics ?? [];
+---
+
+{
+  topics.length > 0 && (
+    <section class="section section--tight topics" aria-label={locale === 'ar' ? 'رسوم من سودافيرس' : 'From Sudaverse'}>
+      <div class="container">
+        <ul role="list" class="topics__list">
+          {topics.map((tp) => (
+            <li>
+              <figure class="topics__fig">
+                <Picture
+                  src={tp.src}
+                  formats={['avif', 'webp']}
+                  widths={[480, 720, 940]}
+                  sizes="(min-width: 64rem) 30rem, (min-width: 40rem) 46vw, 92vw"
+                  alt={pick(tp.alt, locale) ?? ''}
+                  loading="lazy"
+                />
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .topics__list {
+    display: grid;
+    gap: var(--s-5);
+    margin: 0;
+    padding: 0;
+  }
+  .topics__fig {
+    margin: 0;
+  }
+  .topics__fig :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 940 / 788;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  @media (min-width: 40rem) {
+    .topics__list {
+      grid-template-columns: repeat(2, minmax(0, 30rem));
+      gap: var(--s-6);
+    }
+  }
+</style>

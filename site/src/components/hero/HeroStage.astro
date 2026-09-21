@@ -1,0 +1,130 @@
+---
+/**
+ * Stage for the hero React Flow graph: reserves its space (no layout shift), paints soft colour glows
+ * behind it, shows a quiet static skeleton until the island is ready, and carries a plain-text
+ * fallback for visitors without JavaScript.
+ */
+import HeroGraph from './HeroGraph';
+import { CAPS, WIRING, LAYOUTS, TEXT } from './graph-data';
+import { products } from '@/data/products';
+import { withBase } from '@/i18n/base';
+import type { Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const wide = LAYOUTS.wide;
+const narrow = LAYOUTS.narrow;
+const rtl = locale === 'ar';
+const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
+---
+
+<div class="stage">
+  <div class="stage__glow" aria-hidden="true"></div>
+  <div class="stage__dots" aria-hidden="true"></div>
+  <div class="stage__box">
+    <div class="stage__poster" aria-hidden="true">
+      <svg class="poster poster--wide" viewBox={`0 0 ${wide.w} ${wide.h}`} preserveAspectRatio="xMidYMid meet">
+        {CAPS.map((_, i) => <rect x={mx(wide.cap.x, wide.cap.w, wide.w)} y={wide.cap.y0 + i * wide.cap.dy} width={wide.cap.w} height={wide.cap.h} rx="14" />)}
+        <rect x={mx(wide.out.x, wide.out.w, wide.w)} y={wide.out.y} width={wide.out.w} height={wide.out.h} rx="18" />
+      </svg>
+      <svg class="poster poster--narrow" viewBox={`0 0 ${narrow.w} ${narrow.h}`} preserveAspectRatio="xMidYMid meet">
+        {CAPS.map((_, i) => <rect x={mx(narrow.cap.x, narrow.cap.w, narrow.w)} y={narrow.cap.y0 + i * narrow.cap.dy} width={narrow.cap.w} height={narrow.cap.h} rx="14" />)}
+        <rect x={mx(narrow.out.x, narrow.out.w, narrow.w)} y={narrow.out.y} width={narrow.out.w} height={narrow.out.h} rx="18" />
+      </svg>
+    </div>
+    <HeroGraph client:only="react" locale={locale} />
+  </div>
+  <noscript>
+    <p>{TEXT[locale].hint}</p>
+    <ul>
+      {
+        WIRING.map((w) => {
+          const p = products.find((x) => x.slug === w.slug);
+          return (
+            p && (
+              <li>
+                <a href={withBase(`/${locale}/products/${w.slug}/`)}>{p.name}</a>: {w.uses.map((u) => CAPS.find((c) => c.id === u)?.label[locale]).join(', ')}
+              </li>
+            )
+          );
+        })
+      }
+    </ul>
+  </noscript>
+</div>
+
+<style>
+  .stage {
+    position: relative;
+    container-type: inline-size;
+    inline-size: 100%;
+  }
+  /* The vivid backdrop the glass cards blur: three logo hues (sky blue, leaf green, warm sand). Kept pale
+     enough that ink text on the glass stays above AA in every region. */
+  .stage__glow {
+    position: absolute;
+    inset: -16% -12%;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(38% 42% at 20% 30%, color-mix(in srgb, var(--brand-blue) 44%, transparent), transparent 72%),
+      radial-gradient(34% 40% at 80% 22%, color-mix(in srgb, var(--brand-green) 34%, transparent), transparent 72%),
+      radial-gradient(42% 44% at 58% 88%, color-mix(in srgb, var(--copper-300) 42%, transparent), transparent 72%);
+    filter: blur(20px);
+  }
+  /* Fine dot canvas behind the graphic only, fading out towards the edges and the headline. */
+  .stage__dots {
+    position: absolute;
+    inset: -8% -6%;
+    z-index: 1;
+    pointer-events: none;
+    background-image: radial-gradient(circle, color-mix(in srgb, var(--ink) 22%, transparent) 1.1px, transparent 1.7px);
+    background-size: 22px 22px;
+    mask-image: radial-gradient(closest-side, #000 52%, transparent);
+  }
+  .stage__box {
+    position: relative;
+    z-index: 2;
+    aspect-ratio: 880 / 646;
+  }
+  .stage__poster {
+    position: absolute;
+    inset: 0;
+    transition: opacity 0.5s var(--ease-out), visibility 0s linear 0.5s;
+  }
+  .stage__box[data-ready] .stage__poster {
+    opacity: 0;
+    visibility: hidden;
+  }
+  .poster {
+    inline-size: 100%;
+    block-size: 100%;
+  }
+  .poster rect {
+    fill: var(--glass-bg);
+    stroke: var(--glass-border);
+    stroke-width: 1.5;
+  }
+  .poster--narrow {
+    display: none;
+  }
+  @container (max-width: 559px) {
+    .stage__box {
+      aspect-ratio: 360 / 540;
+    }
+    .poster--wide {
+      display: none;
+    }
+    .poster--narrow {
+      display: block;
+    }
+  }
+  noscript {
+    display: block;
+    margin-block-start: var(--s-4);
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+  }
+</style>

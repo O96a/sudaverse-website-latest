@@ -1,0 +1,731 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import Toc from '@/components/docs/Toc.astro';
+import CodeBlock from '@/components/docs/CodeBlock.astro';
+import { openWork } from '@/data/research';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+/** Prose with `inline code`: escapes the text, then wraps backtick runs in an LTR <code>. */
+const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+const rich = (s: string) =>
+  s
+    .split('`')
+    .map((part, i) => (i % 2 ? `<code dir="ltr">${esc(part)}</code>` : esc(part)))
+    .join('');
+
+const kit = openWork.find((w) => w.id === 'llmcorpuskit')!;
+const bench = openWork.find((w) => w.id === 'tokenizer-benchmark')!;
+const readmeHref = `${kit.href}#readme`;
+
+/* Code samples are identical in both languages. */
+const code = {
+  install: 'pip install llmcorpuskit',
+  usage: `from llmcorpuskit import CorpusRefinery
+
+# Initialize with API credentials
+refinery = CorpusRefinery(
+    api_provider="<provider>",
+    api_key="YOUR_API_KEY",
+    model="<model>"
+)
+
+# Process a corpus
+refined_corpus = refinery.refine_corpus(
+    input_file="raw_corpus.txt",
+    output_file="refined_corpus.txt",
+    repair_sentences=True,
+    check_coherence=True
+)`,
+  setup: `# Clone the repository
+git clone https://github.com/sudaverse/<project>.git
+cd <project>
+
+# Create a virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\\Scripts\\activate
+
+# Install dependencies
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+
+# Run tests
+pytest tests/`,
+};
+
+const copy = {
+  en: {
+    title: 'Documentation',
+    description:
+      'Documentation for the public open-source toolkit: LLMCorpusKit installation and usage, a pipeline overview from raw text to a deployed model, development setup and contribution guidelines.',
+    lead: 'Documentation for the public open-source toolkit published on GitHub. It is not documentation for Sudaverse products.',
+    productsLead: 'Looking for a product?',
+    productsLink: 'See the Products pages',
+    toc: 'On this page',
+    copy: 'Copy',
+    copied: 'Copied',
+    llm: {
+      h2: 'LLMCorpusKit',
+      repo: 'Repository',
+      license: 'License',
+      overview: {
+        h3: 'Overview',
+        p: [
+          'LLMCorpusKit is a toolkit for cleaning and polishing large Arabic text corpora. Beyond rule-based cleaning, it uses AI-powered semantic repair to fix sentences and improve quality, so the corpus is suitable for training language models.',
+          'It works with language-model APIs to understand context, with the aim that the refined corpus stays linguistically coherent and culturally authentic.',
+        ],
+      },
+      features: {
+        h3: 'Key features',
+        items: [
+          { t: 'Deep-cleaning workflows', d: 'Multi-stage cleaning pipelines that raise text quality step by step, from surface normalization to deep semantic analysis.' },
+          { t: 'Sentence repair', d: 'AI-powered correction of sentence structure. It fixes grammatical errors, incomplete sentences and fragmented text while preserving meaning.' },
+          { t: 'API integration', d: 'Integrates with language-model APIs for text enhancement and quality assessment.' },
+          { t: 'Bulk and streaming', d: 'Efficient bulk processing for large corpora, and streaming for real-time data pipelines.' },
+        ],
+      },
+      install: {
+        h3: 'Installation and usage',
+        intro: 'Install the package with `pip`, then create a `CorpusRefinery` and point it at your raw corpus file.',
+        installCaption: 'Install',
+        usageCaption: 'Refine a corpus',
+        note: 'Replace `<provider>` and `<model>` with values the toolkit supports, and never commit a real API key. The full API reference is in the repository README.',
+        readme: 'LLMCorpusKit README',
+      },
+      stages: {
+        h3: 'Refinery stages',
+        items: [
+          { t: 'Pre-processing', d: 'Basic normalization and filtering.' },
+          { t: 'Semantic analysis', d: 'Context understanding and validation.' },
+          { t: 'Repair and enhancement', d: 'AI-powered text improvement.' },
+          { t: 'Quality assurance', d: 'Automated quality checks.' },
+          { t: 'Post-processing', d: 'Final formatting and export.' },
+        ],
+      },
+      advanced: {
+        h3: 'Advanced features',
+        items: [
+          { t: 'Context-aware repair', d: 'Maintains discourse coherence across paragraphs.' },
+          { t: 'Dialect preservation', d: 'Repairs text while preserving dialectal features.' },
+          { t: 'Quality scoring', d: 'Assigns quality metrics to each text segment.' },
+          { t: 'Parallel processing', d: 'Multi-threaded processing for large datasets.' },
+          { t: 'Custom rules', d: 'An extensible rule engine for domain-specific refinement.' },
+        ],
+      },
+    },
+    pipeline: {
+      h2: 'Pipeline overview',
+      intro: 'A general view of how raw text becomes a deployed model, and where LLMCorpusKit fits.',
+      steps: [
+        { t: 'Collection', d: 'Gather raw Arabic text from your sources.' },
+        { t: 'Cleaning and normalization', d: 'Initial cleaning and normalization of the raw text.' },
+        { t: 'Refinement with LLMCorpusKit', d: 'Deep cleaning and semantic repair.' },
+        { t: 'Model training', d: 'Train language models on the processed data.' },
+        { t: 'Benchmark evaluation', d: 'Assess model performance.' },
+        { t: 'Application deployment', d: 'Deploy in production.' },
+      ],
+      benchNote: 'For tokenizers, the public benchmark below compares how efficiently they handle Sudanese dialect text.',
+    },
+    setup: {
+      h2: 'Development setup',
+      intro: 'A general setup for working on a public Sudaverse repository. Individual projects may differ, so check the project README first.',
+      prereq: {
+        h3: 'Prerequisites',
+        items: ['Python 3.8 or higher', 'Git for version control', 'A virtual environment tool (venv, conda or poetry)'],
+      },
+      quick: { h3: 'Quick start', caption: 'Set up a project' },
+    },
+    contrib: {
+      h2: 'Contribution guidelines',
+      intro: 'Contributions to the public repositories are welcome: bug fixes, new features, documentation and ideas. Sudaverse is committed to a welcoming and inclusive environment for all contributors.',
+      how: {
+        h3: 'How to contribute',
+        items: [
+          'Fork the repository you want to contribute to.',
+          'Create a feature branch: `git checkout -b feature-name`',
+          'Make your changes, following the coding standards of the project.',
+          'Write tests for new features.',
+          'Run the test suite to make sure nothing breaks.',
+          'Submit a pull request with a clear description.',
+        ],
+      },
+      areas: {
+        h3: 'Contribution areas',
+        items: [
+          { t: 'Code', d: 'Bug fixes, new features and optimizations.' },
+          { t: 'Documentation', d: 'Improve guides and API documentation.' },
+          { t: 'Testing', d: 'Add test cases and improve coverage.' },
+          { t: 'Translation', d: 'Localize documentation.' },
+        ],
+      },
+      help: {
+        h3: 'Need help?',
+        items: ['Check the README and documentation of the project.', 'Open an issue on GitHub for bugs or feature requests.'],
+        contact: 'Or contact the team',
+      },
+    },
+    repos: {
+      h2: 'Repositories',
+      intro: 'The public repositories referenced on this page, and the organization that holds them.',
+      org: 'Sudaverse on GitHub',
+      view: 'View on GitHub',
+    },
+  },
+  ar: {
+    title: 'التوثيق | سودافيرس',
+    description:
+      'توثيق الحزمة المفتوحة المصدر العلنية: تثبيت LLMCorpusKit واستخدامه، ونظرة عامة على خط المعالجة من النص الخام إلى النموذج المنشور، وإعداد بيئة التطوير، وإرشادات المساهمة.',
+    lead: 'توثيق الحزمة المفتوحة المصدر المنشورة علنًا على GitHub. وهو ليس توثيقًا لمنتجات سودافيرس.',
+    productsLead: 'تبحث عن منتج؟',
+    productsLink: 'تصفّح صفحات المنتجات',
+    toc: 'في هذه الصفحة',
+    copy: 'نسخ',
+    copied: 'تم النسخ',
+    llm: {
+      h2: 'LLMCorpusKit',
+      repo: 'المستودع',
+      license: 'الترخيص',
+      overview: {
+        h3: 'نظرة عامة',
+        p: [
+          'LLMCorpusKit حزمة أدوات لتنظيف المدونات النصية العربية الكبيرة وصقلها. فهي لا تكتفي بالتنظيف القائم على القواعد، بل تستخدم إصلاحًا دلاليًا مدعومًا بالذكاء الاصطناعي لتصحيح الجمل ورفع جودة النص، فتصلح المدونة لتدريب النماذج اللغوية.',
+          'وتعمل مع واجهات النماذج اللغوية لفهم السياق، بهدف أن تبقى المدونة المكرّرة متماسكة لغويًا وأصيلة ثقافيًا.',
+        ],
+      },
+      features: {
+        h3: 'أبرز الميزات',
+        items: [
+          { t: 'مسارات تنظيف عميق', d: 'مسارات تنظيف متعددة المراحل ترفع جودة النص تدريجيًا، من التطبيع السطحي إلى التحليل الدلالي العميق.' },
+          { t: 'إصلاح الجمل', d: 'تصحيح بنية الجمل بالذكاء الاصطناعي. يعالج الأخطاء النحوية والجمل غير المكتملة والنصوص المجزأة مع الحفاظ على المعنى.' },
+          { t: 'التكامل مع الواجهات البرمجية', d: 'يتكامل مع واجهات النماذج اللغوية لتحسين النص وتقييم جودته.' },
+          { t: 'المعالجة الدفعية والتدفقية', d: 'معالجة دفعية فعّالة للمدونات الكبيرة، ودعم للتدفق في خطوط البيانات الفورية.' },
+        ],
+      },
+      install: {
+        h3: 'التثبيت والاستخدام',
+        intro: 'ثبّت الحزمة باستخدام `pip`، ثم أنشئ كائنًا من `CorpusRefinery` ووجّهه إلى ملف المدونة الخام.',
+        installCaption: 'التثبيت',
+        usageCaption: 'تنقية مدونة',
+        note: 'استبدل `<provider>` و`<model>` بقيم تدعمها الحزمة، ولا تضع مفتاح واجهة برمجية حقيقيًا في المستودع. المرجع الكامل للواجهة البرمجية في ملف README الخاص بالمستودع.',
+        readme: 'ملف README الخاص بـ LLMCorpusKit',
+      },
+      stages: {
+        h3: 'مراحل المصفاة',
+        items: [
+          { t: 'المعالجة الأولية', d: 'تطبيع أساسي وتصفية.' },
+          { t: 'التحليل الدلالي', d: 'فهم السياق والتحقق منه.' },
+          { t: 'الإصلاح والتحسين', d: 'تحسين النص بالذكاء الاصطناعي.' },
+          { t: 'ضمان الجودة', d: 'فحوص جودة آلية.' },
+          { t: 'المعالجة النهائية', d: 'التنسيق النهائي والتصدير.' },
+        ],
+      },
+      advanced: {
+        h3: 'ميزات متقدمة',
+        items: [
+          { t: 'إصلاح واعٍ بالسياق', d: 'يحافظ على تماسك الخطاب عبر الفقرات.' },
+          { t: 'الحفاظ على اللهجة', d: 'يصلح النص مع الإبقاء على السمات اللهجية.' },
+          { t: 'تقييم الجودة', d: 'يسند مقاييس جودة لكل مقطع نصي.' },
+          { t: 'المعالجة المتوازية', d: 'معالجة متعددة الخيوط لمجموعات البيانات الكبيرة.' },
+          { t: 'قواعد مخصصة', d: 'محرك قواعد قابل للتوسعة للصقل الخاص بمجال معيّن.' },
+        ],
+      },
+    },
+    pipeline: {
+      h2: 'نظرة عامة على خط المعالجة',
+      intro: 'صورة عامة لكيفية تحوّل النص الخام إلى نموذج منشور، وموضع LLMCorpusKit فيها.',
+      steps: [
+        { t: 'الجمع', d: 'اجمع النص العربي الخام من مصادرك.' },
+        { t: 'التنظيف والتطبيع', d: 'تنظيف أولي للنص الخام وتطبيعه.' },
+        { t: 'الصقل باستخدام LLMCorpusKit', d: 'تنظيف عميق وإصلاح دلالي.' },
+        { t: 'تدريب النموذج', d: 'درّب النماذج اللغوية على البيانات المعالجة.' },
+        { t: 'التقييم بمعيار قياس', d: 'قيّم أداء النموذج.' },
+        { t: 'نشر التطبيق', d: 'انشر النموذج في بيئة الإنتاج.' },
+      ],
+      benchNote: 'وفي ما يخص أدوات التجزئة، يقارن معيار القياس العلني أدناه مدى كفاءتها في التعامل مع النص السوداني العامّي.',
+    },
+    setup: {
+      h2: 'إعداد بيئة التطوير',
+      intro: 'إعداد عام للعمل على أي مستودع علني من مستودعات سودافيرس. قد يختلف الإعداد من مشروع إلى آخر، فراجع ملف README الخاص بالمشروع أولًا.',
+      prereq: {
+        h3: 'المتطلبات المسبقة',
+        items: ['Python 3.8 أو أحدث', 'Git لإدارة الإصدارات', 'أداة بيئة افتراضية (venv أو conda أو poetry)'],
+      },
+      quick: { h3: 'البدء السريع', caption: 'إعداد مشروع' },
+    },
+    contrib: {
+      h2: 'إرشادات المساهمة',
+      intro: 'المساهمات في المستودعات العلنية مرحّب بها: إصلاح الأخطاء، وإضافة الميزات، وتحسين التوثيق، واقتراح الأفكار. وتلتزم سودافيرس بتوفير بيئة ترحيبية وشاملة لجميع المساهمين.',
+      how: {
+        h3: 'كيف تساهم',
+        items: [
+          'انسخ (Fork) المستودع الذي تريد المساهمة فيه.',
+          'أنشئ فرعًا للميزة: `git checkout -b feature-name`',
+          'أجرِ تعديلاتك وفق معايير البرمجة المعتمدة في المشروع.',
+          'اكتب اختبارات للميزات الجديدة.',
+          'شغّل مجموعة الاختبارات للتأكد من أن شيئًا لم يتعطل.',
+          'أرسل طلب دمج (Pull Request) بوصف واضح.',
+        ],
+      },
+      areas: {
+        h3: 'مجالات المساهمة',
+        items: [
+          { t: 'الشيفرة', d: 'إصلاح الأخطاء وإضافة الميزات وتحسين الأداء.' },
+          { t: 'التوثيق', d: 'تحسين الأدلة ومراجع الواجهات البرمجية.' },
+          { t: 'الاختبارات', d: 'إضافة حالات اختبار ورفع نسبة التغطية.' },
+          { t: 'الترجمة', d: 'تعريب التوثيق.' },
+        ],
+      },
+      help: {
+        h3: 'تحتاج مساعدة؟',
+        items: ['راجع ملف README وتوثيق المشروع.', 'افتح Issue على GitHub للإبلاغ عن الأخطاء أو طلب الميزات.'],
+        contact: 'أو تواصل مع الفريق',
+      },
+    },
+    repos: {
+      h2: 'المستودعات',
+      intro: 'المستودعات العلنية المذكورة في هذه الصفحة، والمؤسسة التي تضمّها.',
+      org: 'سودافيرس على GitHub',
+      view: 'عرض على GitHub',
+    },
+  },
+}[locale];
+
+const toc = [
+  {
+    id: 'llmcorpuskit',
+    label: 'LLMCorpusKit',
+    children: [
+      { id: 'overview', label: copy.llm.overview.h3 },
+      { id: 'features', label: copy.llm.features.h3 },
+      { id: 'install', label: copy.llm.install.h3 },
+      { id: 'stages', label: copy.llm.stages.h3 },
+      { id: 'advanced', label: copy.llm.advanced.h3 },
+    ],
+  },
+  { id: 'pipeline', label: copy.pipeline.h2 },
+  {
+    id: 'setup',
+    label: copy.setup.h2,
+    children: [
+      { id: 'prerequisites', label: copy.setup.prereq.h3 },
+      { id: 'quick-start', label: copy.setup.quick.h3 },
+    ],
+  },
+  {
+    id: 'contributing',
+    label: copy.contrib.h2,
+    children: [
+      { id: 'how-to-contribute', label: copy.contrib.how.h3 },
+      { id: 'contribution-areas', label: copy.contrib.areas.h3 },
+      { id: 'help', label: copy.contrib.help.h3 },
+    ],
+  },
+  { id: 'repositories', label: copy.repos.h2 },
+];
+
+const repos = [kit, bench];
+const externalNote = t(locale, 'a11y.external');
+const contactHref = `${localePath(locale, 'contact')}?topic=integration`;
+const pageUrl = new URL(localePath(locale, 'resources/documentation'), site.origin).toString();
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: new URL(localePath(locale), site.origin).toString() },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.resources'), item: new URL(localePath(locale, 'resources'), site.origin).toString() },
+      { '@type': 'ListItem', position: 3, name: t(locale, 'nav.documentation'), item: pageUrl },
+    ],
+  },
+];
+---
+
+<Base title={copy.title} description={copy.description} nav="resources" jsonLd={jsonLd}>
+  <div class="container">
+    <Crumbs
+      locale={locale}
+      items={[{ label: t(locale, 'nav.resources'), href: localePath(locale, 'resources') }, { label: t(locale, 'nav.documentation') }]}
+    />
+    <header class="head">
+      <h1 id="docs-h">{t(locale, 'nav.documentation')}</h1>
+      <p class="t-lead">{copy.lead}</p>
+      <p class="t-small t-muted head__more">
+        {copy.productsLead}{' '}<a href={localePath(locale, 'products')}>{copy.productsLink}</a>
+      </p>
+    </header>
+
+    <div class="doc">
+      <aside class="doc__toc">
+        <Toc label={copy.toc} items={toc} />
+      </aside>
+
+      <div class="doc__body">
+        <!-- LLMCorpusKit -->
+        <section class="sec" aria-labelledby="llmcorpuskit">
+          <h2 id="llmcorpuskit" translate="no">{copy.llm.h2}</h2>
+          <dl class="meta">
+            <div>
+              <dt>{copy.llm.repo}</dt>
+              <dd>
+                <a href={kit.href} target="_blank" rel="noopener noreferrer" dir="ltr">github.com/sudaverse/LLMCorpusKit<Icon name="external" size={14} /><span class="sr-only"> ({externalNote})</span></a>
+              </dd>
+            </div>
+            {
+              kit.license && (
+                <div>
+                  <dt>{copy.llm.license}</dt>
+                  <dd>{kit.license}</dd>
+                </div>
+              )
+            }
+          </dl>
+
+          <h3 id="overview">{copy.llm.overview.h3}</h3>
+          {copy.llm.overview.p.map((p) => <p>{p}</p>)}
+
+          <h3 id="features">{copy.llm.features.h3}</h3>
+          <dl class="rows">
+            {
+              copy.llm.features.items.map((f) => (
+                <div>
+                  <dt>{f.t}</dt>
+                  <dd>{f.d}</dd>
+                </div>
+              ))
+            }
+          </dl>
+
+          <h3 id="install">{copy.llm.install.h3}</h3>
+          <p set:html={rich(copy.llm.install.intro)} />
+          <CodeBlock id="code-install" caption={copy.llm.install.installCaption} lang="bash" code={code.install} copyLabel={copy.copy} copiedLabel={copy.copied} />
+          <CodeBlock id="code-usage" caption={copy.llm.install.usageCaption} lang="python" code={code.usage} copyLabel={copy.copy} copiedLabel={copy.copied} />
+          <p class="t-small t-muted">
+            <span set:html={rich(copy.llm.install.note)} />{' '}<a href={readmeHref} target="_blank" rel="noopener noreferrer">
+              <span translate="no">{copy.llm.install.readme}</span><Icon name="external" size={14} /><span class="sr-only"> ({externalNote})</span>
+            </a>
+          </p>
+
+          <h3 id="stages">{copy.llm.stages.h3}</h3>
+          <ol role="list" class="steps">
+            {
+              copy.llm.stages.items.map((s) => (
+                <li>
+                  <span class="steps__t">{s.t}</span>
+                  <span class="steps__d">{s.d}</span>
+                </li>
+              ))
+            }
+          </ol>
+
+          <h3 id="advanced">{copy.llm.advanced.h3}</h3>
+          <dl class="rows">
+            {
+              copy.llm.advanced.items.map((f) => (
+                <div>
+                  <dt>{f.t}</dt>
+                  <dd>{f.d}</dd>
+                </div>
+              ))
+            }
+          </dl>
+        </section>
+
+        <!-- Pipeline overview -->
+        <section class="sec" aria-labelledby="pipeline">
+          <h2 id="pipeline">{copy.pipeline.h2}</h2>
+          <p>{copy.pipeline.intro}</p>
+          <ol role="list" class="steps">
+            {
+              copy.pipeline.steps.map((s) => (
+                <li>
+                  <span class="steps__t">{s.t}</span>
+                  <span class="steps__d">{s.d}</span>
+                </li>
+              ))
+            }
+          </ol>
+          <p class="t-small t-muted">
+            {copy.pipeline.benchNote}{' '}<a href={bench.href} target="_blank" rel="noopener noreferrer">
+              <span translate="no">{bench.name}</span><Icon name="external" size={14} /><span class="sr-only"> ({externalNote})</span>
+            </a>
+          </p>
+        </section>
+
+        <!-- Development setup -->
+        <section class="sec" aria-labelledby="setup">
+          <h2 id="setup">{copy.setup.h2}</h2>
+          <p>{copy.setup.intro}</p>
+          <h3 id="prerequisites">{copy.setup.prereq.h3}</h3>
+          <ul class="plain">
+            {copy.setup.prereq.items.map((item) => <li>{item}</li>)}
+          </ul>
+          <h3 id="quick-start">{copy.setup.quick.h3}</h3>
+          <CodeBlock id="code-setup" caption={copy.setup.quick.caption} lang="bash" code={code.setup} copyLabel={copy.copy} copiedLabel={copy.copied} />
+        </section>
+
+        <!-- Contribution guidelines -->
+        <section class="sec" aria-labelledby="contributing">
+          <h2 id="contributing">{copy.contrib.h2}</h2>
+          <p>{copy.contrib.intro}</p>
+          <h3 id="how-to-contribute">{copy.contrib.how.h3}</h3>
+          <ol role="list" class="steps steps--plain">
+            {copy.contrib.how.items.map((item) => <li><span class="steps__d" set:html={rich(item)} /></li>)}
+          </ol>
+          <h3 id="contribution-areas">{copy.contrib.areas.h3}</h3>
+          <dl class="rows">
+            {
+              copy.contrib.areas.items.map((f) => (
+                <div>
+                  <dt>{f.t}</dt>
+                  <dd>{f.d}</dd>
+                </div>
+              ))
+            }
+          </dl>
+          <h3 id="help">{copy.contrib.help.h3}</h3>
+          <ul class="plain">
+            {copy.contrib.help.items.map((item) => <li>{item}</li>)}
+            <li><a href={contactHref}>{copy.contrib.help.contact}</a></li>
+          </ul>
+        </section>
+
+        <!-- Repositories -->
+        <section class="sec" aria-labelledby="repositories">
+          <h2 id="repositories">{copy.repos.h2}</h2>
+          <p>{copy.repos.intro}</p>
+          <ul role="list" class="repos">
+            <li class="repo">
+              <h3 class="repo__name">{copy.repos.org}</h3>
+              <a class="textlink" href={site.social.github} target="_blank" rel="noopener noreferrer">
+                <span dir="ltr">github.com/sudaverse</span>
+                <Icon name="external" size={16} />
+                <span class="sr-only"> ({externalNote})</span>
+              </a>
+            </li>
+            {
+              repos.map((w) => (
+                <li class="repo">
+                  <h3 class="repo__name" translate="no">{w.name}</h3>
+                  <p class="repo__desc">{L(w.description)}</p>
+                  <a class="textlink" href={w.href} target="_blank" rel="noopener noreferrer">
+                    {copy.repos.view}
+                    <Icon name="external" size={16} />
+                    <span class="sr-only"> ({externalNote})</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--s-4);
+    padding-block: var(--s-6) var(--s-7);
+  }
+  .head h1 {
+    max-inline-size: 14ch;
+  }
+  .head__more {
+    max-inline-size: none;
+  }
+
+  .doc {
+    display: grid;
+    gap: var(--s-6);
+    padding-block-end: var(--section-y);
+    align-items: start;
+  }
+  .doc__toc {
+    min-inline-size: 0;
+  }
+  .doc__body {
+    min-inline-size: 0;
+    max-inline-size: 52rem;
+  }
+  @media (min-width: 64rem) {
+    .doc {
+      grid-template-columns: 15rem minmax(0, 1fr);
+      column-gap: var(--s-9);
+      align-items: stretch;
+    }
+  }
+
+  /* ---- Content ---- */
+  .sec + .sec {
+    margin-block-start: var(--s-9);
+    padding-block-start: var(--s-7);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .sec > h2 {
+    margin-block-end: var(--s-4);
+  }
+  .sec > h3 {
+    margin-block: var(--s-7) var(--s-3);
+    font-size: var(--fs-500);
+  }
+  .sec > p + p {
+    margin-block-start: var(--s-3);
+  }
+  .sec :global(p code),
+  .sec :global(li code) {
+    padding: 0.08em 0.25em;
+    border-radius: var(--radius-1);
+    background: var(--paper-2);
+    color: var(--ink);
+    font-size: 0.9em;
+    overflow-wrap: anywhere;
+  }
+
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-7);
+    margin: 0 0 var(--s-5);
+    font-size: var(--fs-200);
+  }
+  .meta dt {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+  }
+  .meta dd {
+    margin: 0;
+    font-weight: 560;
+  }
+  .meta a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-block-size: 2.25rem;
+    overflow-wrap: anywhere;
+  }
+
+  .rows {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .rows > div {
+    display: grid;
+    gap: var(--s-1) var(--s-5);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .rows dt {
+    font-weight: 650;
+  }
+  .rows dd {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 52ch;
+  }
+  @media (min-width: 48rem) {
+    .rows > div {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+    }
+  }
+
+  .steps {
+    margin: 0;
+    padding: 0;
+    counter-reset: step;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .steps li {
+    counter-increment: step;
+    display: grid;
+    grid-template-columns: 2rem minmax(0, 1fr);
+    gap: var(--s-1) var(--s-3);
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .steps li::before {
+    content: counter(step);
+    font-family: var(--font-mono);
+    font-size: var(--fs-100);
+    line-height: 1.9;
+    color: var(--color-text-meta);
+  }
+  .steps__t {
+    grid-column: 2;
+    font-weight: 650;
+  }
+  .steps__d {
+    grid-column: 2;
+    color: var(--color-text-muted);
+  }
+  .steps--plain .steps__d {
+    color: var(--color-text);
+  }
+  @media (min-width: 48rem) {
+    .steps li:has(.steps__t) {
+      grid-template-columns: 2rem minmax(0, 0.9fr) minmax(0, 1.4fr);
+    }
+    .steps li:has(.steps__t) .steps__t {
+      grid-column: 2;
+    }
+    .steps li:has(.steps__t) .steps__d {
+      grid-column: 3;
+    }
+  }
+
+  .plain {
+    margin: 0;
+    padding-inline-start: 1.25em;
+    display: grid;
+    gap: var(--s-2);
+  }
+
+  .textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .textlink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .sec :global(a:not([class]) svg) {
+    display: inline;
+    vertical-align: -0.1em;
+    margin-inline-start: 0.25em;
+  }
+  .repos {
+    margin: var(--s-5) 0 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .repo {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border-strong);
+  }
+  .repo__name {
+    font-size: var(--fs-400);
+    font-weight: 650;
+  }
+  .repo__desc {
+    color: var(--color-text-muted);
+    max-inline-size: 60ch;
+  }
+</style>

@@ -1,0 +1,337 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import CtaBand from '@/components/products/CtaBand.astro';
+import ProductRow from '@/components/products/ProductRow.astro';
+import { audiences, type Audience } from '@/data/audiences';
+import { productBySlug } from '@/data/products';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { locales, pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) => audiences.map((a) => ({ params: { lang, audience: a.slug }, props: { a } })));
+}
+const locale = Astro.params.lang as Locale;
+const { a } = Astro.props as { a: Audience };
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: {
+    needs: 'Common challenges',
+    help: 'How Sudaverse helps',
+    products: 'Products to look at',
+    process: 'How we work with you',
+    steps: [
+      { t: 'Start with a conversation', d: 'We learn about your use case, your data and where it has to stay.' },
+      { t: 'Agree a scoped pilot', d: 'We choose a narrow first piece of work with a clear way to judge it.' },
+      { t: 'Grow from what is measured', d: 'We extend only after security, traceability and results have been checked.' },
+    ],
+    data: {
+      h: 'Where your data lives',
+      p: 'Selected Sudaverse systems can run against locally hosted models, which keeps sensitive data and models inside your own environment. Which options apply depends on the product, and we say so plainly in the first conversation.',
+    },
+    cta: { h2: 'Tell us what you are working on.', body: 'Your message goes to the Sudaverse team.' },
+    all: 'All audiences',
+    seeProducts: 'Explore products',
+    open: 'Learn more',
+  },
+  ar: {
+    needs: 'تحديات شائعة',
+    help: 'كيف تساعد سودافيرس',
+    products: 'منتجات ذات صلة',
+    process: 'كيف نعمل معك',
+    steps: [
+      { t: 'نبدأ بمحادثة', d: 'نتعرّف على حالة الاستخدام لديك وبياناتك والمكان الذي يجب أن تبقى فيه.' },
+      { t: 'نتفق على تجربة محدودة النطاق', d: 'نختار جزءًا أول ضيق النطاق من العمل مع طريقة واضحة للحكم عليه.' },
+      { t: 'نتوسّع بناءً على ما قيس', d: 'لا نتوسّع إلا بعد التحقق من الأمن وقابلية التتبع والنتائج.' },
+    ],
+    data: {
+      h: 'أين تبقى بياناتك',
+      p: 'يمكن لبعض أنظمة سودافيرس العمل مع نماذج مستضافة محليًا، بما يُبقي البيانات والنماذج الحساسة داخل بيئتك. وتختلف الخيارات المتاحة باختلاف المنتج، ونذكر ذلك بوضوح في أول محادثة.',
+    },
+    cta: { h2: 'أخبرنا بما تعمل عليه.', body: 'تصل رسالتك إلى فريق سودافيرس.' },
+    all: 'كل الفئات',
+    seeProducts: 'استكشف المنتجات',
+    open: 'اعرف المزيد',
+  },
+}[locale];
+
+const title = `${L(a.name)} | ${locale === 'ar' ? 'سودافيرس' : 'Sudaverse'}`;
+const description = L(a.lead).slice(0, 200);
+const products = a.products.map((s) => productBySlug(s)).filter((p) => !!p);
+const linkHref = (path: string) => {
+  const [base, extra] = path.split(/(?=[?#])/);
+  return `${localePath(locale, base)}${extra ?? ''}`;
+};
+const contactHref = `${localePath(locale, 'contact')}?topic=${a.topic}`;
+const abs = (p: string) => new URL(p, site.origin).toString();
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.audience'), item: abs(localePath(locale, 'for')) },
+      { '@type': 'ListItem', position: 3, name: L(a.name), item: abs(localePath(locale, `for/${a.slug}`)) },
+    ],
+  },
+];
+---
+
+<Base title={title} description={description} nav="audience" jsonLd={jsonLd}>
+  <div class="container">
+    <Crumbs
+      locale={locale}
+      items={[{ label: t(locale, 'nav.audience'), href: localePath(locale, 'for') }, { label: L(a.name) }]}
+    />
+  </div>
+
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container hero__grid">
+      <div class="hero__mark" aria-hidden="true"><Icon name={a.icon} size={36} /></div>
+      <div class="hero__text">
+        <h1 id="hero-h">{L(a.h1)}</h1>
+        <p class="t-lead">{L(a.lead)}</p>
+        <div class="cluster">
+          <Button href={contactHref} variant="convert" arrow>{t(locale, 'cta.talk')}</Button>
+          <Button href={localePath(locale, 'products')} variant="secondary">{copy.seeProducts}</Button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="needs-h">
+    <div class="container split">
+      <h2 id="needs-h" class="split__h" data-reveal>{copy.needs}</h2>
+      <dl class="rows" data-reveal>
+        {
+          a.needs.map((n) => (
+            <div class="rows__row">
+              <dt>{L(n.t)}</dt>
+              <dd>{L(n.d)}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section--alt" aria-labelledby="help-h">
+    <div class="container split">
+      <h2 id="help-h" class="split__h" data-reveal>{copy.help}</h2>
+      <ul role="list" class="help" data-reveal>
+        {
+          a.help.map((h) => (
+            <li class="help__row">
+              <div class="help__main">
+                <h3>{L(h.t)}</h3>
+                <p>{L(h.d)}</p>
+              </div>
+              {h.link && (
+                <a class="textlink help__link" href={linkHref(h.link)}>
+                  <span class="sr-only">{L(h.t)}: </span>
+                  {copy.open}
+                  <Icon name="arrow" size={18} directional />
+                </a>
+              )}
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  {
+    products.length > 0 && (
+      <section class="section section--tight prod" aria-labelledby="prod-h">
+        <div class="container">
+          <h2 id="prod-h" data-reveal>{copy.products}</h2>
+          <ul role="list" class="prod__list" data-reveal>
+            {products.map((p) => (
+              <li>
+                <ProductRow product={p!} locale={locale} compact />
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    )
+  }
+
+  <section class="section section--alt" aria-labelledby="proc-h">
+    <div class="container split">
+      <h2 id="proc-h" class="split__h" data-reveal>{copy.process}</h2>
+      <div class="stack" data-reveal>
+        <ol role="list" class="steps">
+          {
+            copy.steps.map((s) => (
+              <li class="steps__row">
+                <h3>{s.t}</h3>
+                <p>{s.d}</p>
+              </li>
+            ))
+          }
+        </ol>
+        <div class="data">
+          <h3>{copy.data.h}</h3>
+          <p>{copy.data.p}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <CtaBand
+    id="aud-cta-h"
+    heading={copy.cta.h2}
+    body={copy.cta.body}
+    primary={{ href: contactHref, label: t(locale, 'cta.talk') }}
+    secondary={{ href: localePath(locale, 'for'), label: copy.all }}
+    seed={a.slug.length * 5 + 11}
+  />
+</Base>
+
+<style>
+  .hero {
+    padding-block: var(--s-4) var(--section-y-tight);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--s-5);
+    align-items: start;
+  }
+  .hero__mark {
+    display: grid;
+    place-items: center;
+    inline-size: 4.5rem;
+    block-size: 4.5rem;
+    border-radius: var(--radius-3);
+    background: color-mix(in srgb, var(--brand-blue) 14%, var(--white));
+    color: var(--brand-blue-700);
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+  .hero h1 {
+    max-inline-size: 18ch;
+  }
+  .split {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .split__h {
+    max-inline-size: 14ch;
+  }
+  .rows {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .rows__row {
+    display: grid;
+    gap: var(--s-2) var(--s-6);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .rows dt {
+    font-size: var(--fs-400);
+    font-weight: 620;
+    line-height: var(--lh-snug);
+  }
+  .rows dd {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 56ch;
+  }
+  .help {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .help__row {
+    display: grid;
+    gap: var(--s-2) var(--s-6);
+    align-items: start;
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .help__main {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .help__main h3 {
+    font-size: var(--fs-400);
+    line-height: var(--lh-snug);
+  }
+  .help__main p {
+    color: var(--color-text-muted);
+    max-inline-size: 56ch;
+  }
+  .prod h2 {
+    margin-block-end: var(--s-6);
+    font-size: var(--fs-500);
+  }
+  .prod__list {
+    display: grid;
+    gap: 0 var(--s-7);
+    padding: 0;
+  }
+  .prod__list > li {
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .steps {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .steps__row {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .steps__row h3 {
+    font-size: var(--fs-400);
+  }
+  .steps__row p,
+  .data p {
+    color: var(--color-text-muted);
+    max-inline-size: 56ch;
+  }
+  .data {
+    display: grid;
+    gap: var(--s-2);
+  }
+  .data h3 {
+    font-size: var(--fs-400);
+  }
+  @media (min-width: 48rem) {
+    .hero__grid {
+      grid-template-columns: 4.5rem minmax(0, 1fr);
+      gap: var(--s-7);
+    }
+    .rows__row {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+    }
+    .help__row {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: center;
+    }
+    .prod__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .split {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      column-gap: var(--s-8);
+    }
+    .prod__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,135 @@
+---
+/**
+ * Table of contents for a long page. Sticky beside the content on wide screens; on narrow screens
+ * it sits above the content and shows only the top-level entries. A small script marks the section
+ * being read with aria-current="location".
+ */
+interface Item {
+  id: string;
+  label: string;
+  children?: { id: string; label: string }[];
+}
+interface Props {
+  label: string;
+  items: Item[];
+}
+const { label, items } = Astro.props;
+---
+
+<nav class="toc" aria-label={label} data-toc>
+  <p class="toc__title" aria-hidden="true">{label}</p>
+  <ol role="list" class="toc__list">
+    {
+      items.map((item) => (
+        <li>
+          <a href={`#${item.id}`} class="toc__link toc__link--top">{item.label}</a>
+          {item.children && item.children.length > 0 && (
+            <ol role="list" class="toc__sub">
+              {item.children.map((child) => (
+                <li>
+                  <a href={`#${child.id}`} class="toc__link">{child.label}</a>
+                </li>
+              ))}
+            </ol>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .toc {
+    padding-block-start: var(--s-4);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .toc__title {
+    margin-block-end: var(--s-2);
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+    max-inline-size: none;
+  }
+  .toc__list,
+  .toc__sub {
+    margin: 0;
+    padding: 0;
+  }
+  .toc__link {
+    display: flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    padding-inline: var(--s-3);
+    border-radius: var(--radius-1);
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+    line-height: 1.35;
+    text-decoration: none;
+  }
+  .toc__link--top {
+    color: var(--color-text);
+    font-weight: 620;
+  }
+  .toc__link:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .toc__link[aria-current='location'] {
+    background: var(--nile-100);
+    color: var(--nile-900);
+    font-weight: 650;
+  }
+  /* Narrow screens: top-level entries only, so the list stays short. */
+  .toc__sub {
+    display: none;
+  }
+  @media (min-width: 64rem) {
+    .toc {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--s-5));
+      max-block-size: calc(100dvh - var(--header-h) - var(--s-7));
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .toc__sub {
+      display: block;
+      margin-block-end: var(--s-2);
+    }
+    .toc__sub .toc__link {
+      min-block-size: 2.25rem;
+      padding-inline-start: var(--s-5);
+    }
+  }
+</style>
+
+<script>
+  // Mark the section being read. Reads layout only on scroll (rAF-throttled); nothing moves.
+  const nav = document.querySelector<HTMLElement>('[data-toc]');
+  if (nav) {
+    const links = [...nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]')];
+    const targets = links.map((a) => document.getElementById(decodeURIComponent(a.hash.slice(1))));
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const line = window.innerHeight * 0.3;
+      let current = -1;
+      targets.forEach((el, i) => {
+        if (el && el.getBoundingClientRect().top <= line) current = i;
+      });
+      links.forEach((a, i) => {
+        if (i === current) a.setAttribute('aria-current', 'location');
+        else a.removeAttribute('aria-current');
+      });
+    };
+    const schedule = () => {
+      if (!queued) {
+        queued = true;
+        requestAnimationFrame(update);
+      }
+    };
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', schedule);
+    update();
+  }
+</script>
