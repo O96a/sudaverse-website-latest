@@ -53,7 +53,7 @@ jobs:
       # Tells us the URL prefix GitHub will serve the site under: empty on the custom domain
       # (www.sudaverse.com), or /repo-name on a project page. The build follows it, so links and assets never break.
       - id: pages
-        uses: actions/configure-pages@v5
+        uses: actions/configure-pages@v6
       - run: npm ci
       - run: npm run build
         env:
