@@ -62,7 +62,7 @@ jobs:
       - run: npm run test:links
         env:
           SITE_BASE: ${{ steps.pages.outputs.base_path }}
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site/dist
 
