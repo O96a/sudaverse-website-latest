@@ -1,0 +1,47 @@
+---
+import { site } from '@/config/site';
+import { alternates } from '@/i18n/utils';
+import { withBase } from '@/i18n/base';
+import { localeMeta, locales, type Locale } from '@/i18n/config';
+
+interface Props {
+  title: string;
+  description: string;
+  locale: Locale;
+  /** Path of the current page, e.g. Astro.url.pathname */
+  pathname: string;
+  /** Absolute or root-relative path to a 1200x630 social preview image. */
+  image?: string;
+  type?: 'website' | 'article';
+  noindex?: boolean;
+}
+const { title, description, locale, pathname, image = '/og/sudaverse-og.png', type = 'website', noindex = false } = Astro.props;
+
+const canonical = new URL(pathname, site.origin).toString();
+// A noindex page (the 404) has no language alternates to advertise.
+const alts = noindex ? [] : alternates(pathname, site.origin);
+const ogImage = new URL(withBase(image), site.origin).toString();
+const fullTitle = title.includes('Sudaverse') || title.includes('سودافيرس') ? title : `${title} | Sudaverse`;
+---
+
+<title>{fullTitle}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonical} />
+{alts.map((a) => <link rel="alternate" hreflang={a.locale} href={a.href} />)}
+<link rel="alternate" hreflang="x-default" href={alts.find((a) => a.locale === 'en')?.href} />
+{noindex && <meta name="robots" content="noindex, nofollow" />}
+
+<meta property="og:site_name" content={site.name} />
+<meta property="og:type" content={type} />
+<meta property="og:title" content={fullTitle} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:locale" content={localeMeta[locale].ogLocale} />
+{locales.filter((l) => l !== locale).map((l) => <meta property="og:locale:alternate" content={localeMeta[l].ogLocale} />)}
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />

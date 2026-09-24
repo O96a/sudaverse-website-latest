@@ -1,0 +1,11 @@
+/*
+ * Self-hosted fonts (no third-party requests). Fontsource ships per-script subsets with
+ * unicode-range, so a page downloads only the files whose characters it actually uses.
+ * Latin + display/UI: Schibsted Grotesk (variable). Arabic: IBM Plex Sans Arabic. Code and data only: JetBrains Mono.
+ */
+@import '@fontsource-variable/schibsted-grotesk/wght.css';
+@import '@fontsource/ibm-plex-sans-arabic/400.css';
+@import '@fontsource/ibm-plex-sans-arabic/500.css';
+@import '@fontsource/ibm-plex-sans-arabic/600.css';
+@import '@fontsource/ibm-plex-sans-arabic/700.css';
+@import '@fontsource-variable/jetbrains-mono/wght.css';

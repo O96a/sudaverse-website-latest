@@ -1,0 +1,35 @@
+---
+import { defaultLocale } from '@/i18n/config';
+import { site } from '@/config/site';
+import { withBase } from '@/i18n/base';
+
+// Root entry: send visitors to a language route. Static hosting has no Accept-Language handling,
+// so a tiny inline script prefers Arabic when the browser does; everyone else gets English.
+const target = withBase(`/${defaultLocale}/`);
+const arTarget = withBase('/ar/');
+const canonical = new URL(target, site.origin).toString();
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sudaverse</title>
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={canonical} />
+    <link rel="alternate" hreflang="en" href={new URL(withBase('/en/'), site.origin).toString()} />
+    <link rel="alternate" hreflang="ar" href={new URL(arTarget, site.origin).toString()} />
+    <link rel="alternate" hreflang="x-default" href={new URL(withBase('/en/'), site.origin).toString()} />
+    <meta name="robots" content="noindex" />
+    <script is:inline define:vars={{ target, arTarget }}>
+      var langs = navigator.languages || [navigator.language || ''];
+      var pref = langs.find(function (l) {
+        return /^(ar|en)/i.test(l);
+      });
+      location.replace(pref && /^ar/i.test(pref) ? arTarget : target);
+    </script>
+  </head>
+  <body>
+    <p><a href={target}>Sudaverse</a></p>
+  </body>
+</html>

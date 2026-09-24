@@ -1,0 +1,314 @@
+---
+/**
+ * The loom: products are the weft (horizontal threads), capability areas are the warp
+ * (vertical threads). A knot marks a capability a product genuinely draws on; every other
+ * crossing is plain weave. The copper thread is the one product that is live today.
+ * This is a simplified view of the portfolio, not a system architecture.
+ */
+import { products } from '@/data/products';
+import { localePath } from '@/i18n/utils';
+import { pick, type Locale, type Localized } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+  class?: string;
+}
+const { locale, class: className } = Astro.props;
+
+const copy = {
+  title: { en: 'Products woven across shared capabilities', ar: 'منتجات منسوجة عبر قدرات مشتركة' },
+  desc: {
+    en: 'Five products are drawn as horizontal threads crossing five capability areas drawn as vertical threads. A knot marks a capability that a product draws on. The copper thread is the product that is live today.',
+    ar: 'خمسة منتجات مرسومة كخيوط أفقية تعبر خمس مجالات قدرة مرسومة كخيوط عمودية. تشير العقدة إلى قدرة يعتمد عليها المنتج. والخيط النحاسي هو المنتج المتاح اليوم.',
+  },
+  live: { en: 'Live', ar: 'متاح' },
+  dev: { en: 'In development', ar: 'قيد التطوير' },
+  knot: { en: 'Draws on this capability', ar: 'يعتمد على هذه القدرة' },
+  caption: {
+    en: 'A simplified view of the portfolio.',
+    ar: 'عرض مبسّط للمحفظة.',
+  },
+} satisfies Record<string, Localized>;
+
+const foundations: { id: string; label: Localized }[] = [
+  { id: 'language', label: { en: 'Language', ar: 'اللغة' } },
+  { id: 'data', label: { en: 'Data', ar: 'البيانات' } },
+  { id: 'models', label: { en: 'Models', ar: 'النماذج' } },
+  { id: 'geo', label: { en: 'Geospatial', ar: 'جغرافي مكاني' } },
+  { id: 'security', label: { en: 'Security', ar: 'الأمن' } },
+];
+const rows = [
+  { slug: 'sudatutor', uses: ['language', 'models'] },
+  { slug: 'terab', uses: ['language', 'models', 'geo'] },
+  { slug: 'sudan-monitor', uses: ['data', 'geo'] },
+  { slug: 'sudaflood', uses: ['data', 'models', 'geo'] },
+  { slug: 'sudandr', uses: ['models', 'security'] },
+]
+  .map((r) => ({ ...r, product: products.find((p) => p.slug === r.slug) }))
+  .filter((r): r is typeof r & { product: NonNullable<typeof r.product> } => !!r.product);
+
+// geometry (viewBox units)
+const W = 440;
+const H = 640;
+const warpTop = 112;
+const warpBottom = 606;
+const warpX = (j: number) => 152 + j * 60;
+const weftY = (i: number) => 176 + i * 92;
+const weftX1 = 128;
+const weftX2 = 416;
+const labelX = 112;
+
+const label = (l: Localized) => pick(l, locale) ?? '';
+const fname = (id: string) => label(foundations.find((f) => f.id === id)!.label);
+---
+
+<figure class:list={['loom', className]}>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="loom-t loom-d" direction="ltr" focusable="false">
+    <title id="loom-t">{label(copy.title)}</title>
+    <desc id="loom-d">{label(copy.desc)}</desc>
+
+    <!-- warp threads (capability areas) -->
+    <g class="warps">
+      {foundations.map((_, j) => <line x1={warpX(j)} y1={warpTop} x2={warpX(j)} y2={warpBottom} />)}
+    </g>
+
+    <!-- gaps where the weft passes over the warp -->
+    <g class="halo">
+      {
+        rows.flatMap((_, i) =>
+          foundations.map((__, j) =>
+            (i + j) % 2 === 1 ? <rect x={warpX(j) - 9} y={weftY(i) - 11} width="18" height="22" /> : null,
+          ),
+        )
+      }
+    </g>
+
+    <!-- weft threads (products) -->
+    <g class="wefts">
+      {
+        rows.map((r, i) => (
+          <line class:list={[{ 'is-live': r.product.stage === 'live' }]} x1={weftX1} y1={weftY(i)} x2={weftX2} y2={weftY(i)} />
+        ))
+      }
+    </g>
+
+    <!-- gaps where the warp passes over the weft, then the warp segment on top -->
+    <g class="halo">
+      {
+        rows.flatMap((_, i) =>
+          foundations.map((__, j) =>
+            (i + j) % 2 === 0 ? <rect x={warpX(j) - 11} y={weftY(i) - 9} width="22" height="18" /> : null,
+          ),
+        )
+      }
+    </g>
+    <g class="warps warps--over">
+      {
+        rows.flatMap((_, i) =>
+          foundations.map((__, j) =>
+            (i + j) % 2 === 0 ? <line x1={warpX(j)} y1={weftY(i) - 14} x2={warpX(j)} y2={weftY(i) + 14} /> : null,
+          ),
+        )
+      }
+    </g>
+
+    <!-- knots: where a product draws on a capability -->
+    <g class="knots">
+      {
+        rows.flatMap((r, i) =>
+          foundations.map((f, j) =>
+            r.uses.includes(f.id) ? (
+              <circle class:list={[{ 'is-live': r.product.stage === 'live' }]} cx={warpX(j)} cy={weftY(i)} r="8.5" />
+            ) : null,
+          ),
+        )
+      }
+    </g>
+
+    <!-- brand "leaf" at the end of every weft -->
+    <g class="leaves">
+      {
+        rows.map((r, i) => (
+          <rect
+            class:list={[{ 'is-live': r.product.stage === 'live' }]}
+            x={weftX2 + 8}
+            y={weftY(i) - 7}
+            width="14"
+            height="14"
+            transform={`rotate(45 ${weftX2 + 15} ${weftY(i)})`}
+          />
+        ))
+      }
+    </g>
+
+    {
+      rows.map((r, i) =>
+        r.product.stage === 'live' ? (
+          <circle class="pulse" r="5">
+            <animateMotion dur="5s" repeatCount="indefinite" path={`M${weftX1} ${weftY(i)} L${weftX2} ${weftY(i)}`} />
+          </circle>
+        ) : null,
+      )
+    }
+
+    <!-- product labels (links) -->
+    <g class="plabels">
+      {
+        rows.map((r, i) => (
+          <a href={localePath(locale, `products/${r.slug}`)}>
+            <text x={labelX} y={weftY(i) + 5} text-anchor="end" class:list={[{ 'is-live': r.product.stage === 'live' }]}>
+              {r.product.name}
+            </text>
+          </a>
+        ))
+      }
+    </g>
+
+    <!-- capability labels, set upward from the top of each warp -->
+    <g class="flabels">
+      {
+        foundations.map((f, j) => (
+          <text transform={`translate(${warpX(j) + 5} ${warpTop - 10}) rotate(-90)`}>{label(f.label)}</text>
+        ))
+      }
+    </g>
+  </svg>
+
+  <figcaption>
+    <ul role="list" class="legend">
+      <li><span class="sw sw--live" aria-hidden="true"></span>{label(copy.live)}</li>
+      <li><span class="sw sw--dev" aria-hidden="true"></span>{label(copy.dev)}</li>
+      <li><span class="sw sw--knot" aria-hidden="true"></span>{label(copy.knot)}</li>
+    </ul>
+    <p class="cap">{label(copy.caption)}</p>
+  </figcaption>
+
+  <ul class="sr-only">
+    {
+      rows.map((r) => (
+        <li>
+          {r.product.name}: {r.uses.map(fname).join(', ')}
+        </li>
+      ))
+    }
+  </ul>
+</figure>
+
+<style>
+  .loom {
+    margin: 0;
+    display: grid;
+    gap: var(--s-4);
+  }
+  svg {
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+    /* SVG text ignores the HTML dir attribute: force LTR so anchors and rotated labels stay put in RTL pages. */
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+  .warps line {
+    stroke: var(--nile-700);
+    stroke-width: 10;
+    stroke-linecap: butt;
+  }
+  .halo rect {
+    fill: var(--color-bg);
+  }
+  .wefts line {
+    stroke: var(--nile-900);
+    stroke-width: 10;
+    stroke-linecap: butt;
+  }
+  .wefts line.is-live {
+    stroke: var(--copper-600);
+    stroke-width: 12;
+  }
+  .knots circle {
+    fill: var(--color-bg);
+    stroke: var(--ink);
+    stroke-width: 3;
+  }
+  .knots circle.is-live {
+    stroke: var(--copper-700);
+  }
+  .leaves rect {
+    fill: none;
+    stroke: var(--sage-600);
+    stroke-width: 3;
+  }
+  .leaves rect.is-live {
+    stroke: var(--copper-600);
+  }
+  .pulse {
+    fill: var(--white);
+    stroke: var(--copper-700);
+    stroke-width: 2;
+  }
+  .plabels text {
+    fill: var(--ink);
+    font-size: 15px;
+    font-weight: 620;
+    font-family: var(--font-sans);
+  }
+  .plabels text.is-live {
+    fill: var(--copper-700);
+  }
+  .plabels a {
+    outline-offset: 4px;
+  }
+  .plabels a:hover text {
+    text-decoration: underline;
+  }
+  .flabels text {
+    fill: var(--color-text-muted);
+    font-size: 14px;
+    font-weight: 560;
+    font-family: var(--font-sans);
+    letter-spacing: 0;
+  }
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    padding: 0;
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+  }
+  .legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .sw {
+    display: inline-block;
+    flex: none;
+  }
+  .sw--live {
+    inline-size: 1.5rem;
+    block-size: 6px;
+    background: var(--copper-600);
+  }
+  .sw--dev {
+    inline-size: 1.5rem;
+    block-size: 6px;
+    background: var(--nile-900);
+  }
+  .sw--knot {
+    inline-size: 0.85rem;
+    block-size: 0.85rem;
+    border: 3px solid var(--ink);
+    border-radius: 50%;
+  }
+  .cap {
+    margin-block-start: var(--s-1);
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pulse {
+      display: none;
+    }
+  }
+</style>

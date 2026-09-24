@@ -1,0 +1,156 @@
+---
+import Button from '@/components/Button.astro';
+
+/**
+ * A code sample: monospaced, keyboard-scrollable, always left-to-right (also on Arabic pages),
+ * with an optional copy button that announces "copied" through a polite live region.
+ * The copy button is hidden until the script runs, so there is no dead control without JavaScript.
+ * Lines (or trailing parts of lines) that start with # are dimmed as comments.
+ */
+interface Props {
+  /** Short name of the sample, e.g. "Install". It also names the scrollable region. */
+  caption: string;
+  /** Language tag shown beside the caption, e.g. "bash". */
+  lang: string;
+  code: string;
+  copyLabel: string;
+  copiedLabel: string;
+  id: string;
+}
+const { caption, lang, code, copyLabel, copiedLabel, id } = Astro.props;
+
+const esc = (s: string) => s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+const html = code
+  .split('\n')
+  .map((line) => {
+    const m = line.match(/(^|\s)#(\s|$)/);
+    if (!m || m.index === undefined) return esc(line);
+    const at = m.index + m[1].length;
+    return `${esc(line.slice(0, at))}<span class="c">${esc(line.slice(at))}</span>`;
+  })
+  .join('\n');
+---
+
+<figure class="code on-deep" data-code>
+  <figcaption class="code__bar">
+    <span class="code__cap" id={`${id}-cap`}>
+      {caption}
+      <span class="code__lang" dir="ltr">{lang}</span>
+    </span>
+    <span class="code__copy" data-copy-wrap hidden>
+      <Button variant="outline-deep" size="sm" data-copy data-copy-label={copyLabel} data-copied-label={copiedLabel}>
+        <span data-copy-text>{copyLabel}</span>
+      </Button>
+      <span class="sr-only" role="status" aria-live="polite" data-copy-status></span>
+    </span>
+  </figcaption>
+  <pre dir="ltr" tabindex="0" role="region" aria-labelledby={`${id}-cap`}><code set:html={html} /></pre>
+</figure>
+
+<style>
+  .code {
+    margin-block: var(--s-5);
+    background: var(--nile-950);
+    color: var(--paper);
+    border-radius: var(--radius-1);
+    overflow: hidden;
+  }
+  .code__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    min-block-size: 3.25rem;
+    padding-block: 0.25rem;
+    padding-inline: var(--s-4) 0.5rem;
+    border-block-end: 1px solid color-mix(in srgb, var(--nile-200) 24%, transparent);
+    font-size: var(--fs-100);
+    color: var(--nile-200);
+  }
+  .code__cap {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--s-3);
+    font-weight: 620;
+  }
+  .code__lang {
+    font-family: var(--font-mono);
+    font-weight: 400;
+    opacity: 0.85;
+  }
+  .code__copy[hidden] {
+    display: none;
+  }
+  /* A <button> gets the browser's default fill; the outline-deep variant sets none. */
+  .code__copy :global(.btn--outline-deep) {
+    background: transparent;
+  }
+  pre {
+    margin: 0;
+    padding: var(--s-4) var(--s-5);
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.75;
+    tab-size: 2;
+    text-align: start;
+    white-space: pre;
+  }
+  pre code {
+    font-size: inherit;
+  }
+  pre:focus-visible {
+    outline: 2px solid var(--color-focus-on-deep);
+    outline-offset: -3px;
+  }
+  pre :global(.c) {
+    color: var(--nile-200);
+  }
+</style>
+
+<script>
+  // Copy buttons. Delegated so it works for every code block on the page.
+  const wraps = document.querySelectorAll<HTMLElement>('[data-copy-wrap]');
+  wraps.forEach((w) => (w.hidden = false));
+
+  const fallbackCopy = (text: string) => {
+    const area = document.createElement('textarea');
+    area.value = text;
+    area.setAttribute('readonly', '');
+    area.style.position = 'fixed';
+    area.style.opacity = '0';
+    document.body.append(area);
+    area.select();
+    let ok = false;
+    try {
+      ok = document.execCommand('copy');
+    } catch {
+      ok = false;
+    }
+    area.remove();
+    return ok;
+  };
+
+  document.addEventListener('click', async (event) => {
+    const button = (event.target as HTMLElement).closest<HTMLElement>('[data-copy]');
+    if (!button) return;
+    const figure = button.closest('[data-code]');
+    const text = figure?.querySelector('pre')?.textContent ?? '';
+    const status = figure?.querySelector<HTMLElement>('[data-copy-status]');
+    const label = button.querySelector<HTMLElement>('[data-copy-text]');
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(text);
+      ok = true;
+    } catch {
+      ok = fallbackCopy(text);
+    }
+    if (!ok) return;
+    const done = button.dataset.copiedLabel ?? '';
+    if (label) label.textContent = done;
+    if (status) status.textContent = done;
+    window.setTimeout(() => {
+      if (label) label.textContent = button.dataset.copyLabel ?? '';
+      if (status) status.textContent = '';
+    }, 2200);
+  });
+</script>

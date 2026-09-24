@@ -1,0 +1,154 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import { localePath, t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+/**
+ * Built to /404.html and served by the host for any missing path, so it cannot know which
+ * language the visitor was reading. It shows both languages side by side. Every link is
+ * root-relative and absolute so it works from any depth.
+ */
+const blocks: { locale: Locale; heading: string; body: string }[] = (['en', 'ar'] as const).map((locale) => ({
+  locale,
+  heading: t(locale, '404.title'),
+  body: t(locale, '404.body'),
+}));
+---
+
+<Base
+  title="Page not found | الصفحة غير موجودة"
+  description="The page you are looking for does not exist or has moved. الصفحة التي تبحث عنها غير موجودة أو تم نقلها."
+  noindex
+  noChat
+>
+  <section class="nf" aria-label="404">
+    <div class="nf__art" aria-hidden="true"><TraceArt seed={404} tone="nile" traces={8} leaves={7} /></div>
+    <div class="container nf__grid">
+      {
+        blocks.map(({ locale, heading, body }) => {
+          const isAr = locale === 'ar';
+          const id = `nf-${locale}`;
+          return (
+            <section
+              class:list={['blk', { 'blk--ar': isAr }]}
+              lang={locale}
+              dir={isAr ? 'rtl' : 'ltr'}
+              aria-labelledby={id}
+            >
+              {isAr ? <h2 id={id} class="blk__h">{heading}</h2> : <h1 id={id} class="blk__h">{heading}</h1>}
+              <p class="blk__body">{body}</p>
+              <div class="blk__home">
+                <Button href={localePath(locale)} variant="primary" arrow>{t(locale, '404.home')}</Button>
+              </div>
+              <ul role="list" class="blk__links">
+                <li>
+                  <a href={localePath(locale, 'products')}>
+                    {t(locale, 'nav.products')}
+                    <Icon name="arrow" size={18} directional />
+                  </a>
+                </li>
+                <li>
+                  <a href={localePath(locale, 'contact')}>
+                    {t(locale, 'nav.contact')}
+                    <Icon name="arrow" size={18} directional />
+                  </a>
+                </li>
+              </ul>
+            </section>
+          );
+        })
+      }
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  /* This page already shows both languages, and the header/footer switch would link to /ar/404/,
+     which does not exist. */
+  [data-lang-switch] {
+    display: none !important;
+  }
+</style>
+
+<style>
+  .nf {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    padding-block: var(--section-y);
+  }
+  .nf__art {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.35;
+    mask-image: linear-gradient(to bottom, #000, transparent 85%);
+  }
+  .nf__art :global(svg) {
+    inline-size: 100%;
+    block-size: 100%;
+    max-inline-size: none;
+  }
+  .nf__grid {
+    display: grid;
+    gap: var(--s-8);
+  }
+  .blk {
+    display: grid;
+    gap: var(--s-5);
+    align-content: start;
+    justify-items: start;
+    padding-block-start: var(--s-5);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  /* The Arabic block sits inside an English document, so it carries its own Arabic type settings. */
+  .blk--ar {
+    font-family: var(--font-sans-ar);
+    --tracking-h1: 0;
+    --tracking-h2: 0;
+    --lh-tight: 1.3;
+    --lh-heading: 1.4;
+    --lh-body: 1.85;
+    --fs-200: 1rem;
+    --fs-300: 1.125rem;
+    line-height: var(--lh-body);
+  }
+  .blk__h {
+    font-size: var(--fs-700);
+    font-weight: 660;
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 14ch;
+  }
+  .blk__body {
+    color: var(--color-text-muted);
+    max-inline-size: 36ch;
+  }
+  .blk__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-5);
+    padding: 0;
+  }
+  .blk__links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .blk__links a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  @media (min-width: 48rem) {
+    .nf__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-9);
+    }
+  }
+</style>

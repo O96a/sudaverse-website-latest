@@ -1,0 +1,649 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import CtaBand from '@/components/products/CtaBand.astro';
+import ServicesBlock from '@/components/services/ServicesBlock.astro';
+import educationGraphic from '@/assets/topics/education.jpg';
+import farm from '@/assets/photos/farm-tablet.jpg';
+import { productBySlug } from '@/data/products';
+import { solutions } from '@/data/solutions';
+import { capabilityById } from '@/data/capabilities';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: {
+    title: 'Solutions: what we can help your organization accomplish | Sudaverse',
+    description:
+      'Where Sudaverse can help: institutional AI knowledge systems, Arabic conversational AI, data insights, geospatial monitoring, secure AI, education and agriculture.',
+    h1: 'Solutions',
+    lead: 'What Sudaverse can help your organization accomplish.',
+    intro:
+      'Each area below names the need, describes what we build toward it, and points to the products and engineering capabilities behind it.',
+    jump: 'Solutions on this page',
+    build: 'What we build toward it',
+    products: 'Products',
+    caps: 'Capabilities behind it',
+    discuss: 'Discuss this',
+    photoAlt: 'Sudaverse graphic: Education will no longer be for the few, it will be for everyone, with an open book, a monitor and a graduation cap.',
+    farmAlt: 'Illustration: a farmer at sunset holds a tablet showing a map of his fields, beside a green crop and an irrigation canal.',
+    illustration: 'Illustration',
+    cta: {
+      h2: 'Bring us the problem.',
+      body: 'Tell us what your organization needs to accomplish. We will say plainly what we can build toward it.',
+    },
+  },
+  ar: {
+    title: 'الحلول: ما يمكننا مساعدة مؤسستك على إنجازه | سودافيرس',
+    description:
+      'أين يمكن لسودافيرس أن تساعد: أنظمة معرفة للمؤسسات، وذكاء اصطناعي محادثي عربي، وتحليل البيانات، والمراقبة الجغرافية، والذكاء الاصطناعي الآمن، والتعليم، والزراعة.',
+    h1: 'الحلول',
+    lead: 'ما يمكن لسودافيرس أن تساعد مؤسستك على إنجازه.',
+    intro:
+      'يبيّن كل مجال أدناه الحاجة، ويصف ما نبنيه لتلبيتها، ويشير إلى المنتجات والقدرات الهندسية التي تقف خلفها.',
+    jump: 'الحلول في هذه الصفحة',
+    build: 'ما نبنيه لتلبيتها',
+    products: 'المنتجات',
+    caps: 'القدرات الداعمة له',
+    discuss: 'ناقش هذا المجال معنا',
+    photoAlt: 'رسم من سودافيرس بعنوان: التعليم لن يكون للقلة بعد اليوم بل للجميع (نص الرسم بالإنجليزية)، وفيه كتاب مفتوح وشاشة وقبعة تخرج.',
+    farmAlt: 'رسم توضيحي: مزارع عند الغروب يحمل جهازًا لوحيًا يعرض خريطة حقوله، بجانب محصول أخضر وقناة ري.',
+    illustration: 'رسم توضيحي',
+    cta: {
+      h2: 'أخبرنا بالمشكلة.',
+      body: 'أخبرنا بما تحتاج مؤسستك إلى إنجازه، وسنقول لك بوضوح ما يمكننا بناءه.',
+    },
+  },
+}[locale];
+
+/**
+ * Each solution gets its own rhythm so the page never reads as identical blocks.
+ * Layouts are pure CSS grid-area arrangements of the same pieces (see the styles below).
+ */
+type Variant = 'split' | 'columns' | 'lead' | 'media-end' | 'deep' | 'media-start' | 'strip';
+type Media =
+  | { kind: 'art'; seed: number; tone: 'nile' | 'sage'; traces: number; leaves: number; graticule?: boolean; thread?: boolean }
+  | { kind: 'photo' }
+  | { kind: 'farm' };
+const layout: Record<string, { variant: Variant; alt?: boolean; media?: Media }> = {
+  'institutional-ai': { variant: 'split' },
+  'arabic-conversational-ai': { variant: 'columns', alt: true },
+  'data-intelligence': { variant: 'lead' },
+  'geospatial-monitoring': {
+    variant: 'media-end',
+    alt: true,
+    media: { kind: 'art', seed: 27, tone: 'nile', traces: 8, leaves: 8, graticule: true, thread: true },
+  },
+  'secure-ai': { variant: 'deep' },
+  'education-platforms': { variant: 'media-start', media: { kind: 'photo' } },
+  'agricultural-intelligence': {
+    variant: 'media-end',
+    alt: true,
+    media: { kind: 'farm' },
+  },
+};
+
+const items = solutions.map((s) => ({
+  s,
+  ...(layout[s.slug] ?? { variant: 'split' as Variant }),
+  prods: s.products.map((slug) => productBySlug(slug)).filter((p) => !!p),
+  caps: (s.capabilities ?? []).map((id) => capabilityById(id)).filter((c) => !!c),
+}));
+
+const contactHref = `${localePath(locale, 'contact')}?topic=institutional`;
+const abs = (path: string) => `${site.origin}${path}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: copy.h1, item: abs(localePath(locale, 'solutions')) },
+    ],
+  },
+];
+---
+
+<Base title={copy.title} description={copy.description} nav="solutions" jsonLd={jsonLd}>
+  <section class="head" aria-labelledby="solutions-h">
+    <div class="container head__grid">
+      <h1 id="solutions-h">{copy.h1}</h1>
+      <div class="head__text">
+        <p class="t-lead">{copy.lead}</p>
+        <p class="t-muted">{copy.intro}</p>
+      </div>
+    </div>
+    <nav class="container jump" aria-label={copy.jump}>
+      <ul role="list" class="jump__list">
+        {
+          items.map(({ s }) => (
+            <li>
+              <a class="jump__link" href={`#${s.slug}`}>
+                <span>{L(s.title)}</span>
+                <Icon name="chevron" size={18} class="jump__icon" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </section>
+
+  {
+    items.map(({ s, variant, alt, media, prods, caps }) => {
+      const id = `${s.slug}-h`;
+      const deep = variant === 'deep';
+      return (
+        <section
+          id={s.slug}
+          class:list={['sol', `sol--${variant}`, { 'section--alt': alt, 'section--deep on-deep': deep }]}
+          aria-labelledby={id}
+        >
+          {deep && (
+            <div class="sol__bg" aria-hidden="true">
+              <TraceArt seed={19} tone="deep" traces={9} leaves={10} graticule />
+            </div>
+          )}
+          <div class="container sol__grid">
+            <header class="sol__head" data-reveal>
+              <h2 id={id}>{L(s.title)}</h2>
+              <p class="sol__need">{L(s.need)}</p>
+            </header>
+
+            {media && (
+              <div class="sol__media" data-reveal>
+                {media.kind === 'farm' ? (
+                  <figure class="sol__photo sol__photo--farm">
+                    <Picture
+                      src={farm}
+                      formats={['avif', 'webp']}
+                      widths={[480, 720, 960]}
+                      sizes="(min-width: 64rem) 30rem, 92vw"
+                      alt={copy.farmAlt}
+                      loading="lazy"
+                    />
+                    <figcaption class="t-small t-muted">{copy.illustration}</figcaption>
+                  </figure>
+                ) : media.kind === 'photo' ? (
+                  <figure class="sol__photo">
+                    <Picture
+                      src={educationGraphic}
+                      formats={['avif', 'webp']}
+                      widths={[480, 720, 940]}
+                      sizes="(min-width: 64rem) 30rem, 92vw"
+                      alt={copy.photoAlt}
+                      loading="lazy"
+                    />
+                  </figure>
+                ) : (
+                  <div class="sol__plate" aria-hidden="true">
+                    <TraceArt
+                      seed={media.seed}
+                      tone={media.tone}
+                      traces={media.traces}
+                      leaves={media.leaves}
+                      graticule={media.graticule}
+                      thread={media.thread}
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div class="sol__offer" data-reveal>
+              <h3 class="sol__k">{copy.build}</h3>
+              <p class="sol__offer-text">{L(s.offer)}</p>
+            </div>
+
+            <div class="sol__refs" data-reveal>
+              {prods.length > 0 && (
+                <div class="sol__block">
+                  <h3 class="sol__k">{copy.products}</h3>
+                  <ul role="list" class="plist">
+                    {prods.map((p) => (
+                      <li>
+                        <a class="plink" href={localePath(locale, `products/${p!.slug}`)}>
+                          <span class="plink__main">
+                            <span class="plink__name" translate="no">{p!.name}</span>
+                            <StageBadge stage={p!.stage} locale={locale} />
+                          </span>
+                          <span class="plink__tag">{L(p!.tagline)}</span>
+                          <Icon name="arrow" size={18} directional class="plink__arrow" />
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {caps.length > 0 && (
+                <div class="sol__block">
+                  <h3 class="sol__k">{copy.caps}</h3>
+                  <ul role="list" class="clist">
+                    {caps.map((c) => (
+                      <li>
+                        <span class="clist__t">{L(c!.title)}</span>
+                        <span class="clist__e">{L(c!.evidence)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <p class="sol__discuss">
+              <a class="discuss" href={contactHref}>
+                {copy.discuss}
+                <Icon name="arrow" size={18} directional />
+              </a>
+            </p>
+          </div>
+        </section>
+      );
+    })
+  }
+
+  <ServicesBlock locale={locale} />
+
+  <CtaBand
+    id="solutions-cta-h"
+    heading={copy.cta.h2}
+    body={copy.cta.body}
+    primary={{ href: contactHref, label: t(locale, 'cta.talk') }}
+    secondary={{ href: localePath(locale, 'products'), label: t(locale, 'cta.exploreProducts') }}
+    seed={33}
+  />
+</Base>
+
+<style>
+  /* ---- Page head ---- */
+  .head {
+    padding-block: clamp(2.5rem, 1.25rem + 5vw, 5.5rem) var(--section-y-tight);
+  }
+  .head__grid {
+    display: grid;
+    gap: var(--s-5);
+    align-items: end;
+  }
+  .head__text {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .jump {
+    margin-block-start: var(--s-8);
+  }
+  .jump__list {
+    display: grid;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .jump__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-block-size: 3.25rem;
+    padding-block: var(--s-2);
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .jump__link:hover {
+    color: var(--ink);
+    background: var(--paper-2);
+  }
+  .jump__link :global(.jump__icon) {
+    flex: none;
+    color: var(--nile-700);
+  }
+  @media (min-width: 48rem) {
+    .jump__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-8);
+    }
+  }
+  @media (min-width: 64rem) {
+    .head__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: var(--s-9);
+    }
+  }
+
+  /* ---- One solution ---- */
+  .sol {
+    --sol-ink: var(--color-text);
+    --sol-muted: var(--color-text-muted);
+    --sol-meta: var(--color-text-meta);
+    --sol-rule: var(--color-border);
+    --sol-rule-strong: var(--color-border-strong);
+    --sol-link: var(--nile-700);
+    position: relative;
+    isolation: isolate;
+    padding-block: var(--section-y-tight);
+    scroll-margin-block-start: var(--header-h);
+  }
+  .sol__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .sol__head {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+  .sol__head h2 {
+    font-size: var(--fs-600);
+    max-inline-size: 18ch;
+  }
+  .sol__need {
+    font-size: var(--fs-400);
+    line-height: 1.5;
+    color: var(--sol-muted);
+    max-inline-size: 38ch;
+  }
+  .sol__k {
+    font-size: var(--fs-200);
+    line-height: var(--lh-snug);
+    font-weight: 650;
+    letter-spacing: 0;
+    color: var(--sol-meta);
+    margin-block-end: var(--s-2);
+  }
+  .sol__offer-text {
+    font-size: var(--fs-300);
+    max-inline-size: 52ch;
+  }
+  .sol__refs {
+    display: grid;
+    gap: var(--s-6);
+    align-content: start;
+  }
+  .sol__block {
+    min-inline-size: 0;
+  }
+  .sol__discuss {
+    max-inline-size: none;
+  }
+
+  /* Reference lists: hairline-ruled, no boxes. */
+  .plist,
+  .clist {
+    padding: 0;
+    border-block-start: 1px solid var(--sol-rule-strong);
+  }
+  .plink {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--s-1) var(--s-4);
+    align-items: center;
+    padding-block: var(--s-3);
+    min-block-size: 3.25rem;
+    border-block-end: 1px solid var(--sol-rule);
+    color: var(--sol-ink);
+    text-decoration: none;
+  }
+  .plink:hover {
+    color: var(--sol-ink);
+    background: color-mix(in srgb, var(--sol-ink) 5%, transparent);
+  }
+  .plink__main {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-1) var(--s-3);
+  }
+  .plink__name {
+    font-size: var(--fs-400);
+    font-weight: 660;
+    line-height: var(--lh-snug);
+  }
+  .plink__tag {
+    grid-column: 1;
+    font-size: var(--fs-200);
+    color: var(--sol-muted);
+  }
+  .plink :global(.plink__arrow) {
+    grid-column: 2;
+    grid-row: 1 / span 2;
+    color: var(--sol-link);
+  }
+  .clist li {
+    display: grid;
+    gap: var(--s-1);
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--sol-rule);
+  }
+  .clist__t {
+    font-weight: 620;
+  }
+  .clist__e {
+    font-size: var(--fs-200);
+    color: var(--sol-meta);
+  }
+  .discuss {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    color: var(--sol-link);
+    text-decoration: none;
+  }
+  .discuss:hover {
+    color: var(--sol-link);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* Media */
+  .sol__plate {
+    aspect-ratio: 800 / 520;
+    overflow: hidden;
+    background: var(--paper);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-1);
+  }
+  .sol__photo {
+    margin: 0;
+    max-inline-size: 30rem;
+  }
+  .sol__photo :global(img) {
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 940 / 788;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  .sol--strip .sol__plate {
+    aspect-ratio: 800 / 190;
+  }
+  .sol__photo--farm {
+    display: grid;
+    gap: var(--s-2);
+    max-inline-size: 34rem;
+  }
+  .sol__photo--farm :global(img) {
+    aspect-ratio: 4 / 3;
+    object-position: 26% center;
+  }
+
+  /* Deep band: the secure and private AI solution. */
+  .sol--deep {
+    --sol-ink: var(--color-text-on-deep);
+    --sol-muted: var(--color-text-on-deep-muted);
+    --sol-meta: var(--nile-200);
+    --sol-rule: color-mix(in srgb, var(--nile-200) 24%, transparent);
+    --sol-rule-strong: color-mix(in srgb, var(--nile-200) 46%, transparent);
+    --sol-link: var(--paper);
+    overflow: clip;
+    padding-block: var(--section-y);
+  }
+  .sol__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    opacity: 0.3;
+    mask-image: linear-gradient(to left, #000 20%, transparent 85%);
+  }
+  :global([dir='rtl']) .sol__bg {
+    mask-image: linear-gradient(to right, #000 20%, transparent 85%);
+  }
+  .sol--deep .sol__head h2 {
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 3.75rem);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 14ch;
+  }
+  .sol--deep .sol__offer-text {
+    font-size: var(--fs-400);
+    line-height: 1.55;
+    max-inline-size: 44ch;
+  }
+
+  /* Rhythm: layouts per variant. Mobile is one column in DOM order. */
+  @media (min-width: 40rem) {
+    .sol__refs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-6);
+    }
+    .sol--lead .sol__refs,
+    .sol--deep .sol__refs,
+    .sol--media-start .sol__refs,
+    .sol--media-end .sol__refs {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (min-width: 64rem) {
+    .sol__grid {
+      column-gap: var(--s-8);
+      row-gap: var(--s-6);
+    }
+
+    /* Split: title left, everything else right. */
+    .sol--split .sol__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas:
+        'head offer'
+        'head refs'
+        'head discuss';
+    }
+    .sol--split .sol__head {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--s-6));
+    }
+
+    /* Columns: title row, then offer | products | capabilities. */
+    .sol--columns .sol__grid,
+    .sol--strip .sol__grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-areas:
+        'head head head'
+        'offer refs refs'
+        'discuss discuss discuss';
+    }
+    .sol--strip .sol__grid {
+      grid-template-areas:
+        'head head head'
+        'media media media'
+        'offer refs refs'
+        'discuss discuss discuss';
+    }
+    .sol--columns .sol__head,
+    .sol--strip .sol__head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      column-gap: var(--s-8);
+      align-items: end;
+    }
+    .sol--columns .sol__head h2,
+    .sol--strip .sol__head h2 {
+      max-inline-size: 16ch;
+    }
+
+    /* Lead: title over the top, offer set large on the left, references on the right. */
+    .sol--lead .sol__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-areas:
+        'head head'
+        'offer refs'
+        'discuss refs';
+    }
+    .sol--lead .sol__head {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      column-gap: var(--s-8);
+      align-items: end;
+    }
+    .sol--lead .sol__offer-text {
+      font-size: var(--fs-500);
+      line-height: 1.4;
+      letter-spacing: var(--tracking-h3);
+      font-weight: 520;
+      max-inline-size: 28ch;
+    }
+
+    /* Media at the end / start: art or photograph opposite the text. */
+    .sol--media-end .sol__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-areas:
+        'head media'
+        'offer media'
+        'refs media'
+        'discuss media';
+    }
+    .sol--media-start .sol__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      grid-template-areas:
+        'media head'
+        'media offer'
+        'media refs'
+        'media discuss';
+    }
+    .sol--media-end .sol__media,
+    .sol--media-start .sol__media {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--s-6));
+    }
+
+    /* Deep: title and offer on the left, references on the right. */
+    .sol--deep .sol__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      column-gap: var(--s-9);
+      grid-template-areas:
+        'head refs'
+        'offer refs'
+        'discuss refs';
+    }
+
+    .sol__head {
+      grid-area: head;
+    }
+    .sol__media {
+      grid-area: media;
+    }
+    .sol__offer {
+      grid-area: offer;
+    }
+    .sol__refs {
+      grid-area: refs;
+    }
+    .sol__discuss {
+      grid-area: discuss;
+    }
+    /* Columns and strip: the references sit as two of the three columns. */
+    .sol--columns .sol__refs,
+    .sol--strip .sol__refs {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-6);
+    }
+  }
+</style>

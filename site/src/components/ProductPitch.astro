@@ -1,0 +1,134 @@
+---
+import Button from './Button.astro';
+import StageBadge from './StageBadge.astro';
+import Icon from './Icon.astro';
+import type { Product } from '@/data/products';
+import { localePath, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  product: Product;
+  locale: Locale;
+  /** Show the capability list (only renders when the product has real capabilities). */
+  capabilities?: boolean;
+  /** Button styling for deep backgrounds. */
+  deep?: boolean;
+}
+const { product, locale, capabilities = false, deep = false } = Astro.props;
+const href = localePath(locale, `products/${product.slug}`);
+const caps = capabilities ? (product.capabilities ?? []) : [];
+---
+
+<div class="pitch">
+  <div class="pitch__head">
+    <h3 class="pitch__name" translate="no">{product.name}</h3>
+    <StageBadge stage={product.stage} locale={locale} />
+  </div>
+  <p class="pitch__tag">{pick(product.tagline, locale)}</p>
+  <p class="pitch__sum">{pick(product.summary, locale)}</p>
+  {
+    product.audience && (
+      <p class="pitch__aud">
+        <span class="pitch__k">{t(locale, 'misc.audience')}</span> {pick(product.audience, locale)}
+      </p>
+    )
+  }
+  {
+    caps.length > 0 && (
+      <ul class="pitch__caps" role="list">
+        {caps.map((c) => (
+          <li>
+            <Icon name="check" size={18} />
+            <span>{pick(c, locale)}</span>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  <div class="cluster pitch__cta">
+    <Button href={href} variant={deep ? 'light' : 'primary'} arrow>{t(locale, 'cta.exploreProduct')}</Button>
+    {
+      product.url && (
+        <a class="pitch__ext" href={product.url} target="_blank" rel="noopener noreferrer">
+          {product.name}
+          <Icon name="external" size={16} />
+          <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+        </a>
+      )
+    }
+  </div>
+</div>
+
+<style>
+  .pitch {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+  }
+  .pitch__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3);
+  }
+  .pitch__name {
+    font-size: var(--fs-600);
+    line-height: var(--lh-tight);
+    font-weight: 680;
+    letter-spacing: var(--tracking-h2);
+  }
+  .pitch__tag {
+    font-size: var(--fs-400);
+    line-height: 1.4;
+    font-weight: 560;
+    max-inline-size: 34ch;
+  }
+  .pitch__sum {
+    color: var(--color-text-muted);
+    max-inline-size: 56ch;
+  }
+  .pitch__k {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    text-transform: uppercase;
+    color: var(--color-text-meta);
+    margin-inline-end: 0.4rem;
+  }
+  .pitch__aud {
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+  }
+  .pitch__caps {
+    display: grid;
+    gap: var(--s-2);
+    padding: 0;
+  }
+  .pitch__caps li {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.6rem;
+    align-items: start;
+    font-size: var(--fs-200);
+  }
+  .pitch__caps :global(svg) {
+    color: var(--sage-600);
+    margin-block-start: 0.2em;
+  }
+  .pitch__cta {
+    margin-block-start: var(--s-2);
+    gap: var(--s-4);
+  }
+  .pitch__ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .pitch__ext:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+</style>

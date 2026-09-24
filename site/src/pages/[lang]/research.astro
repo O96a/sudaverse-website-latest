@@ -1,0 +1,493 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import researchHall from '@/assets/photos/research-hall.jpg';
+import healthGraphic from '@/assets/topics/health.jpg';
+import { directions } from '@/data/research';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+/** Product names stay Latin and isolated from the surrounding bidi text. Copy is authored here, so set:html is safe. */
+const nm = (s: string) => s.replace(/\[\[(.+?)\]\]/g, '<bdi translate="no">$1</bdi>');
+
+const copy = {
+  en: {
+    title: 'Research and development | Sudaverse',
+    description:
+      'Research and development at Sudaverse: directions in Sudanese Arabic language technology, ethical AI, computer vision and applied AI, and how they feed products.',
+    crumb: 'Research and development',
+    hero: {
+      h1: 'Research and development',
+      lead: 'Research that becomes infrastructure. We choose our directions because our products depend on the answers, and we publish the tools that come out of the work.',
+      alt: 'Illustration: researchers seated in a lecture hall with laptops open, one showing a map of Sudan.',
+      caption: 'Illustration',
+    },
+    dir: {
+      h2: 'Research directions',
+      lead: 'These are directions we are investigating. None of them has been published yet.',
+      topics: 'Topics under investigation',
+    },
+    applied: {
+      h2: 'Applied AI for health, education and agriculture',
+      body: 'Health is one of the directions we are exploring, next to education and agriculture, where our products are already live. It is a direction under investigation, and nothing in it has been published yet.',
+      alt: 'Sudaverse graphic: a doctor’s coat with a stethoscope and a heart, beside the line Smarter care, faster treatment, healthier Sudan.',
+    },
+    how: {
+      h2: 'How research becomes products',
+      lead: 'Research at Sudaverse is not a separate department. The directions are the ones our products depend on, and the products are built on what the work shows.',
+      rows: [
+        {
+          t: 'Language',
+          d: 'Work on dialects, code-switching and low-resource modeling is aimed at products that understand and answer in Sudanese Arabic, such as [[SudaTutor]].',
+        },
+        {
+          t: 'Applied AI',
+          d: 'Applied directions feed tutoring in [[SudaTutor]] and crop and farm intelligence in [[Terab]].',
+        },
+        {
+          t: 'Evaluation',
+          d: 'Bias detection, fairness metrics for African contexts and privacy preservation shape how we evaluate what we build.',
+        },
+      ],
+    },
+    pub: {
+      h2: 'Published research',
+      body: 'Where the work is useful beyond our own products, we publish it. Our open tools and benchmarks are public on GitHub, and contributions are welcome.',
+      cta: 'Published research',
+      gh: 'sudaverse on GitHub',
+    },
+    collab: {
+      h2: 'Collaboration',
+      body: 'Sudaverse welcomes collaboration proposals from researchers, research groups and universities. If your work touches one of these directions, tell us what you have in mind and the team will reply by email.',
+      cta: 'Propose a collaboration',
+    },
+    home: 'Home',
+  },
+  ar: {
+    title: 'البحث والتطوير | سودافيرس',
+    description:
+      'البحث والتطوير في سودافيرس: اتجاهات في تقنيات اللغة العربية السودانية والذكاء الاصطناعي الأخلاقي والرؤية الحاسوبية والذكاء الاصطناعي التطبيقي، وكيف تغذّي المنتجات.',
+    crumb: 'البحث والتطوير',
+    hero: {
+      h1: 'البحث والتطوير',
+      lead: 'بحث يتحوّل إلى بنية تحتية. نختار اتجاهاتنا لأن منتجاتنا تعتمد على إجاباتها، وننشر الأدوات التي تنبثق من هذا العمل.',
+      alt: 'رسم توضيحي: باحثون يجلسون في قاعة محاضرات وأمامهم حواسيب محمولة، على أحدها خريطة للسودان.',
+      caption: 'رسم توضيحي',
+    },
+    dir: {
+      h2: 'الاتجاهات البحثية',
+      lead: 'هذه اتجاهات نعمل على استكشافها، ولم يُنشر شيء منها بعد.',
+      topics: 'موضوعات قيد الاستكشاف',
+    },
+    applied: {
+      h2: 'الذكاء الاصطناعي التطبيقي للصحة والتعليم والزراعة',
+      body: 'الصحة أحد الاتجاهات التي نستكشفها، إلى جانب التعليم والزراعة اللذين تعمل فيهما منتجاتنا بالفعل. وهو اتجاه قيد الاستكشاف، ولم يُنشر شيء منه بعد.',
+      alt: 'رسم من سودافيرس: معطف طبيب وسماعة وقلب، بجانب عبارة رعاية أذكى وعلاج أسرع وسودان أكثر صحة (نص الرسم بالإنجليزية).',
+    },
+    how: {
+      h2: 'كيف يتحوّل البحث إلى منتجات',
+      lead: 'البحث في سودافيرس ليس إدارة منفصلة. اتجاهاتنا هي التي تعتمد عليها منتجاتنا، وتُبنى المنتجات على ما يُظهره هذا العمل.',
+      rows: [
+        {
+          t: 'اللغة',
+          d: 'تستهدف الأعمال على اللهجات والتبديل اللغوي ونمذجة اللغات شحيحة الموارد منتجاتٍ تفهم العربية السودانية وتجيب بها، مثل [[SudaTutor]].',
+        },
+        {
+          t: 'الذكاء الاصطناعي التطبيقي',
+          d: 'تغذّي الاتجاهات التطبيقية التعليم في [[SudaTutor]] وذكاء المحاصيل والمزارع في [[Terab]].',
+        },
+        {
+          t: 'التقييم',
+          d: 'يشكّل كشف التحيز ومقاييس العدالة للسياقات الأفريقية وحماية الخصوصية طريقةَ تقييمنا لما نبنيه.',
+        },
+      ],
+    },
+    pub: {
+      h2: 'الأبحاث المنشورة',
+      body: 'حين يكون العمل مفيدًا خارج منتجاتنا نفسها ننشره. أدواتنا ومعايير القياس المفتوحة متاحة علنًا على GitHub، والمساهمات مرحّب بها.',
+      cta: 'الأبحاث المنشورة',
+      gh: 'sudaverse على GitHub',
+    },
+    collab: {
+      h2: 'التعاون',
+      body: 'يرحّب فريق سودافيرس بمقترحات التعاون من الباحثين والمجموعات البحثية والجامعات. إذا كان عملك يتقاطع مع أحد هذه الاتجاهات، فأخبرنا بما يدور في ذهنك وسيردّ عليك الفريق عبر البريد الإلكتروني.',
+      cta: 'اقترح تعاونًا',
+    },
+    home: 'الرئيسية',
+  },
+}[locale];
+
+const homeUrl = `${site.origin}${localePath(locale)}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: copy.home, item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: copy.crumb, item: `${site.origin}${localePath(locale, 'research')}` },
+    ],
+  },
+];
+
+const publishedHref = localePath(locale, 'research/published');
+const collabHref = `${localePath(locale, 'contact')}?topic=research`;
+---
+
+<Base title={copy.title} description={copy.description} nav="research" jsonLd={jsonLd}>
+  <!-- 1. Hero -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <h1 id="hero-h">{copy.hero.h1}</h1>
+        <p class="t-lead">{copy.hero.lead}</p>
+      </div>
+      <figure class="hero__photo">
+        <Picture
+          src={researchHall}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1040]}
+          sizes="(min-width: 64rem) 52vw, 92vw"
+          alt={copy.hero.alt}
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption class="t-small t-muted">{copy.hero.caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. Research directions -->
+  <section class="section section--tight" aria-labelledby="dir-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="dir-h">{copy.dir.h2}</h2>
+        <p class="t-lead dir__note">{copy.dir.lead}</p>
+      </div>
+      <ul role="list" class="dirs" data-reveal>
+        {
+          directions.map((d) => (
+            <li class="dirs__item">
+              <div class="dirs__main">
+                <h3 class="dirs__t">{L(d.title)}</h3>
+                <p class="dirs__s">{L(d.summary)}</p>
+              </div>
+              <div class="dirs__topics">
+                <p class="t-meta dirs__label" id={`topics-${d.id}`}>{copy.dir.topics}</p>
+                <ul role="list" class="dirs__list" aria-labelledby={`topics-${d.id}`}>
+                  {d.topics.map((topic) => <li>{L(topic)}</li>)}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <!-- Applied AI for health: an owner-supplied graphic for the applied direction -->
+  <section class="section section--tight applied" aria-labelledby="applied-h">
+    <div class="container applied__grid">
+      <figure class="applied__fig" data-reveal>
+        <Picture
+          src={healthGraphic}
+          formats={['avif', 'webp']}
+          widths={[480, 720, 940]}
+          sizes="(min-width: 64rem) 30rem, 92vw"
+          alt={copy.applied.alt}
+          loading="lazy"
+        />
+      </figure>
+      <div class="applied__text" data-reveal>
+        <h2 id="applied-h">{copy.applied.h2}</h2>
+        <p class="t-lead">{copy.applied.body}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. How research becomes products -->
+  <section class="section section--alt" aria-labelledby="how-h">
+    <div class="container how__grid">
+      <div class="how__lead" data-reveal>
+        <h2 id="how-h">{copy.how.h2}</h2>
+        <p class="t-lead">{copy.how.lead}</p>
+      </div>
+      <dl class="how__list" data-reveal>
+        {
+          copy.how.rows.map((r) => (
+            <div class="how__row">
+              <dt>{r.t}</dt>
+              <dd set:html={nm(r.d)} />
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- 4. Published research -->
+  <section class="section section--tight pub" aria-labelledby="pub-h">
+    <div class="container pub__grid" data-reveal>
+      <h2 id="pub-h">{copy.pub.h2}</h2>
+      <div class="pub__body">
+        <p class="t-lead">{copy.pub.body}</p>
+        <div class="cluster pub__actions">
+          <Button href={publishedHref} variant="primary" arrow>{copy.pub.cta}</Button>
+          <a class="textlink" href={site.social.github} target="_blank" rel="noopener noreferrer">
+            <span dir="ltr">{copy.pub.gh}</span>
+            <Icon name="external" size={16} />
+            <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Collaboration -->
+  <section class="section section--deep on-deep collab" aria-labelledby="collab-h">
+    <div class="collab__art" aria-hidden="true"><TraceArt seed={29} tone="deep" traces={7} leaves={8} /></div>
+    <div class="container collab__inner">
+      <h2 id="collab-h">{copy.collab.h2}</h2>
+      <p class="t-lead collab__body">{copy.collab.body}</p>
+      <div class="cluster">
+        <Button href={collabHref} variant="light" arrow>{copy.collab.cta}</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-7);
+  }
+  .head h2 {
+    max-inline-size: 22ch;
+  }
+  .textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .textlink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* ---- Hero ---- */
+  .hero {
+    padding-block: clamp(2.5rem, 1rem + 5vw, 5rem) var(--section-y-tight);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-5);
+    align-content: center;
+  }
+  .hero h1 {
+    max-inline-size: 14ch;
+  }
+  .applied__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: center;
+  }
+  .applied__fig {
+    margin: 0;
+    min-inline-size: 0;
+  }
+  .applied__fig :global(img) {
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 30rem;
+    block-size: auto;
+    aspect-ratio: 940 / 788;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  .applied__text {
+    display: grid;
+    gap: var(--s-4);
+    align-content: center;
+  }
+  .applied__text h2 {
+    max-inline-size: 18ch;
+  }
+  @media (min-width: 64rem) {
+    .applied__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
+      column-gap: var(--s-8);
+    }
+  }
+  .hero__photo {
+    display: grid;
+    gap: var(--s-2);
+    margin: 0;
+    min-inline-size: 0;
+  }
+  .hero__photo :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-8);
+    }
+  }
+
+  /* ---- Directions ---- */
+  .dir__note {
+    color: var(--color-text);
+    font-weight: 560;
+  }
+  .dirs {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .dirs__item {
+    display: grid;
+    gap: var(--s-5) var(--s-7);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--color-border-strong);
+  }
+  .dirs__main {
+    display: grid;
+    gap: var(--s-2);
+    align-content: start;
+  }
+  .dirs__t {
+    max-inline-size: 26ch;
+  }
+  .dirs__s {
+    color: var(--color-text-muted);
+    max-inline-size: 48ch;
+  }
+  .dirs__label {
+    margin-block-end: var(--s-2);
+  }
+  .dirs__list {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border);
+  }
+  .dirs__list li {
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+  @media (min-width: 64rem) {
+    .dirs__item {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      column-gap: var(--s-9);
+    }
+  }
+
+  /* ---- How research becomes products ---- */
+  .how__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: start;
+  }
+  .how__lead {
+    display: grid;
+    gap: var(--s-4);
+  }
+  .how__lead h2 {
+    max-inline-size: 16ch;
+  }
+  .how__list {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .how__row {
+    display: grid;
+    gap: var(--s-1) var(--s-5);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .how__row dt {
+    font-weight: 650;
+  }
+  .how__row dd {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 52ch;
+  }
+  @media (min-width: 48rem) {
+    .how__row {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.5fr);
+    }
+  }
+  @media (min-width: 64rem) {
+    .how__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+    }
+  }
+
+  /* ---- Published research ---- */
+  .pub__grid {
+    display: grid;
+    gap: var(--s-5);
+    align-items: start;
+  }
+  .pub__body {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .pub__actions {
+    gap: var(--s-4) var(--s-5);
+  }
+  @media (min-width: 64rem) {
+    .pub__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-9);
+    }
+  }
+
+  /* ---- Collaboration ---- */
+  .collab {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .collab__art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(60%, 46rem);
+    opacity: 0.5;
+    z-index: -1;
+    mask-image: linear-gradient(to left, #000 30%, transparent);
+  }
+  [dir='rtl'] .collab__art {
+    mask-image: linear-gradient(to right, #000 30%, transparent);
+  }
+  .collab__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .collab__body {
+    color: var(--color-text-on-deep-muted);
+    max-inline-size: 52ch;
+  }
+</style>

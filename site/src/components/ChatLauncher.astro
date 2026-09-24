@@ -1,0 +1,249 @@
+---
+import Icon from './Icon.astro';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+
+/**
+ * Floating chat launcher: WhatsApp, Signal and Telegram. Click-to-chat only (no backend, no third-party
+ * script): each channel is a plain link to the company's own account, shown only when it is configured
+ * (PUBLIC_WHATSAPP_NUMBER, PUBLIC_SIGNAL_NUMBER or PUBLIC_SIGNAL_URL, PUBLIC_TELEGRAM_HANDLE). In dev and
+ * preview builds it renders anyway, with disabled channels and a visible notice, so the design can be
+ * reviewed before the accounts exist.
+ */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+const { whatsapp, signal, telegram } = site.contact;
+const prefill = encodeURIComponent(t(locale, 'wa.prefill'));
+const channels = [
+  { id: 'whatsapp', name: 'WhatsApp', icon: 'whatsapp' as const, href: whatsapp ? `https://wa.me/${whatsapp}?text=${prefill}` : '' },
+  { id: 'signal', name: 'Signal', icon: 'signal' as const, href: signal },
+  { id: 'telegram', name: 'Telegram', icon: 'telegram' as const, href: telegram ? `https://t.me/${telegram}` : '' },
+];
+const anyLive = channels.some((c) => c.href);
+const enabled = anyLive || site.previewWhatsapp;
+const shown = anyLive ? channels.filter((c) => c.href) : channels;
+---
+
+{
+  enabled && (
+    <div class="wa" data-wa>
+      <div class="wa__panel" id="wa-panel" role="dialog" aria-label={t(locale, 'wa.title')} hidden>
+        <div class="wa__head">
+          <p class="wa__title">{t(locale, 'wa.title')}</p>
+          <button class="wa__x" type="button" data-wa-close aria-label={t(locale, 'wa.close')}>
+            <Icon name="close" size={18} />
+          </button>
+        </div>
+        <p class="wa__body">{t(locale, 'chat.body')}</p>
+        <ul role="list" class="wa__topics">
+          {shown.map((c) => (
+            <li>
+              <a
+                class="wa__topic"
+                href={c.href || '#'}
+                {...(c.href ? { target: '_blank', rel: 'noopener noreferrer' } : { 'aria-disabled': 'true', tabindex: -1 })}
+              >
+                <span class="wa__chan">
+                  <Icon name={c.icon} size={20} />
+                  <span translate="no">{c.name}</span>
+                </span>
+                {c.href && <span class="sr-only"> ({t(locale, 'a11y.external')})</span>}
+                <Icon name="arrow" size={16} directional />
+              </a>
+            </li>
+          ))}
+        </ul>
+        <p class="wa__mail">
+          <a class="wa__maillink" href={localePath(locale, 'contact')}>{t(locale, 'chat.email')}</a>
+        </p>
+        {!anyLive && <p class="wa__note">{t(locale, 'chat.unconfigured')}</p>}
+      </div>
+      <button class="wa__fab" type="button" data-wa-open aria-expanded="false" aria-controls="wa-panel">
+        <Icon name="chat" size={22} />
+        <span class="wa__label">{t(locale, 'chat.open')}</span>
+      </button>
+    </div>
+  )
+}
+
+<style>
+  .wa {
+    position: fixed;
+    inset-block-end: max(1rem, env(safe-area-inset-bottom));
+    inset-inline-end: max(1rem, env(safe-area-inset-right));
+    z-index: var(--z-chat);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.75rem;
+  }
+  [dir='rtl'] .wa {
+    align-items: flex-start;
+  }
+  .wa__fab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-block-size: 3.25rem;
+    padding-inline: 1.1rem;
+    border: 0;
+    border-radius: var(--radius-pill);
+    background: var(--sage-700);
+    color: var(--white);
+    font-size: var(--fs-200);
+    font-weight: 620;
+    box-shadow: var(--shadow-pop);
+    transition: background-color var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out);
+  }
+  .wa__fab:hover {
+    background: var(--sage-800);
+  }
+  .wa__fab:active {
+    transform: translateY(1px);
+  }
+  .wa__label {
+    display: none;
+  }
+  @media (min-width: 40rem) {
+    .wa__label {
+      display: inline;
+    }
+  }
+  .wa__panel {
+    inline-size: min(22rem, calc(100vw - 2rem));
+    padding: var(--s-4);
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    color: var(--ink);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-3);
+    box-shadow: var(--glass-shadow);
+  }
+  .wa__panel:not([hidden]) {
+    animation: wa-in var(--dur-2) var(--ease-out);
+  }
+  @keyframes wa-in {
+    from {
+      opacity: 0;
+      translate: 0 0.5rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .wa__panel:not([hidden]) {
+      animation: none;
+    }
+  }
+  .wa__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+  }
+  .wa__title {
+    font-size: var(--fs-400);
+    font-weight: 650;
+    line-height: var(--lh-snug);
+    max-inline-size: none;
+  }
+  .wa__x {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.5rem;
+    block-size: 2.5rem;
+    border: 0;
+    border-radius: var(--radius-2);
+    background: transparent;
+    color: var(--ink);
+  }
+  .wa__x:hover {
+    background: var(--paper-2);
+  }
+  .wa__body {
+    margin-block: var(--s-2) var(--s-3);
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+  }
+  .wa__topics {
+    display: grid;
+    gap: var(--s-1);
+    padding: 0;
+  }
+  .wa__topic {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    min-block-size: 2.75rem;
+    padding-inline: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-2);
+    color: var(--ink);
+    font-size: var(--fs-200);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .wa__topic:hover {
+    border-color: var(--sage-700);
+    background: var(--sage-100);
+    color: var(--ink);
+  }
+  .wa__topic[aria-disabled='true'] {
+    opacity: 0.55;
+    pointer-events: none;
+  }
+  .wa__chan {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .wa__mail {
+    margin-block-start: var(--s-3);
+    max-inline-size: none;
+  }
+  .wa__maillink {
+    display: inline-flex;
+    align-items: center;
+    min-block-size: 2.75rem;
+    font-size: var(--fs-200);
+    font-weight: 560;
+  }
+  .wa__note {
+    margin-block-start: var(--s-3);
+    padding: var(--s-3);
+    border-radius: var(--radius-2);
+    background: var(--copper-100);
+    color: var(--copper-700);
+    font-size: var(--fs-100);
+    line-height: 1.45;
+  }
+</style>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-wa]');
+  if (root) {
+    const panel = root.querySelector<HTMLElement>('.wa__panel')!;
+    const openBtn = root.querySelector<HTMLButtonElement>('[data-wa-open]')!;
+    const closeBtn = root.querySelector<HTMLButtonElement>('[data-wa-close]')!;
+    const setOpen = (open: boolean) => {
+      panel.toggleAttribute('hidden', !open);
+      openBtn.setAttribute('aria-expanded', String(open));
+      if (open) panel.querySelector<HTMLElement>('a:not([aria-disabled])')?.focus();
+    };
+    openBtn.addEventListener('click', () => setOpen(panel.hasAttribute('hidden')));
+    closeBtn.addEventListener('click', () => {
+      setOpen(false);
+      openBtn.focus();
+    });
+    root.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !panel.hasAttribute('hidden')) {
+        setOpen(false);
+        openBtn.focus();
+      }
+    });
+  }
+</script>

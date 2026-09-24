@@ -1,0 +1,778 @@
+---
+import { Image } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import HeroStage from '@/components/hero/HeroStage.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import ProductArt from '@/components/products/ProductArt.astro';
+import ProductPitch from '@/components/ProductPitch.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import PipelineFlow from '@/components/flow/PipelineFlow';
+import { productBySlug, products } from '@/data/products';
+import { solutions } from '@/data/solutions';
+import { openWork, directions } from '@/data/research';
+import { team } from '@/data/team';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+interface Counts {
+  team: number;
+  live: number;
+  dev: number;
+  repos: number;
+}
+
+const copy = {
+  en: {
+    title: 'Sudaverse | Applied AI and digital systems for Sudan',
+    description:
+      'Sudaverse builds Arabic and global AI products and digital platforms across education, agriculture, cybersecurity, geospatial monitoring and language technology.',
+    hero: {
+      h1: ['Applied AI for Sudan’s most ', 'important systems.', ''],
+      lead: 'Sudaverse builds Arabic and global AI products and digital platforms across education, agriculture, cybersecurity, geospatial monitoring and language technology.',
+    },
+    about: {
+      label: 'Sudaverse at a glance',
+      detail: ({ team, live, dev, repos }: Counts) =>
+        `A team of ${team} Sudanese engineers and researchers. ${live} products are live${dev > 0 ? `, ${dev} more are in development,` : ''} and ${repos} open-source repositories are public on GitHub.`,
+    },
+    cred: {
+      h2: 'Local context, engineering depth, applied research.',
+      points: ['Arabic-first AI', 'Local and private deployment options', 'Applied AI engineering', 'Domain-specific systems', 'Research-driven development'],
+    },
+    products: {
+      h2: 'Products',
+      lead: 'Every product below is live today.',
+      more: 'More from Sudaverse',
+    },
+    solutions: {
+      h2: 'Problems we can help solve',
+    },
+    eng: {
+      h2: 'From raw text to a deployed model',
+      lead: 'The pipeline behind Sudaverse language products, from collection to deployment.',
+      more: 'See the capabilities behind each solution',
+    },
+    research: {
+      h2: 'Research that becomes infrastructure.',
+      lead: 'Open tools and a benchmark on GitHub that feed directly into Sudaverse products.',
+      open: 'Open work',
+      dir: 'Research directions',
+      dirNote: 'Directions under investigation. Not yet published.',
+      license: 'License',
+      repo: 'View on GitHub',
+    },
+    company: 'Sudanese-founded. Globally connected. Building technology around local realities.',
+    cta: {
+      h2: 'Build with Sudaverse.',
+      body: 'Working on a problem involving AI, data, cybersecurity, education, agriculture, digital health or digital infrastructure? Talk with our engineering team.',
+    },
+  },
+  ar: {
+    title: 'سودافيرس | ذكاء اصطناعي تطبيقي وأنظمة رقمية للسودان',
+    description:
+      'تبني سودافيرس منتجات ذكاء اصطناعي ومنصات رقمية عربية وعالمية في التعليم والزراعة والأمن السيبراني والمراقبة الجغرافية وتقنيات اللغة.',
+    hero: {
+      h1: ['ذكاء اصطناعي تطبيقي لأهم ', 'أنظمة السودان', '.'],
+      lead: 'تبني سودافيرس منتجات ذكاء اصطناعي ومنصات رقمية عربية وعالمية في التعليم والزراعة والأمن السيبراني والمراقبة الجغرافية وتقنيات اللغة.',
+    },
+    about: {
+      label: 'سودافيرس بنظرة سريعة',
+      detail: ({ team, live, dev, repos }: Counts) =>
+        `فريق من ${team} مهندسًا وباحثًا سودانيًا. ${live} منتجات متاحة${dev > 0 ? `، و${dev} منتجات أخرى قيد التطوير،` : '،'} و${repos} مستودعات مفتوحة المصدر علنية على GitHub.`,
+    },
+    cred: {
+      h2: 'سياق محلي وعمق هندسي وبحث تطبيقي.',
+      points: ['ذكاء اصطناعي عربي أولاً', 'خيارات نشر محلية وخاصة', 'هندسة ذكاء اصطناعي تطبيقي', 'أنظمة متخصصة بالمجال', 'تطوير مدفوع بالبحث'],
+    },
+    products: {
+      h2: 'المنتجات',
+      lead: 'كل المنتجات أدناه متاحة اليوم.',
+      more: 'المزيد من سودافيرس',
+    },
+    solutions: {
+      h2: 'مشكلات نساعد في حلّها',
+    },
+    eng: {
+      h2: 'من النص الخام إلى نموذج منشور',
+      lead: 'خط المعالجة وراء منتجات سودافيرس اللغوية، من الجمع حتى النشر.',
+      more: 'اطلع على القدرات الداعمة لكل حل',
+    },
+    research: {
+      h2: 'بحث يتحول إلى بنية تحتية.',
+      lead: 'أدوات ومعيار قياس مفتوحة على GitHub تغذّي منتجات سودافيرس مباشرة.',
+      open: 'أعمال مفتوحة',
+      dir: 'اتجاهات بحثية',
+      dirNote: 'اتجاهات قيد الاستكشاف. لم تُنشر بعد.',
+      license: 'الترخيص',
+      repo: 'عرض على GitHub',
+    },
+    company: 'تأسست في السودان. متصلة بالعالم. تبني التقنية حول الواقع المحلي.',
+    cta: {
+      h2: 'ابنِ مع سودافيرس.',
+      body: 'هل تعمل على مشكلة تتعلق بالذكاء الاصطناعي أو البيانات أو الأمن السيبراني أو التعليم أو الزراعة أو الصحة الرقمية أو البنية الرقمية؟ تحدّث مع فريقنا الهندسي.',
+    },
+  },
+}[locale];
+
+const tutor = productBySlug('sudatutor')!;
+const terab = productBySlug('terab')!;
+const monitor = productBySlug('sudan-monitor')!;
+const ndr = productBySlug('sudandr')!;
+const more = ['sudaflood', 'sudata', 'urri', 'sudanizer', 'llmcorpuskit'].map((s) => productBySlug(s)!).filter(Boolean);
+const counts: Counts = {
+  team: team.length,
+  live: products.filter((p) => p.stage === 'live' && p.slug !== 'llmcorpuskit').length,
+  dev: products.filter((p) => p.stage === 'development').length,
+  repos: openWork.length,
+};
+const productsHref = localePath(locale, 'products');
+const contactHref = localePath(locale, 'contact');
+---
+
+<Base title={copy.title} description={copy.description} nav="home">
+  <!-- 1. Hero -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <h1 id="hero-h">{copy.hero.h1[0]}<span class="hero__accent">{copy.hero.h1[1]}</span>{copy.hero.h1[2]}</h1>
+        <p class="t-lead hero__lead">{copy.hero.lead}</p>
+        <div class="cluster hero__cta">
+          <Button href={productsHref} variant="primary" arrow>{t(locale, 'cta.exploreProducts')}</Button>
+          <Button href={contactHref} variant="secondary">{t(locale, 'cta.talkToSudaverse')}</Button>
+        </div>
+        <a class="textlink" href={localePath(locale, 'research')}>
+          {t(locale, 'cta.researchEngineering')}
+          <Icon name="arrow" size={18} directional />
+        </a>
+      </div>
+      <div class="hero__stage">
+        <HeroStage locale={locale} />
+      </div>
+    </div>
+  </section>
+
+  <!-- 1b. Company statement and what sets the work apart, in one band (every number is counted from data) -->
+  <section class="about" aria-label={copy.about.label}>
+    <div class="container about__grid">
+      <div class="about__main">
+        <p class="about__lead">{copy.company}</p>
+        <p class="about__detail">{copy.about.detail(counts)}</p>
+        <a class="textlink" href={localePath(locale, 'company')}>
+          {t(locale, 'cta.meetTeam')}
+          <Icon name="arrow" size={18} directional />
+        </a>
+      </div>
+      <div class="about__pts">
+        <h2 class="about__h">{copy.cred.h2}</h2>
+        <ul role="list" class="about__list">
+          {copy.cred.points.map((p) => <li>{p}</li>)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Flagship products -->
+  <section class="products" aria-labelledby="products-h">
+    <div class="container products__intro">
+      <h2 id="products-h">{copy.products.h2}</h2>
+      <p class="t-lead">{copy.products.lead}</p>
+    </div>
+
+    <!-- SudaTutor: the live product, shown with its logo -->
+    <div class="fp fp--tutor">
+      <div class="container fp__grid">
+        <div class="fp__art" data-reveal>
+          <ProductArt slug={tutor.slug} />
+        </div>
+        <div class="fp__body" data-reveal>
+          <ProductPitch product={tutor} locale={locale} />
+        </div>
+      </div>
+    </div>
+
+    <!-- Terab: text-led on a mineral band, with its logo -->
+    <div class="fp fp--terab">
+      <div class="container fp__grid fp__grid--flip">
+        <div class="fp__body" data-reveal>
+          <ProductPitch product={terab} locale={locale} />
+        </div>
+        <div class="fp__art" data-reveal>
+          <ProductArt slug={terab.slug} />
+        </div>
+      </div>
+    </div>
+
+    <!-- Sudan Monitor: its logo on a plain plate over a deep field -->
+    <div class="fp fp--monitor on-deep section--deep">
+      <div class="container fp__grid">
+        <div class="fp__art" data-reveal>
+          <ProductArt slug={monitor.slug} />
+        </div>
+        <div class="fp__body" data-reveal>
+          <ProductPitch product={monitor} locale={locale} deep />
+        </div>
+      </div>
+    </div>
+
+    <!-- SudaNDR: compact ruled spotlight -->
+    <div class="fp fp--ndr">
+      <div class="container">
+        <div class="ndr" data-reveal>
+          <div class="ndr__art"><ProductArt slug={ndr.slug} /></div>
+          <div class="ndr__body"><ProductPitch product={ndr} locale={locale} /></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- The wider ecosystem -->
+    <div class="container more" data-reveal>
+      <h3 class="more__h">{copy.products.more}</h3>
+      <ul role="list" class="more__list">
+        {
+          more.map((p) => (
+            <li>
+              <a class="more__row" href={localePath(locale, `products/${p.slug}`)}>
+                <span class="more__logo" aria-hidden="true">{p.logo && <Image src={p.logo} alt="" width={120} loading="lazy" />}</span>
+                <span class="more__name" translate="no">{p.name}</span>
+                <span class="more__tag">{L(p.tagline)}</span>
+                <StageBadge stage={p.stage} locale={locale} />
+                <Icon name="arrow" size={18} directional class="more__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="more__all"><a class="textlink" href={productsHref}>{t(locale, 'cta.seeAllProducts')}<Icon name="arrow" size={18} directional /></a></p>
+    </div>
+  </section>
+
+  <!-- 4. Solutions: titles only, with the link to all of them under the table -->
+  <section class="section section--alt" aria-labelledby="solutions-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="solutions-h">{copy.solutions.h2}</h2>
+      </div>
+      <ul role="list" class="sol" data-reveal>
+        {
+          solutions.map((s) => (
+            <li>
+              <a class="sol__row" href={`${localePath(locale, 'solutions')}#${s.slug}`}>
+                <span class="sol__title">{L(s.title)}</span>
+                <Icon name="arrow" size={20} directional class="sol__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="head__cta"><Button href={localePath(locale, 'solutions')} variant="secondary" arrow>{t(locale, 'cta.seeAllSolutions')}</Button></p>
+    </div>
+  </section>
+
+  <!-- 5. Engineering: the pipeline diagram (the capabilities with their evidence live on the Solutions page) -->
+  <section class="section eng" aria-labelledby="eng-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="eng-h">{copy.eng.h2}</h2>
+        <p class="t-lead">{copy.eng.lead}</p>
+      </div>
+      <div class="flow" data-reveal>
+        <PipelineFlow client:visible locale={locale} />
+      </div>
+      <p class="head__cta">
+        <a class="textlink" href={localePath(locale, 'solutions')}>
+          {copy.eng.more}
+          <Icon name="arrow" size={18} directional />
+        </a>
+      </p>
+    </div>
+  </section>
+
+  <!-- 6. Research -->
+  <section class="section section--alt" aria-labelledby="research-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="research-h">{copy.research.h2}</h2>
+        <p class="t-lead">{copy.research.lead}</p>
+      </div>
+      <div class="res">
+        <div class="res__open" data-reveal>
+          <h3 class="res__h">{copy.research.open}</h3>
+          <ul role="list" class="res__list">
+            {
+              openWork.map((w) => (
+                <li class="res__item">
+                  <div class="res__meta">
+                    <span class="res__kind t-meta">{L(w.kind)}</span>
+                    {w.license && <span class="res__lic t-meta">{copy.research.license}: {w.license}</span>}
+                  </div>
+                  <h4 class="res__name" translate="no">{w.name}</h4>
+                  <a class="textlink" href={w.href} target="_blank" rel="noopener noreferrer">
+                    {copy.research.repo}
+                    <Icon name="external" size={16} />
+                    <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="res__dir" data-reveal>
+          <h3 class="res__h">{copy.research.dir}</h3>
+          <p class="t-small t-muted">{copy.research.dirNote}</p>
+          <ul role="list" class="dir">
+            {directions.map((d) => <li><span class="dir__t">{L(d.title)}</span></li>)}
+          </ul>
+          <a class="textlink" href={localePath(locale, 'research')}>
+            {t(locale, 'cta.researchEngineering')}
+            <Icon name="arrow" size={18} directional />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Final call to action -->
+  <section class="section section--deep on-deep cta" aria-labelledby="cta-h">
+    <div class="cta__art" aria-hidden="true"><TraceArt seed={5} tone="deep" traces={7} leaves={8} /></div>
+    <div class="container cta__inner">
+      <h2 id="cta-h">{copy.cta.h2}</h2>
+      <p class="t-lead cta__body">{copy.cta.body}</p>
+      <div class="cluster">
+        <Button href={contactHref} variant="light" arrow>{t(locale, 'cta.talk')}</Button>
+        <Button href={productsHref} variant="outline-deep">{t(locale, 'cta.exploreProducts')}</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  h2 {
+    max-inline-size: 20ch;
+  }
+  .head {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-7);
+  }
+  .head h2 {
+    max-inline-size: 22ch;
+  }
+  .head__cta {
+    margin-block-start: var(--s-7);
+    max-inline-size: none;
+  }
+  .textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .textlink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* ---- Hero ---- */
+  .hero {
+    position: relative;
+    overflow: hidden;
+    padding-block: clamp(2rem, 0.75rem + 4vw, 4.25rem) var(--section-y-tight);
+  }
+  .hero__grid {
+    position: relative;
+    display: grid;
+    align-items: center;
+    gap: var(--s-7);
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-5);
+    align-content: center;
+    justify-items: start;
+  }
+  .hero h1 {
+    font-size: clamp(2.25rem, 1.15rem + 3vw, 3.5rem);
+    line-height: var(--lh-tight);
+    max-inline-size: 17ch;
+  }
+  .hero__accent {
+    color: var(--brand-blue-600);
+  }
+  .hero__lead {
+    max-inline-size: 44ch;
+  }
+  .hero__cta {
+    gap: var(--s-3);
+  }
+  @media (max-width: 39.99rem) {
+    .hero__cta {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      inline-size: 100%;
+    }
+    .hero__cta :global(.btn) {
+      justify-content: center;
+    }
+  }
+  .hero__stage {
+    min-inline-size: 0;
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-7);
+    }
+  }
+
+  /* ---- Company statement and what sets the work apart ---- */
+  .about {
+    padding-block: 0 var(--section-y-tight);
+  }
+  .about__grid {
+    display: grid;
+    gap: var(--s-6);
+    padding-block-start: var(--s-6);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .about__main {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+    align-content: start;
+  }
+  .about__lead {
+    font-size: clamp(1.5rem, 1.1rem + 1.6vw, 2.25rem);
+    font-weight: 650;
+    line-height: var(--lh-heading);
+    letter-spacing: var(--tracking-h2);
+    max-inline-size: 24ch;
+  }
+  .about__detail {
+    color: var(--color-text-muted);
+    max-inline-size: 50ch;
+  }
+  .about__pts {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+  }
+  .about__h {
+    font-size: var(--fs-400);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-h3);
+    max-inline-size: none;
+  }
+  .about__list {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .about__list li {
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+    font-weight: 560;
+  }
+  @media (min-width: 48rem) {
+    .about__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-8);
+    }
+  }
+
+  /* ---- Products ---- */
+  .products {
+    padding-block-start: var(--section-y-tight);
+  }
+  .products__intro {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-8);
+  }
+  .fp {
+    padding-block: var(--section-y-tight);
+  }
+  .fp__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .fp--terab {
+    background: var(--color-bg-alt);
+  }
+  .fp__art {
+    min-inline-size: 0;
+  }
+  .fp--monitor {
+    padding-block: var(--section-y);
+  }
+  .fp--monitor :global(.pitch__sum),
+  .fp--monitor :global(.pitch__aud) {
+    color: var(--color-text-on-deep-muted);
+  }
+  .fp--monitor :global(.pitch__k) {
+    color: var(--nile-200);
+  }
+  .fp--monitor :global(.pitch__name),
+  .fp--monitor :global(.pitch__tag) {
+    color: var(--paper);
+  }
+  .ndr {
+    display: grid;
+    gap: var(--s-6);
+    padding-block: var(--s-7);
+    border-block: 1px solid var(--color-border-strong);
+    align-items: center;
+  }
+  .ndr__art {
+    min-inline-size: 0;
+  }
+  @media (min-width: 64rem) {
+    .fp__grid {
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: var(--s-5);
+    }
+    .fp--tutor .fp__art {
+      grid-column: 1 / span 5;
+    }
+    .fp--tutor .fp__body {
+      grid-column: 7 / span 6;
+    }
+    .fp--terab .fp__body {
+      grid-column: 1 / span 5;
+    }
+    .fp--terab .fp__art {
+      grid-column: 7 / span 6;
+    }
+    .fp--monitor .fp__art {
+      grid-column: 1 / span 6;
+    }
+    .fp--monitor .fp__body {
+      grid-column: 8 / span 5;
+    }
+    .ndr {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: var(--s-8);
+    }
+  }
+  .more {
+    margin-block-start: var(--s-6);
+  }
+  .more__h {
+    font-size: var(--fs-400);
+    margin-block-end: var(--s-4);
+  }
+  .more__list {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .more__row {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr auto;
+    gap: var(--s-1) var(--s-4);
+    align-items: center;
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .more__row:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .more__logo {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    display: grid;
+    place-items: center;
+    inline-size: 3.5rem;
+    block-size: 3.5rem;
+  }
+  .more__logo :global(img) {
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    inline-size: auto;
+    block-size: auto;
+    object-fit: contain;
+  }
+  .more__name {
+    grid-column: 2;
+    font-weight: 680;
+    font-size: var(--fs-400);
+  }
+  .more__tag {
+    grid-column: 2;
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+  }
+  .more__row :global(.stage) {
+    grid-column: 3;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .more__row :global(.more__arrow) {
+    display: none;
+  }
+  @media (min-width: 48rem) {
+    .more__row {
+      grid-template-columns: 4.5rem 12rem 1fr auto auto;
+    }
+    .more__logo {
+      grid-row: auto;
+      inline-size: 4rem;
+      block-size: 3.25rem;
+    }
+    .more__name,
+    .more__tag {
+      grid-column: auto;
+    }
+    .more__row :global(.stage) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .more__row :global(.more__arrow) {
+      display: block;
+    }
+  }
+  .more__all {
+    margin-block-start: var(--s-4);
+    max-inline-size: none;
+  }
+
+  /* ---- Solutions ---- */
+  .sol {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .sol__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    min-block-size: 3.5rem;
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border-strong);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .sol__row:hover {
+    background: color-mix(in srgb, var(--paper) 60%, transparent);
+    color: var(--ink);
+  }
+  .sol__title {
+    font-size: var(--fs-400);
+    font-weight: 620;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-h3);
+  }
+  .sol__row :global(.sol__arrow) {
+    flex: none;
+    color: var(--nile-700);
+  }
+  @media (min-width: 48rem) {
+    .sol {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-8);
+    }
+  }
+
+  /* ---- Engineering ---- */
+  .flow {
+    margin-block-start: var(--s-6);
+  }
+
+  /* ---- Research ---- */
+  .res {
+    display: grid;
+    gap: var(--s-8);
+  }
+  .res__h {
+    font-size: var(--fs-400);
+    margin-block-end: var(--s-4);
+  }
+  .res__list {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .res__item {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border-strong);
+    justify-items: start;
+  }
+  .res__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+  }
+  .res__name {
+    font-size: var(--fs-500);
+    font-weight: 650;
+  }
+  .dir {
+    display: grid;
+    gap: 0;
+    padding: 0;
+    margin-block: var(--s-4);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .dir li {
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .dir__t {
+    font-weight: 560;
+  }
+  @media (min-width: 64rem) {
+    .res {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-9);
+    }
+  }
+
+  /* ---- Final CTA ---- */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .cta__art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(60%, 46rem);
+    opacity: 0.55;
+    z-index: -1;
+    mask-image: linear-gradient(to left, #000 30%, transparent);
+  }
+  [dir='rtl'] .cta__art {
+    mask-image: linear-gradient(to right, #000 30%, transparent);
+  }
+  .cta__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .cta h2 {
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 3.75rem);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 14ch;
+  }
+  .cta__body {
+    color: var(--color-text-on-deep-muted);
+    max-inline-size: 52ch;
+  }
+</style>

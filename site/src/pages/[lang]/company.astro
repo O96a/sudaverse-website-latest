@@ -1,0 +1,797 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import teamIllustration from '@/assets/photos/company-team.jpg';
+import valuesGraphic from '@/assets/topics/values.jpg';
+import TeamMember from '@/components/team/TeamMember.astro';
+import { products } from '@/data/products';
+import { founders, teamMembers } from '@/data/team';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+/** Product names stay Latin and isolated from the surrounding bidi text. Copy is authored here, so set:html is safe. */
+const nm = (s: string) => s.replace(/\[\[(.+?)\]\]/g, '<bdi translate="no">$1</bdi>');
+
+const copy = {
+  en: {
+    title: 'Company and team | Sudaverse',
+    description:
+      'Sudaverse is a company of Sudanese AI professionals building applied AI products and digital infrastructure. Meet the founders and the team.',
+    crumb: 'Company',
+    home: 'Home',
+    hero: {
+      h1: 'Sudanese AI professionals building products.',
+      lead: 'Sudaverse is an applied AI and digital systems company, Sudanese-founded and globally connected.',
+      valuesAlt: 'Sudaverse graphic: six illustrated portraits of Sudanese women in traditional dress, with the line Our values, our resilience and our unity will guide the journey.',
+      alt: 'Illustration: a team of Sudanese engineers and researchers working together in a bright office above the Nile, with Sudaverse product screens on their desks.',
+      caption: 'Illustration',
+    },
+    who: {
+      h2: 'Who we are',
+      p: [
+        'We are engineers, researchers and advisors who build production-oriented AI products and digital infrastructure. The team spans machine learning, software engineering, cybersecurity, applied research, consulting and business development.',
+        'Our work is one body of work, from language technology to secure systems, not a set of unrelated business units.',
+      ],
+    },
+    vm: {
+      h2: 'Vision and mission',
+      lead: 'Sudaverse is an integrated technology ecosystem that combines applied AI and cybersecurity to establish a sovereign, secure and customized digital infrastructure. It brings together the development of language models on one side, and the security of data, infrastructure and digital systems on the other, in order to provide a trusted and protected operating environment.',
+      visionLabel: 'Vision',
+      vision: 'Build national capabilities entirely through Sudanese expertise, so that Sudan becomes a producer of ethical and inclusive artificial intelligence rather than merely a consumer of ready-made tools.',
+      missionLabel: 'Mission',
+      mission: 'Empower institutions and developers by building customized and trusted AI and cybersecurity systems and tools, supported by advanced defensive and security solutions to protect data and safely bridge the digital divide.',
+    },
+    training: {
+      h2: 'Training and consulting',
+      lead: 'Sudaverse offers training and consulting to organizations, academic institutions and students. Training builds practical skills in applied AI, data and cybersecurity, in levels from foundations to leadership. Consulting helps an organization define and plan its work before anything is built. Content and duration are agreed with each institution.',
+      coop: 'We welcome cooperation with universities and academic institutions on curricula, student training and applied research. An institution that wants to work with us can start with a conversation.',
+      talk: 'Talk to us about training',
+      services: 'See the services',
+    },
+    build: {
+      h2: 'What we build',
+      lead: 'AI products and digital infrastructure for education, agriculture, cybersecurity, geospatial monitoring and language technology.',
+    },
+    why: {
+      h2: 'Why Sudan matters technically',
+      lead: 'The language and the deployment conditions are engineering constraints. They shape what we build and how we test it.',
+      rows: [
+        {
+          t: 'Low-resource dialects',
+          d: 'Sudanese Arabic dialects are a low-resource language variant. Tokenizers, text normalization and training corpora have to be measured and built for them, which is the work behind our open tools.',
+        },
+        {
+          t: 'Code-switching',
+          d: 'Everyday text moves between Arabic, English and local languages, often within a single message.',
+        },
+        {
+          t: 'Informal writing',
+          d: 'Informal writing is the norm in everyday text. A system has to expect dialect spelling and informal phrasing rather than assume clean, standard input.',
+        },
+        {
+          t: 'Local and private deployment',
+          d: 'Some organizations need sensitive data and models to stay inside their own environment. Selected Sudaverse systems can run against locally hosted models.',
+        },
+      ],
+    },
+    rnd: {
+      h2: 'Research and engineering, together',
+      rows: [
+        {
+          t: 'Directions feed products',
+          d: 'We investigate Sudanese Arabic language technology, ethical AI, computer vision for heritage material and applied AI for health, education and agriculture, and we choose the directions our products depend on.',
+        },
+        {
+          t: 'Open tools',
+          d: 'Tools and benchmarks that are useful beyond our own products are public on GitHub, including a corpus toolkit and a Sudanese dialect tokenizer benchmark.',
+        },
+        {
+          t: 'Collaboration with researchers',
+          d: 'Our research and development is open to collaboration with researchers, research groups and universities on datasets, benchmarks, models and applied studies. Proposals are welcome.',
+        },
+      ],
+      cta: 'Research and development',
+      collab: 'Propose a collaboration',
+    },
+    values: {
+      h2: 'Values',
+      items: [
+        {
+          t: 'Cultural integrity',
+          d: 'Our products speak the way people speak. Local language, context and heritage are design inputs, not afterthoughts.',
+        },
+        {
+          t: 'Ethical AI',
+          d: 'Bias, fairness and privacy are engineering concerns. We evaluate what we build for the contexts it serves.',
+        },
+        {
+          t: 'Open collaboration',
+          d: 'We publish tools and benchmarks on GitHub, and we welcome researchers and institutions who want to build with us.',
+        },
+        {
+          t: 'Education first',
+          d: 'Teaching and learning come first. [[SudaTutor]] is free for every Sudanese student, teacher and educator.',
+        },
+      ],
+    },
+    people: {
+      h2: 'The people behind Sudaverse',
+      lead: 'Twelve people across engineering, research, security, advisory and business development.',
+      founders: 'Founders',
+      team: 'Team',
+    },
+    cta: {
+      h2: 'Talk to the people who build it.',
+      body: 'Bring a problem involving AI, data, security, education or agriculture. We will tell you plainly whether we can help.',
+    },
+  },
+  ar: {
+    title: 'الشركة والفريق | سودافيرس',
+    description:
+      'سودافيرس شركة يقودها متخصصون سودانيون في الذكاء الاصطناعي، تبني منتجات ذكاء اصطناعي تطبيقي وبنية رقمية. تعرّف على المؤسسين والفريق.',
+    crumb: 'الشركة',
+    home: 'الرئيسية',
+    hero: {
+      h1: 'متخصصون سودانيون في الذكاء الاصطناعي يبنون المنتجات.',
+      lead: 'شركة ذكاء اصطناعي تطبيقي وأنظمة رقمية، تأسست في السودان ومتصلة بالعالم.',
+      valuesAlt: 'رسم من سودافيرس: ست صور مرسومة لنساء سودانيات بأزياء تقليدية، مع عبارة قيمنا وصمودنا ووحدتنا ستقود الرحلة (نص الرسم بالإنجليزية).',
+      alt: 'رسم توضيحي: فريق من المهندسين والباحثين السودانيين يعملون معًا في مكتب مضيء يطل على النيل، وعلى مكاتبهم شاشات منتجات سودافيرس.',
+      caption: 'رسم توضيحي',
+    },
+    who: {
+      h2: 'من نحن',
+      p: [
+        'نحن مهندسون وباحثون ومستشارون نبني منتجات ذكاء اصطناعي وبنية رقمية موجّهة للتشغيل. يمتد الفريق عبر التعلّم الآلي وهندسة البرمجيات والأمن السيبراني والبحث التطبيقي والاستشارات وتطوير الأعمال.',
+        'عملنا منظومة واحدة، من تقنيات اللغة إلى الأنظمة الآمنة، وليس مجموعة وحدات أعمال لا صلة بينها.',
+      ],
+    },
+    vm: {
+      h2: 'الرؤية والمهمة',
+      lead: 'سودافيرس منظومة تكنولوجية متكاملة تدمج بين الذكاء الاصطناعي التطبيقي والأمن السيبراني، لتأسيس بنية رقمية سيادية وآمنة ومخصصة. تجمع المنظومة بين تطوير النماذج اللغوية من جهة، وتأمين البيانات والبنية التحتية والأنظمة الرقمية من جهة أخرى، لتوفير بيئة عمل موثوقة ومحمية.',
+      visionLabel: 'الرؤية',
+      vision: 'بناء القدرات الوطنية بأيدٍ سودانية خالصة، بحيث يكون السودان منتجًا للذكاء الاصطناعي الأخلاقي والشامل وليس مجرد مستهلك للأدوات الجاهزة.',
+      missionLabel: 'المهمة',
+      mission: 'تمكين المؤسسات والمطورين عبر تطوير أنظمة وأدوات ذكاء اصطناعي وأمن سيبراني مخصصة وموثوقة، مدعومة بحلول دفاعية وأمنية متقدمة لحماية البيانات وتجسير الفجوة الرقمية بأمان.',
+    },
+    training: {
+      h2: 'التدريب والاستشارات',
+      lead: 'تقدّم سودافيرس التدريب والاستشارات للمنظمات والمؤسسات الأكاديمية والطلاب. يبني التدريب مهارات عملية في الذكاء الاصطناعي التطبيقي والبيانات والأمن السيبراني، في مستويات من الأساسيات حتى القيادة. وتساعد الاستشارات الجهةَ على تحديد عملها والتخطيط له قبل بدء البناء. ويُتفق على المحتوى والمدة مع كل جهة.',
+      coop: 'نرحّب بالتعاون مع الجامعات والمؤسسات الأكاديمية في المناهج وتدريب الطلاب والبحث التطبيقي. والمؤسسة الراغبة في العمل معنا يمكنها أن تبدأ بمحادثة.',
+      talk: 'تحدّث معنا عن التدريب',
+      services: 'اطلع على الخدمات',
+    },
+    build: {
+      h2: 'ما نبنيه',
+      lead: 'منتجات ذكاء اصطناعي وبنية رقمية للتعليم والزراعة والأمن السيبراني والمراقبة الجغرافية وتقنيات اللغة.',
+    },
+    why: {
+      h2: 'لماذا يهمّ السياق السوداني عملنا الهندسي',
+      lead: 'اللغة وظروف النشر قيود هندسية. وهي تحدد ما نبنيه وكيف نختبره.',
+      rows: [
+        {
+          t: 'لهجات شحيحة الموارد',
+          d: 'اللهجات العربية السودانية متغيّر لغوي شحيح الموارد. ولذلك ينبغي قياس أدوات التجزئة وتطبيع النصوص ومدونات التدريب وبناؤها لها، وهذا هو العمل الذي تقوم عليه أدواتنا المفتوحة.',
+        },
+        {
+          t: 'التبديل اللغوي',
+          d: 'ينتقل النص اليومي بين العربية والإنجليزية واللغات المحلية، وكثيرًا ما يحدث ذلك داخل الرسالة الواحدة.',
+        },
+        {
+          t: 'الكتابة غير الرسمية',
+          d: 'الكتابة غير الرسمية هي السائدة في النصوص اليومية. وعلى النظام أن يتوقع تهجئة اللهجة والصياغة غير الرسمية بدلًا من افتراض مدخلات نظيفة وموحّدة.',
+        },
+        {
+          t: 'النشر المحلي والخاص',
+          d: 'تحتاج بعض المؤسسات إلى إبقاء بياناتها ونماذجها الحساسة داخل بيئتها. ويمكن لبعض أنظمة سودافيرس العمل مع نماذج مستضافة محليًا.',
+        },
+      ],
+    },
+    rnd: {
+      h2: 'البحث والهندسة معًا',
+      rows: [
+        {
+          t: 'الاتجاهات تغذّي المنتجات',
+          d: 'نستكشف تقنيات اللغة العربية السودانية والذكاء الاصطناعي الأخلاقي والرؤية الحاسوبية للمواد التراثية والذكاء الاصطناعي التطبيقي للصحة والتعليم والزراعة، ونختار الاتجاهات التي تعتمد عليها منتجاتنا.',
+        },
+        {
+          t: 'أدوات مفتوحة',
+          d: 'الأدوات ومعايير القياس المفيدة خارج منتجاتنا منشورة علنًا على GitHub، ومنها حزمة أدوات للمدونات ومعيار قياس لتجزئة اللهجة السودانية.',
+        },
+        {
+          t: 'التعاون مع الباحثين',
+          d: 'يرحّب البحث والتطوير لدينا بالتعاون مع الباحثين والمجموعات البحثية والجامعات في مجموعات البيانات ومعايير القياس والنماذج والدراسات التطبيقية. والمقترحات مرحّب بها.',
+        },
+      ],
+      cta: 'البحث والتطوير',
+      collab: 'اقترح تعاونًا',
+    },
+    values: {
+      h2: 'قيمنا',
+      items: [
+        {
+          t: 'الأصالة الثقافية',
+          d: 'تتحدث منتجاتنا كما يتحدث الناس. اللغة والسياق والتراث المحلي مدخلات في التصميم وليست أفكارًا لاحقة.',
+        },
+        {
+          t: 'الذكاء الاصطناعي الأخلاقي',
+          d: 'التحيز والعدالة والخصوصية شواغل هندسية. ونقيّم ما نبنيه بحسب السياقات التي يخدمها.',
+        },
+        {
+          t: 'التعاون المفتوح',
+          d: 'ننشر الأدوات ومعايير القياس على GitHub، ونرحّب بالباحثين والمؤسسات الراغبين في البناء معنا.',
+        },
+        {
+          t: 'التعليم أولًا',
+          d: 'التعليم في المقدمة. [[SudaTutor]] مجاني لكل طالب ومعلّم ومربٍّ سوداني.',
+        },
+      ],
+    },
+    people: {
+      h2: 'من يقف وراء سودافيرس',
+      lead: 'اثنا عشر شخصًا في الهندسة والبحث والأمن والاستشارات وتطوير الأعمال.',
+      founders: 'المؤسسون',
+      team: 'الفريق',
+    },
+    cta: {
+      h2: 'تحدّث مع من يبنون المنتجات.',
+      body: 'أحضر مشكلة تتعلق بالذكاء الاصطناعي أو البيانات أو الأمن أو التعليم أو الزراعة. وسنخبرك بوضوح إن كان بوسعنا المساعدة.',
+    },
+  },
+}[locale];
+
+const homeUrl = `${site.origin}${localePath(locale)}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: copy.home, item: homeUrl },
+      { '@type': 'ListItem', position: 2, name: copy.crumb, item: `${site.origin}${localePath(locale, 'company')}` },
+    ],
+  },
+];
+
+const productsHref = localePath(locale, 'products');
+const contactHref = localePath(locale, 'contact');
+---
+
+<Base title={copy.title} description={copy.description} nav="company" jsonLd={jsonLd}>
+  <!-- 1. Hero -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container hero__grid">
+      <div class="hero__text">
+        <h1 id="hero-h">{copy.hero.h1}</h1>
+        <p class="t-lead">{copy.hero.lead}</p>
+      </div>
+      <figure class="hero__photo">
+        <Picture
+          src={teamIllustration}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1400]}
+          sizes="(min-width: 64rem) 52vw, 92vw"
+          alt={copy.hero.alt}
+          loading="eager"
+          fetchpriority="high"
+        />
+        <figcaption class="t-small t-muted">{copy.hero.caption}</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 2. Who we are -->
+  <section class="section section--tight" aria-labelledby="who-h">
+    <div class="container split">
+      <h2 id="who-h" class="split__h" data-reveal>{copy.who.h2}</h2>
+      <div class="split__body stack" data-reveal>
+        <p class="t-lead who__lead">{copy.who.p[0]}</p>
+        <p>{copy.who.p[1]}</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2b. Vision and mission (the owner's own words, from the company presentation) -->
+  <section class="section section--tight" aria-labelledby="vm-h">
+    <div class="container split">
+      <h2 id="vm-h" class="split__h" data-reveal>{copy.vm.h2}</h2>
+      <div class="split__body stack" data-reveal>
+        <p class="t-lead who__lead">{copy.vm.lead}</p>
+        <dl class="vm">
+          <div>
+            <dt>{copy.vm.visionLabel}</dt>
+            <dd>{copy.vm.vision}</dd>
+          </div>
+          <div>
+            <dt>{copy.vm.missionLabel}</dt>
+            <dd>{copy.vm.mission}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2c. Training and cooperation with academia -->
+  <section class="section section--tight" aria-labelledby="train-h">
+    <div class="container split">
+      <h2 id="train-h" class="split__h" data-reveal>{copy.training.h2}</h2>
+      <div class="split__body stack" data-reveal>
+        <p class="t-lead who__lead">{copy.training.lead}</p>
+        <p>{copy.training.coop}</p>
+        <div class="train__links">
+          <a class="textlink" href={`${localePath(locale, 'contact')}?topic=institutional`}>
+            {copy.training.talk}
+            <Icon name="arrow" size={18} directional />
+          </a>
+          <a class="textlink" href={`${localePath(locale, 'solutions')}#services`}>
+            {copy.training.services}
+            <Icon name="arrow" size={18} directional />
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. What we build -->
+  <section class="section section--alt" aria-labelledby="build-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="build-h">{copy.build.h2}</h2>
+        <p class="t-lead">{copy.build.lead}</p>
+      </div>
+      <ul role="list" class="prod" data-reveal>
+        {
+          products.map((p) => (
+            <li>
+              <a class="prod__row" href={localePath(locale, `products/${p.slug}`)}>
+                <span class="prod__name" translate="no">{p.name}</span>
+                <span class="prod__tag">{L(p.tagline)}</span>
+                <StageBadge stage={p.stage} locale={locale} />
+                <Icon name="arrow" size={18} directional class="prod__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <p class="head__cta">
+        <Button href={productsHref} variant="secondary" arrow>{t(locale, 'cta.seeAllProducts')}</Button>
+      </p>
+    </div>
+  </section>
+
+  <!-- 4. Why the Sudanese context matters technically -->
+  <section class="section" aria-labelledby="why-h">
+    <div class="container split">
+      <div class="split__h why__lead" data-reveal>
+        <h2 id="why-h">{copy.why.h2}</h2>
+        <p class="t-lead">{copy.why.lead}</p>
+      </div>
+      <dl class="rows" data-reveal>
+        {
+          copy.why.rows.map((r) => (
+            <div class="rows__row">
+              <dt>{r.t}</dt>
+              <dd>{r.d}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- 5. Research and engineering -->
+  <section class="section section--alt" aria-labelledby="rnd-h">
+    <div class="container split">
+      <div class="split__h rnd__lead" data-reveal>
+        <h2 id="rnd-h">{copy.rnd.h2}</h2>
+        <a class="textlink" href={localePath(locale, 'research')}>
+          {copy.rnd.cta}
+          <Icon name="arrow" size={18} directional />
+        </a>
+        <a class="textlink" href={`${localePath(locale, 'contact')}?topic=research`}>
+          {copy.rnd.collab}
+          <Icon name="arrow" size={18} directional />
+        </a>
+      </div>
+      <dl class="rows" data-reveal>
+        {
+          copy.rnd.rows.map((r) => (
+            <div class="rows__row">
+              <dt>{r.t}</dt>
+              <dd>{r.d}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- 6. Values -->
+  <section class="section" aria-labelledby="values-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="values-h">{copy.values.h2}</h2>
+      </div>
+      <div class="vals__wrap" data-reveal>
+        <figure class="vals__fig">
+          <Picture
+            src={valuesGraphic}
+            formats={['avif', 'webp']}
+            widths={[480, 720, 940]}
+            sizes="(min-width: 64rem) 30rem, 92vw"
+            alt={copy.hero.valuesAlt}
+            loading="lazy"
+          />
+        </figure>
+        <ul role="list" class="vals">
+          {
+            copy.values.items.map((v) => (
+              <li class="vals__item">
+                <h3 class="vals__t">{v.t}</h3>
+                <p set:html={nm(v.d)} />
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7. Team -->
+  <section class="section section--alt" aria-labelledby="people-h">
+    <div class="container">
+      <div class="head" data-reveal>
+        <h2 id="people-h">{copy.people.h2}</h2>
+        <p class="t-lead">{copy.people.lead}</p>
+      </div>
+
+      <div class="group" data-reveal>
+        <h3 id="founders-h" class="group__h">{copy.people.founders}</h3>
+        <ul role="list" class="roster roster--founders" aria-labelledby="founders-h">
+          {founders.map((p) => <TeamMember person={p} locale={locale} featured />)}
+        </ul>
+      </div>
+
+      <div class="group" data-reveal>
+        <h3 id="team-h" class="group__h">{copy.people.team}</h3>
+        <ul role="list" class="roster roster--team" aria-labelledby="team-h">
+          {teamMembers.map((p) => <TeamMember person={p} locale={locale} />)}
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8. Final call to action -->
+  <section class="section section--deep on-deep cta" aria-labelledby="cta-h">
+    <div class="cta__art" aria-hidden="true"><TraceArt seed={5} tone="deep" traces={7} leaves={8} /></div>
+    <div class="container cta__inner">
+      <h2 id="cta-h">{copy.cta.h2}</h2>
+      <p class="t-lead cta__body">{copy.cta.body}</p>
+      <div class="cluster">
+        <Button href={contactHref} variant="light" arrow>{t(locale, 'cta.talk')}</Button>
+        <Button href={productsHref} variant="outline-deep">{t(locale, 'cta.exploreProducts')}</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-7);
+  }
+  .head h2 {
+    max-inline-size: 24ch;
+  }
+  .head__cta {
+    margin-block-start: var(--s-7);
+    max-inline-size: none;
+  }
+  .textlink {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .textlink:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* Heading left, body right: the recurring two-column split. */
+  .split {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .split__h {
+    max-inline-size: 20ch;
+  }
+  @media (min-width: 64rem) {
+    .split {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: var(--s-9);
+    }
+  }
+
+  /* ---- Hero ---- */
+  .hero {
+    padding-block: clamp(2.5rem, 1rem + 5vw, 5rem) var(--section-y-tight);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-5);
+    align-content: center;
+  }
+  .hero h1 {
+    max-inline-size: 15ch;
+  }
+  .hero__photo {
+    display: grid;
+    gap: var(--s-2);
+    margin: 0;
+    min-inline-size: 0;
+  }
+  .hero__photo :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-8);
+    }
+  }
+
+  /* ---- Who we are ---- */
+  .vm {
+    display: grid;
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .vm > div {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .vm dt {
+    font-weight: 650;
+  }
+  .vm dd {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 60ch;
+  }
+  @media (min-width: 48rem) {
+    .vm > div {
+      grid-template-columns: 8rem minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+  }
+  .train__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-6);
+  }
+  .who__lead {
+    color: var(--color-text);
+    max-inline-size: 52ch;
+  }
+
+  /* ---- Products ---- */
+  .prod {
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .prod__row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--s-1) var(--s-4);
+    align-items: center;
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .prod__row:hover {
+    background: color-mix(in srgb, var(--paper) 60%, transparent);
+    color: var(--ink);
+  }
+  .prod__name {
+    font-weight: 680;
+    font-size: var(--fs-400);
+  }
+  .prod__tag {
+    grid-column: 1;
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+  }
+  .prod__row :global(.stage) {
+    grid-column: 2;
+    grid-row: 1;
+    justify-self: end;
+  }
+  .prod__row :global(.prod__arrow) {
+    display: none;
+    color: var(--nile-700);
+  }
+  @media (min-width: 48rem) {
+    .prod__row {
+      grid-template-columns: 12rem 1fr auto 1.5rem;
+      padding-inline: var(--s-3);
+    }
+    .prod__tag {
+      grid-column: auto;
+    }
+    .prod__row :global(.stage) {
+      grid-column: auto;
+      grid-row: auto;
+    }
+    .prod__row :global(.prod__arrow) {
+      display: block;
+    }
+  }
+
+  /* ---- Ruled definition rows (why, research) ---- */
+  .why__lead,
+  .rnd__lead {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+  .rows {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .rows__row {
+    display: grid;
+    gap: var(--s-1) var(--s-5);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .rows__row dt {
+    font-weight: 650;
+  }
+  .rows__row dd {
+    margin: 0;
+    color: var(--color-text-muted);
+    max-inline-size: 56ch;
+  }
+  @media (min-width: 48rem) {
+    .rows__row {
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+    }
+  }
+
+  /* ---- Values ---- */
+  .vals__wrap {
+    display: grid;
+    gap: var(--s-6);
+    align-items: start;
+  }
+  .vals__fig {
+    margin: 0;
+    min-inline-size: 0;
+  }
+  .vals__fig :global(img) {
+    display: block;
+    inline-size: 100%;
+    max-inline-size: 30rem;
+    block-size: auto;
+    aspect-ratio: 940 / 788;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  @media (min-width: 64rem) {
+    .vals__wrap {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      column-gap: var(--s-8);
+    }
+  }
+  .vals {
+    display: grid;
+    gap: var(--s-6) var(--s-7);
+    padding: 0;
+  }
+  .vals__item {
+    display: grid;
+    gap: var(--s-2);
+    align-content: start;
+    padding-block-start: var(--s-4);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .vals__item p {
+    color: var(--color-text-muted);
+  }
+  .vals__t {
+    font-size: var(--fs-400);
+  }
+  @media (min-width: 48rem) {
+    .vals {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .vals {
+      column-gap: var(--s-6);
+    }
+  }
+
+  /* ---- Team ---- */
+  .group + .group {
+    margin-block-start: var(--s-8);
+  }
+  .group__h {
+    margin-block-end: var(--s-4);
+  }
+  .roster {
+    display: grid;
+    padding: 0;
+    column-gap: var(--s-8);
+    border-block-end: 1px solid var(--color-border-strong);
+  }
+  @media (min-width: 48rem) {
+    .roster--founders {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    .roster--team {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  /* ---- Final CTA ---- */
+  .cta {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .cta__art {
+    position: absolute;
+    inset-block: 0;
+    inset-inline-end: 0;
+    inline-size: min(60%, 46rem);
+    opacity: 0.5;
+    z-index: -1;
+    mask-image: linear-gradient(to left, #000 30%, transparent);
+  }
+  [dir='rtl'] .cta__art {
+    mask-image: linear-gradient(to right, #000 30%, transparent);
+  }
+  .cta__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .cta h2 {
+    font-size: clamp(2.25rem, 1.4rem + 3vw, 3.75rem);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 16ch;
+  }
+  .cta__body {
+    color: var(--color-text-on-deep-muted);
+    max-inline-size: 52ch;
+  }
+</style>

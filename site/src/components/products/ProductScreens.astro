@@ -1,0 +1,110 @@
+---
+import { Picture } from 'astro:assets';
+import type { Product } from '@/data/products';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  product: Product;
+  locale: Locale;
+}
+const { product, locale } = Astro.props;
+const screens = product.screens ?? [];
+const heading = { en: 'Screens', ar: 'لقطات من المنتج' }[locale];
+const id = `screens-${product.slug}`;
+---
+
+{
+  screens.length > 0 && (
+    <section class="section section--tight screens" aria-labelledby={id}>
+      <div class="container">
+        <h2 id={id}>{heading}</h2>
+        <ul role="list" class:list={['screens__list', { 'screens__list--multi': screens.length > 1 }]}>
+          {screens.map((s) => (
+            <li>
+              <figure class="screens__frame">
+                <div class="screens__chrome" aria-hidden="true">
+                  <span class="screens__dots">
+                    <i />
+                    <i />
+                    <i />
+                  </span>
+                  {s.host && <span class="screens__host" dir="ltr">{s.host}</span>}
+                </div>
+                <Picture
+                  src={s.src}
+                  formats={['avif', 'webp']}
+                  widths={[480, 800, 1200]}
+                  sizes="(min-width: 64rem) 40rem, 92vw"
+                  alt={pick(s.alt, locale) ?? ''}
+                  loading="lazy"
+                />
+                {s.caption && <figcaption class="t-small t-muted">{pick(s.caption, locale)}</figcaption>}
+              </figure>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .screens h2 {
+    margin-block-end: var(--s-6);
+  }
+  .screens__list {
+    display: grid;
+    gap: var(--s-6);
+    padding: 0;
+    max-inline-size: 52rem;
+  }
+  .screens__frame {
+    display: grid;
+    gap: var(--s-3);
+    margin: 0;
+  }
+  /* A quiet browser frame: the capture is a real page, so it is shown as one. */
+  .screens__chrome {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    padding: 0.6rem 0.9rem;
+    background: var(--color-bg-alt);
+    border: 1px solid var(--color-border-strong);
+    border-block-end: 0;
+    border-start-start-radius: var(--radius-3);
+    border-start-end-radius: var(--radius-3);
+    margin-block-end: calc(var(--s-3) * -1);
+  }
+  .screens__dots {
+    display: inline-flex;
+    gap: 0.35rem;
+  }
+  .screens__dots i {
+    inline-size: 0.6rem;
+    block-size: 0.6rem;
+    border-radius: 50%;
+    background: var(--color-border-strong);
+  }
+  .screens__host {
+    padding: 0.15rem 0.75rem;
+    border-radius: var(--radius-pill);
+    background: var(--white);
+    color: var(--color-text-meta);
+    font-size: var(--fs-100);
+  }
+  .screens__frame :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    border: 1px solid var(--color-border-strong);
+    border-end-start-radius: var(--radius-3);
+    border-end-end-radius: var(--radius-3);
+  }
+  @media (min-width: 48rem) {
+    .screens__list--multi {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-inline-size: none;
+    }
+  }
+</style>

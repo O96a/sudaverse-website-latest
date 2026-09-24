@@ -1,0 +1,227 @@
+---
+import Icon from '@/components/Icon.astro';
+import { site } from '@/config/site';
+import { t } from '@/i18n/utils';
+import type { Locale } from '@/i18n/config';
+import { whatsappEnabled, whatsappLinks } from './topics';
+
+/** Direct contact channels shown beside the form: the company email, public profiles and, when configured, WhatsApp. */
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+
+const copy = {
+  en: {
+    h: 'Reach us directly',
+    email: 'Email',
+    linkedin: 'LinkedIn',
+    linkedinText: 'Sudaverse on LinkedIn',
+    github: 'GitHub',
+    githubText: 'github.com/sudaverse',
+    waHeading: 'WhatsApp',
+    signal: 'Signal',
+    signalText: 'Message us on Signal',
+    telegram: 'Telegram',
+    telegramText: 'Message us on Telegram',
+  },
+  ar: {
+    h: 'تواصل معنا مباشرة',
+    email: 'البريد الإلكتروني',
+    linkedin: 'LinkedIn',
+    linkedinText: 'سودافيرس على LinkedIn',
+    github: 'GitHub',
+    githubText: 'github.com/sudaverse',
+    waHeading: 'واتساب',
+    signal: 'Signal',
+    signalText: 'راسلنا على Signal',
+    telegram: 'Telegram',
+    telegramText: 'راسلنا على Telegram',
+  },
+}[locale];
+
+const wa = whatsappEnabled ? whatsappLinks(locale) : [];
+const externalNote = t(locale, 'a11y.external');
+---
+
+<div class="direct">
+  <div>
+  <h2 id="direct-h" class="direct__h">{copy.h}</h2>
+
+  <dl class="direct__list">
+    <div class="direct__row">
+      <dt>{copy.email}</dt>
+      <dd>
+        <a class="direct__link" href={`mailto:${site.contact.email}`} dir="ltr">
+          <Icon name="mail" size={18} />
+          {site.contact.email}
+        </a>
+      </dd>
+    </div>
+    <div class="direct__row">
+      <dt><span translate="no">{copy.linkedin}</span></dt>
+      <dd>
+        <a class="direct__link" href={site.social.linkedin} target="_blank" rel="noopener noreferrer">
+          {copy.linkedinText}
+          <Icon name="external" size={16} />
+          <span class="sr-only"> ({externalNote})</span>
+        </a>
+      </dd>
+    </div>
+    <div class="direct__row">
+      <dt><span translate="no">{copy.github}</span></dt>
+      <dd>
+        <a class="direct__link" href={site.social.github} target="_blank" rel="noopener noreferrer">
+          <span dir="ltr">{copy.githubText}</span>
+          <Icon name="external" size={16} />
+          <span class="sr-only"> ({externalNote})</span>
+        </a>
+      </dd>
+    </div>
+    {
+      site.contact.signal && (
+        <div class="direct__row">
+          <dt><span translate="no">{copy.signal}</span></dt>
+          <dd>
+            <a class="direct__link" href={site.contact.signal} target="_blank" rel="noopener noreferrer">
+              {copy.signalText}
+              <Icon name="external" size={16} />
+              <span class="sr-only"> ({externalNote})</span>
+            </a>
+          </dd>
+        </div>
+      )
+    }
+    {
+      site.contact.telegram && (
+        <div class="direct__row">
+          <dt><span translate="no">{copy.telegram}</span></dt>
+          <dd>
+            <a class="direct__link" href={`https://t.me/${site.contact.telegram}`} target="_blank" rel="noopener noreferrer">
+              {copy.telegramText}
+              <Icon name="external" size={16} />
+              <span class="sr-only"> ({externalNote})</span>
+            </a>
+          </dd>
+        </div>
+      )
+    }
+  </dl>
+  </div>
+
+  {
+    whatsappEnabled && (
+      <div class="wa" aria-labelledby="wa-h">
+        <h3 id="wa-h" class="wa__h">{copy.waHeading}</h3>
+        <p class="wa__body t-small t-muted">{t(locale, 'wa.body')}</p>
+        <ul role="list" class="wa__list">
+          {wa.map((topic) => (
+            <li>
+              <a
+                class="wa__link"
+                href={topic.href}
+                {...(topic.live
+                  ? { target: '_blank', rel: 'noopener noreferrer' }
+                  : { 'aria-disabled': 'true', tabindex: -1 })}
+              >
+                {topic.label}
+                {topic.live ? (
+                  <span class="sr-only"> ({externalNote})</span>
+                ) : null}
+                <Icon name="arrow" size={16} directional />
+              </a>
+            </li>
+          ))}
+        </ul>
+        {!site.contact.whatsapp && <p class="wa__note">{t(locale, 'wa.unconfigured')}</p>}
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .direct {
+    display: grid;
+    gap: var(--s-7);
+    align-content: start;
+  }
+  .direct__h {
+    font-size: var(--fs-500);
+    margin-block-end: var(--s-4);
+  }
+  .direct__list {
+    margin: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .direct__row {
+    display: grid;
+    gap: var(--s-1);
+    padding-block: var(--s-4);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .direct__row dt {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+  }
+  .direct__row dd {
+    margin: 0;
+  }
+  .direct__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-block-size: 2.75rem;
+    font-size: var(--fs-400);
+    font-weight: 620;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  .direct__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  .wa__h {
+    font-size: var(--fs-400);
+    margin-block-end: var(--s-2);
+  }
+  .wa__body {
+    margin-block-end: var(--s-4);
+  }
+  .wa__list {
+    display: grid;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .wa__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    min-block-size: 3rem;
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    font-size: var(--fs-200);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .wa__link:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .wa__link[aria-disabled='true'] {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  .wa__note {
+    margin-block-start: var(--s-4);
+    padding: var(--s-3);
+    border-radius: var(--radius-2);
+    background: var(--copper-100);
+    color: var(--copper-700);
+    font-size: var(--fs-100);
+    line-height: 1.45;
+  }
+</style>

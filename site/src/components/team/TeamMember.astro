@@ -1,0 +1,117 @@
+---
+import { Picture } from 'astro:assets';
+import Icon from '@/components/Icon.astro';
+import type { Person } from '@/data/team';
+import { pick, type Locale } from '@/i18n/config';
+import { t } from '@/i18n/utils';
+
+interface Props {
+  person: Person;
+  locale: Locale;
+  /** Founders get a larger portrait and name. */
+  featured?: boolean;
+}
+const { person, locale, featured = false } = Astro.props;
+
+const alt = locale === 'ar' ? `صورة شخصية لـ ${person.name}` : `Portrait of ${person.name}`;
+const sizes = featured ? '(min-width: 40rem) 12rem, 7rem' : '(min-width: 40rem) 9rem, 6rem';
+---
+
+<li class:list={['member', featured && 'member--featured']}>
+  <div class="member__photo">
+    <Picture
+      src={person.portrait}
+      formats={['avif', 'webp']}
+      widths={[360, 720]}
+      sizes={sizes}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+    />
+  </div>
+  <div class="member__body">
+    <h4 class="member__name"><span dir="ltr" translate="no">{person.name}</span></h4>
+    <p class="member__role"><span dir="ltr" translate="no">{person.role}</span></p>
+    <p class="member__sum">{pick(person.summary, locale)}</p>
+    <a class="member__link" href={person.linkedin} target="_blank" rel="noopener noreferrer">
+      <span translate="no">LinkedIn</span>
+      <span class="sr-only"> <span dir="ltr" translate="no">{person.name}</span></span>
+      <Icon name="external" size={16} />
+      <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+    </a>
+  </div>
+</li>
+
+<style>
+  .member {
+    display: grid;
+    grid-template-columns: 6rem minmax(0, 1fr);
+    gap: var(--s-4);
+    align-items: start;
+    padding-block: var(--s-5);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .member--featured {
+    grid-template-columns: 7rem minmax(0, 1fr);
+  }
+  .member__photo {
+    aspect-ratio: 4 / 5;
+    background: var(--paper-3);
+    border-radius: var(--radius-1);
+    overflow: hidden;
+  }
+  .member__photo :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: 100%;
+    object-fit: cover;
+  }
+  .member__body {
+    display: grid;
+    gap: var(--s-1);
+    justify-items: start;
+    min-inline-size: 0;
+  }
+  .member__name {
+    font-size: var(--fs-400);
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-h3);
+  }
+  .member--featured .member__name {
+    font-size: var(--fs-500);
+  }
+  .member__role {
+    font-size: var(--fs-200);
+    font-weight: 620;
+    color: var(--color-link);
+  }
+  .member__sum {
+    margin-block-start: var(--s-2);
+    font-size: var(--fs-200);
+    line-height: 1.55;
+    color: var(--color-text-muted);
+    max-inline-size: 50ch;
+  }
+  .member__link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-block-size: 2.75rem;
+    font-size: var(--fs-200);
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .member__link:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  @media (min-width: 40rem) {
+    .member {
+      grid-template-columns: 9rem minmax(0, 1fr);
+      gap: var(--s-5);
+    }
+    .member--featured {
+      grid-template-columns: 12rem minmax(0, 1fr);
+    }
+  }
+</style>

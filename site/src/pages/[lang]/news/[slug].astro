@@ -1,0 +1,239 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import { news, type NewsPost } from '@/data/news';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { locales, pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) => news.map((post) => ({ params: { lang, slug: post.slug }, props: { post } })));
+}
+const locale = Astro.params.lang as Locale;
+const { post } = Astro.props as { post: NewsPost };
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: { news: 'News', back: 'All news', brand: 'Sudaverse', by: 'By' },
+  ar: { news: 'الأخبار', back: 'كل الأخبار', brand: 'سودافيرس', by: 'بقلم' },
+}[locale];
+
+const fmt = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, d)).toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : 'en', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
+const linkHref = (path: string) => {
+  const [base, extra] = path.split(/(?=[?#])/);
+  return `${localePath(locale, base)}${extra ?? ''}`;
+};
+
+const title = `${L(post.title)} | ${copy.brand}`;
+const abs = (p: string) => new URL(p, site.origin).toString();
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: copy.news, item: abs(localePath(locale, 'news')) },
+      { '@type': 'ListItem', position: 3, name: L(post.title), item: abs(localePath(locale, `news/${post.slug}`)) },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: L(post.title),
+    description: L(post.summary),
+    datePublished: post.date,
+    inLanguage: locale,
+    mainEntityOfPage: abs(localePath(locale, `news/${post.slug}`)),
+    author: { '@type': 'Organization', name: 'Sudaverse' },
+    publisher: { '@type': 'Organization', name: 'Sudaverse' },
+  },
+];
+---
+
+<Base title={title} description={L(post.summary)} nav="news" jsonLd={jsonLd} ogType="article">
+  <div class="container container--narrow">
+    <Crumbs
+      locale={locale}
+      items={[{ label: copy.news, href: localePath(locale, 'news') }, { label: L(post.title) }]}
+    />
+    <article class="art">
+      <header class="art__head">
+        <div class="art__meta">
+          <time datetime={post.date}>{fmt(post.date)}</time>
+          <span class="art__cat">{L(post.category)}</span>
+        </div>
+        <h1 id="post-h">{L(post.title)}</h1>
+        <p class="t-lead">{L(post.summary)}</p>
+        {post.author && <p class="art__by">{copy.by} <strong>{L(post.author)}</strong></p>}
+      </header>
+
+      {
+        post.cover && (
+          <figure class="art__cover">
+            <Picture
+              src={post.cover.src}
+              formats={['avif', 'webp']}
+              widths={[480, 720, 940]}
+              sizes="(min-width: 64rem) 34rem, 92vw"
+              alt={L(post.cover.alt)}
+              loading="eager"
+            />
+          </figure>
+        )
+      }
+
+      {post.note && <p class="art__note">{L(post.note)}</p>}
+
+      <div class="art__body">
+        {
+          post.body.map((b) =>
+            b.type === 'h2' ? (
+              <h2>{L(b.text)}</h2>
+            ) : b.type === 'p' ? (
+              <p>{L(b.text)}</p>
+            ) : (
+              <ul>
+                {b.items.map((i) => (
+                  <li>{L(i)}</li>
+                ))}
+              </ul>
+            ),
+          )
+        }
+      </div>
+
+      {
+        post.source && (
+          <p class="art__source">
+            <a class="textlink" href={post.source.url} target="_blank" rel="noopener noreferrer">
+              {L(post.source.label)}
+              <Icon name="external" size={16} />
+              <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+            </a>
+          </p>
+        )
+      }
+
+      {
+        post.links && (
+          <p class="art__cta">
+            {post.links.map((l) => (
+              <a class="textlink" href={linkHref(l.path)}>
+                {L(l.label)}
+                <Icon name="arrow" size={18} directional />
+              </a>
+            ))}
+          </p>
+        )
+      }
+      <p class="art__back">
+        <a class="textlink" href={localePath(locale, 'news')}>
+          <Icon name="arrow" size={18} directional class="art__backicon" />
+          {copy.back}
+        </a>
+      </p>
+    </article>
+  </div>
+</Base>
+
+<style>
+  .art {
+    padding-block: var(--s-6) var(--section-y);
+  }
+  .art__head {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-end: var(--s-7);
+  }
+  .art__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+    color: var(--color-text-meta);
+    font-size: var(--fs-200);
+  }
+  .art__cat {
+    padding: 0.15rem 0.65rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-stage-dev-bg);
+    color: var(--color-stage-dev);
+    font-size: var(--fs-100);
+    font-weight: 650;
+  }
+  .art__head h1 {
+    font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+    max-inline-size: 22ch;
+  }
+  .art__by {
+    color: var(--color-text-meta);
+    font-size: var(--fs-200);
+  }
+  .art__by strong {
+    color: var(--ink);
+  }
+  .art__cover {
+    margin: 0 0 var(--s-6);
+    max-inline-size: 34rem;
+  }
+  .art__cover :global(img) {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    aspect-ratio: 940 / 788;
+    object-fit: cover;
+    border-radius: var(--radius-1);
+  }
+  .art__note {
+    margin-block-end: var(--s-4);
+    padding-inline-start: var(--s-4);
+    border-inline-start: 1px solid var(--color-border-strong);
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+    max-inline-size: 62ch;
+  }
+  .art__source {
+    margin-block-start: var(--s-5);
+    max-inline-size: none;
+  }
+  .art__body {
+    display: grid;
+    gap: var(--s-4);
+    max-inline-size: 62ch;
+  }
+  .art__body h2 {
+    margin-block-start: var(--s-5);
+    font-size: var(--fs-500);
+  }
+  .art__body ul {
+    display: grid;
+    gap: var(--s-2);
+    padding-inline-start: 1.25rem;
+  }
+  .art__cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--s-6);
+    margin-block-start: var(--s-6);
+    max-inline-size: none;
+  }
+  .art__back {
+    margin-block-start: var(--s-5);
+    padding-block-start: var(--s-4);
+    border-block-start: 1px solid var(--color-border);
+    max-inline-size: none;
+  }
+  .art__back :global(.art__backicon) {
+    rotate: 180deg;
+  }
+</style>

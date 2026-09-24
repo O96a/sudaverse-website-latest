@@ -1,0 +1,89 @@
+name: Site CI
+
+# Every pull request and every push to main runs the same checks, so a broken build, a broken link, a
+# content-integrity slip or a leaked credential is caught before it can ship. Deployment lives in publish.yml.
+on:
+  pull_request:
+    paths: ['site/**', '.github/**', 'PRODUCT.md']
+  push:
+    branches: [main]
+    paths: ['site/**', '.github/**', 'PRODUCT.md']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  site:
+    name: Type check, build and content checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      - name: Type check (astro check)
+        run: npm run check
+      - name: Build
+        run: npm run build
+      - name: Content integrity (banned strings, one h1, lang and dir, titles, alt text, JSON-LD, dashes)
+        run: npm run test:integrity
+      - name: Internal links, assets and #fragments
+        run: npm run test:links
+      - name: "Published root matches the build (advisory, matters only when Pages serves the repository root)"
+        run: npm run test:root
+        continue-on-error: true
+
+  secrets:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: node site/scripts/check-secrets.mjs
+
+  relay:
+    name: Contact relay tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: site/relay
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: site/relay/package-lock.json
+      - run: npm ci
+      - run: npm test
+
+  audit:
+    name: Dependency audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Audit site production dependencies
+        working-directory: site
+        run: npm audit --omit=dev --audit-level=high
+      - name: Audit relay production dependencies
+        working-directory: site/relay
+        run: npm audit --omit=dev --audit-level=high

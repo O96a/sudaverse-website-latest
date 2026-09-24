@@ -1,0 +1,36 @@
+---
+import { withBase } from '@/i18n/base';
+/**
+ * The Sudaverse logo: a baobab tree grown from circuit traces (mark) beside the SUDAVERSE wordmark.
+ * Assets are derived from brand-src/logo.jpg by scripts/build-brand-assets.mjs; do not redraw them.
+ * `onDeep` selects the reversed variants for dark backgrounds.
+ */
+interface Props {
+  treeHeight?: number;
+  wordHeight?: number;
+  onDeep?: boolean;
+  class?: string;
+}
+const { treeHeight = 40, wordHeight = 14, onDeep = false, class: className } = Astro.props;
+const suffix = onDeep ? '-reversed' : '';
+const treeW = Math.round((treeHeight * 263) / 240);
+const wordW = Math.round((wordHeight * 986) / 96);
+---
+
+<span class:list={['logo', className]}>
+  <img src={withBase(`/brand/logo-tree${suffix}.png`)} width={treeW} height={treeHeight} alt="" decoding="async" />
+  <img src={withBase(`/brand/logo-wordmark${suffix}.png`)} width={wordW} height={wordHeight} alt="" decoding="async" />
+</span>
+
+<style>
+  .logo {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+  .logo img {
+    display: block;
+    max-inline-size: none;
+    block-size: auto;
+  }
+</style>

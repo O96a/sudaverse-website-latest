@@ -1,0 +1,690 @@
+---
+import type { ComponentProps } from 'astro/types';
+import Icon from './Icon.astro';
+import Button from './Button.astro';
+import Logo from './Logo.astro';
+import LangSwitch from './LangSwitch.astro';
+import StageBadge from './StageBadge.astro';
+import { categoryOrder, productsByCategory, type Stage } from '@/data/products';
+import { solutions } from '@/data/solutions';
+import { audiences } from '@/data/audiences';
+import { site } from '@/config/site';
+import type { NavKey } from '@/config/nav';
+import { localePath, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+interface Props {
+  locale: Locale;
+  current?: NavKey;
+}
+const { locale, current = '' } = Astro.props;
+
+type IconName = ComponentProps<typeof Icon>['name'];
+interface MenuItem {
+  href: string;
+  icon: IconName;
+  title: string;
+  desc: string;
+  /** Brand names stay Latin and are shielded from translation. */
+  brand?: boolean;
+  stage?: Stage;
+}
+interface Menu {
+  key: NavKey;
+  label: string;
+  cols: 1 | 2;
+  items: MenuItem[];
+  /** A short second group under the list (for example Resources under Products). */
+  extras?: MenuItem[];
+  /** Other page groups that should highlight this menu. */
+  alsoCurrent?: NavKey[];
+  all?: { href: string; label: string };
+}
+
+const productIcon: Record<string, IconName> = {
+  sudatutor: 'book',
+  terab: 'sprout',
+  'sudan-monitor': 'globe',
+  sudandr: 'shield',
+  sudaflood: 'waves',
+  llmcorpuskit: 'code',
+  urri: 'chat',
+  sudanizer: 'code',
+  sudata: 'book',
+};
+const solutionIcon: Record<string, IconName> = {
+  'institutional-ai': 'building',
+  'arabic-conversational-ai': 'chat',
+  'data-intelligence': 'layers',
+  'geospatial-monitoring': 'globe',
+  'secure-ai': 'shield',
+  'education-platforms': 'book',
+  'agricultural-intelligence': 'sprout',
+  'custom-solutions': 'code',
+};
+
+const productItems: MenuItem[] = categoryOrder
+  .flatMap((id) => productsByCategory(id))
+  .map((p) => ({
+    href: localePath(locale, `products/${p.slug}`),
+    icon: productIcon[p.slug] ?? 'layers',
+    title: p.name,
+    desc: pick(p.tagline, locale) ?? '',
+    brand: true,
+    stage: p.stage,
+  }));
+
+const menus: Menu[] = [
+  {
+    key: 'products',
+    label: t(locale, 'nav.products'),
+    cols: 2,
+    items: productItems,
+    extras: [
+      {
+        href: localePath(locale, 'resources'),
+        icon: 'book',
+        title: t(locale, 'nav.resources'),
+        desc: t(locale, 'nav.resourcesDesc'),
+      },
+      {
+        href: localePath(locale, 'resources/faq'),
+        icon: 'chat',
+        title: t(locale, 'nav.faq'),
+        desc: t(locale, 'nav.faqDesc'),
+      },
+    ],
+    alsoCurrent: ['resources'],
+    all: { href: localePath(locale, 'products'), label: t(locale, 'nav.allProducts') },
+  },
+  {
+    key: 'solutions',
+    label: t(locale, 'nav.solutions'),
+    cols: 2,
+    items: solutions.map((s) => ({
+      href: `${localePath(locale, 'solutions')}#${s.slug}`,
+      icon: solutionIcon[s.slug] ?? 'layers',
+      title: pick(s.title, locale) ?? '',
+      desc: pick(s.need, locale) ?? '',
+    })),
+    all: { href: localePath(locale, 'solutions'), label: t(locale, 'nav.allSolutions') },
+  },
+  {
+    key: 'audience',
+    label: t(locale, 'nav.audience'),
+    cols: 1,
+    items: audiences.map((a) => ({
+      href: localePath(locale, `for/${a.slug}`),
+      icon: a.icon,
+      title: pick(a.name, locale) ?? '',
+      desc: pick(a.short, locale) ?? '',
+    })),
+    all: { href: localePath(locale, 'for'), label: t(locale, 'nav.allAudiences') },
+  },
+  {
+    key: 'research',
+    label: t(locale, 'nav.research'),
+    cols: 1,
+    items: [
+      { href: localePath(locale, 'research'), icon: 'flask', title: t(locale, 'nav.rd'), desc: t(locale, 'nav.rdDesc') },
+      {
+        href: localePath(locale, 'research/published'),
+        icon: 'paper',
+        title: t(locale, 'nav.published'),
+        desc: t(locale, 'nav.publishedDesc'),
+      },
+      {
+        href: `${localePath(locale, 'contact')}?topic=research`,
+        icon: 'users',
+        title: t(locale, 'nav.collaborate'),
+        desc: t(locale, 'nav.collaborateDesc'),
+      },
+    ],
+  },
+];
+
+const simpleLinks: { key: NavKey; label: string; href: string }[] = [
+  { key: 'company', label: t(locale, 'nav.company'), href: localePath(locale, 'company') },
+  { key: 'news', label: t(locale, 'nav.news'), href: localePath(locale, 'news') },
+];
+---
+
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand" href={localePath(locale)} aria-label={`${site.name}, ${t(locale, 'misc.home')}`}>
+      <Logo treeHeight={40} wordHeight={14} />
+      <span class="brand__descriptor">{pick(site.descriptor, locale)}</span>
+    </a>
+
+    <nav class="primary" aria-label={t(locale, 'a11y.mainNav')}>
+      <ul role="list">
+        {
+          menus.map((m) => (
+            <li>
+              <details class="menu" data-menu>
+                <summary class:list={[{ 'is-current': current === m.key || (m.alsoCurrent ?? []).includes(current) }]}>
+                  {m.label}
+                  <Icon name="chevron" size={16} class="chev" />
+                </summary>
+                <div class="panel" data-cols={m.cols}>
+                  <ul role="list" class="panel__list">
+                    {m.items.map((it, i) => (
+                      <li>
+                        <a class="mi" href={it.href}>
+                          <span class="mi__icon" data-tone={i % 3}>
+                            <Icon name={it.icon} size={20} />
+                          </span>
+                          <span class="mi__text">
+                            <span class="mi__title">
+                              <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                              {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                            </span>
+                            <span class="mi__desc">{it.desc}</span>
+                          </span>
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                  {m.extras && (
+                    <ul role="list" class="panel__list panel__extras">
+                      {m.extras.map((it, i) => (
+                        <li>
+                          <a class="mi" href={it.href}>
+                            <span class="mi__icon" data-tone={(i + 1) % 3}>
+                              <Icon name={it.icon} size={20} />
+                            </span>
+                            <span class="mi__text">
+                              <span class="mi__title">{it.title}</span>
+                              <span class="mi__desc">{it.desc}</span>
+                            </span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {m.all && (
+                    <a class="panel__all" href={m.all.href}>
+                      {m.all.label}
+                      <Icon name="arrow" size={18} directional />
+                    </a>
+                  )}
+                </div>
+              </details>
+            </li>
+          ))
+        }
+        {
+          simpleLinks.map((l) => (
+            <li>
+              <a class="nav-link" href={l.href} aria-current={current === l.key ? 'page' : undefined}>
+                {l.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <LangSwitch locale={locale} class="actions__lang" />
+      <Button href={localePath(locale, 'contact')} variant="convert" size="sm" class="actions__cta">
+        {t(locale, 'cta.talk')}
+      </Button>
+      <button class="menu-toggle" type="button" data-nav-open aria-controls="mobile-nav" aria-expanded="false">
+        <Icon name="menu" size={22} />
+        <span class="sr-only">{t(locale, 'a11y.menu')}</span>
+      </button>
+    </div>
+  </div>
+
+  <dialog id="mobile-nav" class="mobile-nav" aria-label={t(locale, 'a11y.menu')}>
+    <div class="mobile-nav__bar">
+      <a class="brand" href={localePath(locale)}>
+        <Logo treeHeight={36} wordHeight={13} />
+      </a>
+      <button class="menu-toggle" type="button" data-nav-close>
+        <Icon name="close" size={22} />
+        <span class="sr-only">{t(locale, 'a11y.closeMenu')}</span>
+      </button>
+    </div>
+    <nav class="mobile-nav__body" aria-label={t(locale, 'a11y.mainNav')}>
+      {
+        menus.map((m) => (
+          <details class="m-acc">
+            <summary>
+              {m.label}
+              <Icon name="chevron" size={18} class="chev" />
+            </summary>
+            <div class="m-acc__body">
+              <ul role="list">
+                {m.items.map((it) => (
+                  <li>
+                    <a class="m-link" href={it.href}>
+                      <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                      {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                    </a>
+                  </li>
+                ))}
+                {m.extras &&
+                  m.extras.map((it) => (
+                    <li>
+                      <a class="m-link" href={it.href}>
+                        <span>{it.title}</span>
+                      </a>
+                    </li>
+                  ))}
+                {m.all && (
+                  <li>
+                    <a class="m-link m-link--all" href={m.all.href}>{m.all.label}</a>
+                  </li>
+                )}
+              </ul>
+            </div>
+          </details>
+        ))
+      }
+      {simpleLinks.map((l) => <a class="m-top" href={l.href}>{l.label}</a>)}
+      <a class="m-top" href={localePath(locale, 'contact')}>{t(locale, 'nav.contact')}</a>
+    </nav>
+    <div class="mobile-nav__foot">
+      <Button href={localePath(locale, 'contact')} variant="convert">{t(locale, 'cta.talk')}</Button>
+      <LangSwitch locale={locale} />
+    </div>
+  </dialog>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: var(--z-header);
+    border-block-end: 1px solid var(--glass-edge);
+  }
+  /* The frosted layer is a pseudo-element, not the header itself: an ancestor with backdrop-filter would
+     stop the menu panels (its descendants) from blurring the page behind them. */
+  .site-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: var(--glass-bg-header);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-5);
+    min-block-size: var(--header-h);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .brand:hover {
+    color: var(--ink);
+  }
+  .brand__name {
+    font-size: 1.375rem;
+    font-weight: 720;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .brand__descriptor {
+    display: none;
+    padding-inline-start: 0.75rem;
+    border-inline-start: 1px solid var(--color-border-strong);
+    font-size: var(--fs-100);
+    line-height: 1.4;
+    color: var(--color-text-meta);
+    max-inline-size: 12ch;
+  }
+  :global(:root:lang(ar)) .brand__descriptor {
+    max-inline-size: 18ch;
+  }
+  @media (min-width: 80rem) {
+    .brand__descriptor {
+      display: inline-block;
+    }
+  }
+
+  /* Desktop navigation */
+  .primary {
+    display: none;
+  }
+  .primary > ul {
+    display: flex;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0;
+  }
+  .nav-link,
+  summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-block-size: 2.75rem;
+    padding-inline: 0.85rem;
+    border-radius: var(--radius-2);
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+    font-weight: 560;
+    white-space: nowrap;
+    text-decoration: none;
+    cursor: pointer;
+    list-style: none;
+  }
+  /* Six items: tighten the padding until there is room for the full spacing. */
+  @media (max-width: 79.99rem) {
+    .nav-link,
+    summary {
+      padding-inline: 0.55rem;
+      gap: 0.25rem;
+    }
+    .primary > ul {
+      gap: 0;
+    }
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  .nav-link:hover,
+  summary:hover,
+  .menu[open] > summary {
+    color: var(--ink);
+    background: var(--paper-2);
+  }
+  .nav-link[aria-current='page'],
+  summary.is-current {
+    color: var(--ink);
+    box-shadow: inset 0 -2px 0 var(--brand-blue-600);
+    border-end-start-radius: 0;
+    border-end-end-radius: 0;
+  }
+  summary :global(.chev) {
+    transition: rotate var(--dur-2) var(--ease-out);
+  }
+  .menu[open] :global(.chev) {
+    rotate: 180deg;
+  }
+
+  .primary > ul > li {
+    position: relative;
+  }
+  /* Popover card centred under its trigger (never wider than the viewport). */
+  .panel {
+    --tx: -50%;
+    position: absolute;
+    inset-block-start: calc(100% + 0.35rem);
+    inset-inline-start: 50%;
+    translate: var(--tx) 0;
+    inline-size: min(var(--panel-w, 25rem), calc(100vw - 2 * var(--gutter)));
+    padding: 0.5rem;
+    background: var(--glass-bg-strong);
+    -webkit-backdrop-filter: var(--glass-blur);
+    backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--radius-3);
+    box-shadow: var(--glass-shadow);
+  }
+  .panel[data-cols='2'] {
+    --panel-w: 46rem;
+  }
+  .panel__extras {
+    margin-block-start: 0.25rem;
+    padding-block-start: 0.35rem;
+    border-block-start: 1px solid var(--glass-edge);
+  }
+  .panel[data-cols='2'] .panel__extras {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  :global(:root:lang(ar)) .panel {
+    --tx: 50%;
+  }
+  .panel__list {
+    display: grid;
+    gap: 0.125rem;
+    padding: 0;
+  }
+  .panel[data-cols='2'] .panel__list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mi {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: 0.85rem;
+    padding: 0.7rem 0.75rem;
+    border-radius: 8px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .mi:hover,
+  .mi:focus-visible {
+    background: color-mix(in srgb, var(--brand-blue) 10%, var(--white));
+    color: var(--ink);
+  }
+  .mi__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    border-radius: 8px;
+    background: color-mix(in srgb, var(--brand-blue) 16%, var(--white));
+    color: var(--brand-blue-700);
+  }
+  .mi__icon[data-tone='1'] {
+    background: color-mix(in srgb, var(--brand-green) 18%, var(--white));
+    color: var(--brand-green-700);
+  }
+  .mi__icon[data-tone='2'] {
+    background: var(--nile-100);
+    color: var(--nile-800);
+  }
+  .mi__text {
+    display: grid;
+    gap: 0.15rem;
+    min-inline-size: 0;
+  }
+  .mi__title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    font-size: var(--fs-200);
+    font-weight: 650;
+    line-height: var(--lh-snug);
+  }
+  .mi__desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-size: var(--fs-100);
+    line-height: 1.45;
+    color: var(--color-text-meta);
+  }
+  .panel__all {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-block-start: 0.25rem;
+    padding: 0.85rem 0.75rem 0.5rem;
+    border-block-start: 1px solid var(--glass-edge);
+    font-size: var(--fs-200);
+    font-weight: 650;
+    text-decoration: none;
+    min-block-size: 2.75rem;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .menu[open] .panel {
+      animation: panel-in var(--dur-2) var(--ease-out);
+    }
+  }
+  @keyframes panel-in {
+    from {
+      opacity: 0;
+      translate: var(--tx) -0.35rem;
+    }
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+  }
+  .actions__cta {
+    display: none;
+  }
+  .menu-toggle {
+    display: inline-grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: var(--radius-2);
+    background: transparent;
+    color: var(--ink);
+  }
+  .menu-toggle:hover {
+    background: var(--paper-2);
+  }
+
+  @media (min-width: 64rem) {
+    .primary {
+      display: block;
+    }
+    .actions__cta {
+      display: inline-flex;
+    }
+    .actions .menu-toggle {
+      display: none;
+    }
+  }
+
+  /* Mobile navigation (native dialog: focus trap, Esc and inert background for free) */
+  .mobile-nav {
+    inline-size: 100%;
+    max-inline-size: none;
+    block-size: 100dvh;
+    max-block-size: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+  }
+  .mobile-nav::backdrop {
+    background: rgb(6 26 44 / 0.5);
+  }
+  .mobile-nav[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  .mobile-nav__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-block-size: var(--header-h);
+    padding-inline: var(--gutter);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .mobile-nav__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--s-3) var(--gutter) var(--s-6);
+  }
+  .m-acc,
+  .m-top {
+    display: block;
+    border-block-end: 1px solid var(--color-border);
+  }
+  .m-acc > summary,
+  .m-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-block-size: 3.5rem;
+    padding-inline: 0;
+    font-size: var(--fs-400);
+    font-weight: 620;
+    color: var(--ink);
+    text-decoration: none;
+    background: none;
+    box-shadow: none;
+  }
+  .m-acc[open] :global(.chev) {
+    rotate: 180deg;
+  }
+  .m-acc__body {
+    padding-block: var(--s-2) var(--s-5);
+  }
+  .m-acc__body section + section {
+    margin-block-start: var(--s-4);
+  }
+  .m-acc__body ul {
+    padding: 0;
+  }
+  .m-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-3);
+    min-block-size: 2.75rem;
+    color: var(--color-text-muted);
+    font-weight: 560;
+    text-decoration: none;
+  }
+  .m-link--all {
+    color: var(--color-link);
+    font-weight: 650;
+  }
+  .mobile-nav__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4);
+    padding: var(--s-4) var(--gutter) calc(var(--s-4) + env(safe-area-inset-bottom));
+    border-block-start: 1px solid var(--color-border);
+  }
+</style>
+
+<script>
+  const menus = Array.from(document.querySelectorAll<HTMLDetailsElement>('[data-menu]'));
+  menus.forEach((m) =>
+    m.addEventListener('toggle', () => {
+      if (m.open) menus.forEach((o) => o !== m && (o.open = false));
+    }),
+  );
+  document.addEventListener('click', (e) => {
+    menus.forEach((m) => {
+      if (m.open && !m.contains(e.target as Node)) m.open = false;
+    });
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    const open = menus.find((m) => m.open);
+    if (open) {
+      open.open = false;
+      open.querySelector<HTMLElement>('summary')?.focus();
+    }
+  });
+
+  const dialog = document.getElementById('mobile-nav') as HTMLDialogElement | null;
+  const openBtn = document.querySelector<HTMLButtonElement>('[data-nav-open]');
+  openBtn?.addEventListener('click', () => {
+    dialog?.showModal();
+    openBtn.setAttribute('aria-expanded', 'true');
+  });
+  dialog?.querySelectorAll('[data-nav-close]').forEach((b) => b.addEventListener('click', () => dialog.close()));
+  dialog?.addEventListener('close', () => openBtn?.setAttribute('aria-expanded', 'false'));
+  dialog?.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => dialog.close()));
+  window.matchMedia('(min-width: 64rem)').addEventListener('change', (e) => {
+    if (e.matches && dialog?.open) dialog.close();
+  });
+</script>
