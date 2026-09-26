@@ -8,6 +8,7 @@
 /** English labels: the mailbox is read by the team, so subjects are always English. */
 export const TOPIC_LABELS = {
   product: 'Product inquiry',
+  services: 'Services inquiry',
   institutional: 'Institutional partnership',
   research: 'Research collaboration',
   data: 'Data or model collaboration',
@@ -24,6 +25,7 @@ export const TOPICS = Object.keys(TOPIC_LABELS);
 const TOPIC_ALIASES = new Map([
   ...Object.entries(TOPIC_LABELS).map(([key, label]) => [label.toLowerCase(), key]),
   ['استفسار عن منتج', 'product'],
+  ['استفسار عن الخدمات', 'services'],
   ['شراكة مؤسسية', 'institutional'],
   ['تعاون بحثي', 'research'],
   ['تعاون في البيانات أو النماذج', 'data'],

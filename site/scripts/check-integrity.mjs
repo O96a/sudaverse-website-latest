@@ -49,7 +49,9 @@ if (pages.length === 0) {
 for (const file of pages) {
   const html = readFileSync(file, 'utf8');
   const rel = relative(dist, file).replace(/\\/g, '/');
-  const isRedirect = rel === 'index.html';
+  // The site root and the retired URLs (astro.config.mjs `redirects`) are meta-refresh stubs, not pages.
+  const isRedirect = rel === 'index.html' || /<meta[^>]+http-equiv="refresh"/i.test(html);
+  if (isRedirect && rel !== 'index.html') continue;
   const is404 = rel === '404.html';
   const noindex = /<meta[^>]+name="robots"[^>]+noindex/i.test(html);
 

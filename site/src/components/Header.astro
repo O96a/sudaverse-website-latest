@@ -6,8 +6,6 @@ import Logo from './Logo.astro';
 import LangSwitch from './LangSwitch.astro';
 import StageBadge from './StageBadge.astro';
 import { categoryOrder, productsByCategory, type Stage } from '@/data/products';
-import { solutions } from '@/data/solutions';
-import { audiences } from '@/data/audiences';
 import { site } from '@/config/site';
 import type { NavKey } from '@/config/nav';
 import { localePath, t } from '@/i18n/utils';
@@ -29,15 +27,19 @@ interface MenuItem {
   brand?: boolean;
   stage?: Stage;
 }
+interface MenuGroup {
+  label: string;
+  items: MenuItem[];
+}
 interface Menu {
   key: NavKey;
   label: string;
   cols: 1 | 2;
-  items: MenuItem[];
-  /** A short second group under the list (for example Resources under Products). */
+  /** A flat list of items, or labelled groups (the Projects menu groups its items by category). */
+  items?: MenuItem[];
+  groups?: MenuGroup[];
+  /** A short second group under the list (for example Contact under About). */
   extras?: MenuItem[];
-  /** Other page groups that should highlight this menu. */
-  alsoCurrent?: NavKey[];
   all?: { href: string; label: string };
 }
 
@@ -52,87 +54,39 @@ const productIcon: Record<string, IconName> = {
   sudanizer: 'code',
   sudata: 'book',
 };
-const solutionIcon: Record<string, IconName> = {
-  'institutional-ai': 'building',
-  'arabic-conversational-ai': 'chat',
-  'data-intelligence': 'layers',
-  'geospatial-monitoring': 'globe',
-  'secure-ai': 'shield',
-  'education-platforms': 'book',
-  'agricultural-intelligence': 'sprout',
-  'custom-solutions': 'code',
-};
 
-const productItems: MenuItem[] = categoryOrder
-  .flatMap((id) => productsByCategory(id))
-  .map((p) => ({
-    href: localePath(locale, `products/${p.slug}`),
+const projectGroups: MenuGroup[] = categoryOrder.map((id) => ({
+  label: t(locale, `category.${id}` as const),
+  items: productsByCategory(id).map((p) => ({
+    href: localePath(locale, `projects/${p.slug}`),
     icon: productIcon[p.slug] ?? 'layers',
     title: p.name,
     desc: pick(p.tagline, locale) ?? '',
     brand: true,
     stage: p.stage,
-  }));
+  })),
+}));
+
+const aboutHref = localePath(locale, 'about');
 
 const menus: Menu[] = [
   {
-    key: 'products',
-    label: t(locale, 'nav.products'),
+    key: 'projects',
+    label: t(locale, 'nav.projects'),
     cols: 2,
-    items: productItems,
-    extras: [
-      {
-        href: localePath(locale, 'resources'),
-        icon: 'book',
-        title: t(locale, 'nav.resources'),
-        desc: t(locale, 'nav.resourcesDesc'),
-      },
-      {
-        href: localePath(locale, 'resources/faq'),
-        icon: 'chat',
-        title: t(locale, 'nav.faq'),
-        desc: t(locale, 'nav.faqDesc'),
-      },
-    ],
-    alsoCurrent: ['resources'],
-    all: { href: localePath(locale, 'products'), label: t(locale, 'nav.allProducts') },
-  },
-  {
-    key: 'solutions',
-    label: t(locale, 'nav.solutions'),
-    cols: 2,
-    items: solutions.map((s) => ({
-      href: `${localePath(locale, 'solutions')}#${s.slug}`,
-      icon: solutionIcon[s.slug] ?? 'layers',
-      title: pick(s.title, locale) ?? '',
-      desc: pick(s.need, locale) ?? '',
-    })),
-    all: { href: localePath(locale, 'solutions'), label: t(locale, 'nav.allSolutions') },
-  },
-  {
-    key: 'audience',
-    label: t(locale, 'nav.audience'),
-    cols: 1,
-    items: audiences.map((a) => ({
-      href: localePath(locale, `for/${a.slug}`),
-      icon: a.icon,
-      title: pick(a.name, locale) ?? '',
-      desc: pick(a.short, locale) ?? '',
-    })),
-    all: { href: localePath(locale, 'for'), label: t(locale, 'nav.allAudiences') },
+    groups: projectGroups,
+    all: { href: localePath(locale, 'projects'), label: t(locale, 'nav.allProjects') },
   },
   {
     key: 'research',
     label: t(locale, 'nav.research'),
     cols: 1,
     items: [
-      { href: localePath(locale, 'research'), icon: 'flask', title: t(locale, 'nav.rd'), desc: t(locale, 'nav.rdDesc') },
-      {
-        href: localePath(locale, 'research/published'),
-        icon: 'paper',
-        title: t(locale, 'nav.published'),
-        desc: t(locale, 'nav.publishedDesc'),
-      },
+      { href: localePath(locale, 'research/papers'), icon: 'paper', title: t(locale, 'nav.papers'), desc: t(locale, 'nav.papersDesc') },
+      { href: localePath(locale, 'research/artifacts'), icon: 'chart', title: t(locale, 'nav.artifacts'), desc: t(locale, 'nav.artifactsDesc') },
+      { href: localePath(locale, 'research/directions'), icon: 'network', title: t(locale, 'nav.directions'), desc: t(locale, 'nav.directionsDesc') },
+    ],
+    extras: [
       {
         href: `${localePath(locale, 'contact')}?topic=research`,
         icon: 'users',
@@ -140,12 +94,20 @@ const menus: Menu[] = [
         desc: t(locale, 'nav.collaborateDesc'),
       },
     ],
+    all: { href: localePath(locale, 'research'), label: t(locale, 'nav.researchHub') },
   },
-];
-
-const simpleLinks: { key: NavKey; label: string; href: string }[] = [
-  { key: 'company', label: t(locale, 'nav.company'), href: localePath(locale, 'company') },
-  { key: 'news', label: t(locale, 'nav.news'), href: localePath(locale, 'news') },
+  {
+    key: 'about',
+    label: t(locale, 'nav.about'),
+    cols: 1,
+    items: [
+      { href: `${aboutHref}#who`, icon: 'building', title: t(locale, 'nav.who'), desc: t(locale, 'nav.whoDesc') },
+      { href: `${aboutHref}#mission`, icon: 'compass', title: t(locale, 'nav.mission'), desc: t(locale, 'nav.missionDesc') },
+      { href: `${aboutHref}#team`, icon: 'users', title: t(locale, 'nav.team'), desc: t(locale, 'nav.teamDesc') },
+    ],
+    extras: [{ href: localePath(locale, 'contact'), icon: 'mail', title: t(locale, 'nav.contact'), desc: t(locale, 'nav.contactDesc') }],
+    all: { href: aboutHref, label: t(locale, 'nav.allAbout') },
+  },
 ];
 ---
 
@@ -162,29 +124,58 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
           menus.map((m) => (
             <li>
               <details class="menu" data-menu>
-                <summary class:list={[{ 'is-current': current === m.key || (m.alsoCurrent ?? []).includes(current) }]}>
+                <summary class:list={[{ 'is-current': current === m.key }]}>
                   {m.label}
                   <Icon name="chevron" size={16} class="chev" />
                 </summary>
                 <div class="panel" data-cols={m.cols}>
-                  <ul role="list" class="panel__list">
-                    {m.items.map((it, i) => (
-                      <li>
-                        <a class="mi" href={it.href}>
-                          <span class="mi__icon" data-tone={i % 3}>
-                            <Icon name={it.icon} size={20} />
-                          </span>
-                          <span class="mi__text">
-                            <span class="mi__title">
-                              <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                              {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                  {m.groups && (
+                    <div class="panel__groups">
+                      {m.groups.map((g, gi) => (
+                        <section class="panel__group" aria-label={g.label}>
+                          <p class="panel__label" aria-hidden="true">{g.label}</p>
+                          <ul role="list" class="panel__list">
+                            {g.items.map((it) => (
+                              <li>
+                                <a class="mi" href={it.href}>
+                                  <span class="mi__icon" data-tone={gi % 3}>
+                                    <Icon name={it.icon} size={20} />
+                                  </span>
+                                  <span class="mi__text">
+                                    <span class="mi__title">
+                                      <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                                      {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                                    </span>
+                                    <span class="mi__desc">{it.desc}</span>
+                                  </span>
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      ))}
+                    </div>
+                  )}
+                  {m.items && (
+                    <ul role="list" class="panel__list">
+                      {m.items.map((it, i) => (
+                        <li>
+                          <a class="mi" href={it.href}>
+                            <span class="mi__icon" data-tone={i % 3}>
+                              <Icon name={it.icon} size={20} />
                             </span>
-                            <span class="mi__desc">{it.desc}</span>
-                          </span>
-                        </a>
-                      </li>
-                    ))}
-                  </ul>
+                            <span class="mi__text">
+                              <span class="mi__title">
+                                <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                                {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                              </span>
+                              <span class="mi__desc">{it.desc}</span>
+                            </span>
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                   {m.extras && (
                     <ul role="list" class="panel__list panel__extras">
                       {m.extras.map((it, i) => (
@@ -210,15 +201,6 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
                   )}
                 </div>
               </details>
-            </li>
-          ))
-        }
-        {
-          simpleLinks.map((l) => (
-            <li>
-              <a class="nav-link" href={l.href} aria-current={current === l.key ? 'page' : undefined}>
-                {l.label}
-              </a>
             </li>
           ))
         }
@@ -256,8 +238,24 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
               <Icon name="chevron" size={18} class="chev" />
             </summary>
             <div class="m-acc__body">
+              {m.groups &&
+                m.groups.map((g) => (
+                  <section class="m-group" aria-label={g.label}>
+                    <p class="m-group__label" aria-hidden="true">{g.label}</p>
+                    <ul role="list">
+                      {g.items.map((it) => (
+                        <li>
+                          <a class="m-link" href={it.href}>
+                            <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                            {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                ))}
               <ul role="list">
-                {m.items.map((it) => (
+                {(m.items ?? []).map((it) => (
                   <li>
                     <a class="m-link" href={it.href}>
                       <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
@@ -283,7 +281,6 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
           </details>
         ))
       }
-      {simpleLinks.map((l) => <a class="m-top" href={l.href}>{l.label}</a>)}
       <a class="m-top" href={localePath(locale, 'contact')}>{t(locale, 'nav.contact')}</a>
     </nav>
     <div class="mobile-nav__foot">
@@ -362,7 +359,6 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
     gap: 0.15rem;
     padding: 0;
   }
-  .nav-link,
   summary {
     display: inline-flex;
     align-items: center;
@@ -378,27 +374,20 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
     cursor: pointer;
     list-style: none;
   }
-  /* Six items: tighten the padding until there is room for the full spacing. */
-  @media (max-width: 79.99rem) {
-    .nav-link,
-    summary {
-      padding-inline: 0.55rem;
-      gap: 0.25rem;
-    }
+  /* Three menus: a little more room between them on wide screens. */
+  @media (min-width: 80rem) {
     .primary > ul {
-      gap: 0;
+      gap: 0.35rem;
     }
   }
   summary::-webkit-details-marker {
     display: none;
   }
-  .nav-link:hover,
   summary:hover,
   .menu[open] > summary {
     color: var(--ink);
     background: var(--paper-2);
   }
-  .nav-link[aria-current='page'],
   summary.is-current {
     color: var(--ink);
     box-shadow: inset 0 -2px 0 var(--brand-blue-600);
@@ -450,8 +439,28 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
     gap: 0.125rem;
     padding: 0;
   }
-  .panel[data-cols='2'] .panel__list {
+  .panel[data-cols='2'] > .panel__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  /* Grouped menu (Projects): categories in a two-column grid, each a labelled single-column list. */
+  .panel__groups {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 0.25rem;
+  }
+  .panel__group {
+    display: grid;
+    align-content: start;
+    gap: 0.1rem;
+  }
+  .panel__label {
+    margin: 0;
+    padding: 0.55rem 0.75rem 0.15rem;
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+    max-inline-size: none;
   }
   .mi {
     display: grid;
@@ -624,8 +633,17 @@ const simpleLinks: { key: NavKey; label: string; href: string }[] = [
   .m-acc__body {
     padding-block: var(--s-2) var(--s-5);
   }
-  .m-acc__body section + section {
-    margin-block-start: var(--s-4);
+  .m-group + .m-group,
+  .m-group + ul {
+    margin-block-start: var(--s-3);
+  }
+  .m-group__label {
+    margin: 0;
+    padding-block: var(--s-2) 0;
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
   }
   .m-acc__body ul {
     padding: 0;

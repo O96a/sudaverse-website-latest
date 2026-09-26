@@ -1,0 +1,56 @@
+---
+/**
+ * A short aside inside an artifact: a note, or a caution about how to read a result.
+ * <Callout kind="caution" title="What this does not measure">...</Callout>
+ */
+import Icon from '@/components/Icon.astro';
+import { vizLocale } from './viz-text';
+
+interface Props {
+  kind?: 'note' | 'caution';
+  title?: string;
+}
+const { kind = 'note', title } = Astro.props;
+const locale = vizLocale(Astro.params.lang);
+const fallback = { note: { en: 'Note', ar: 'ملاحظة' }, caution: { en: 'Caution', ar: 'تنبيه' } }[kind][locale];
+---
+
+<aside class:list={['callout', `callout--${kind}`]}>
+  <p class="callout__h">
+    <Icon name={kind === 'caution' ? 'shield' : 'paper'} size={18} />
+    <span>{title ?? fallback}</span>
+  </p>
+  <div class="callout__body"><slot /></div>
+</aside>
+
+<style>
+  .callout {
+    margin-block: var(--s-6);
+    padding: var(--s-4) var(--s-5);
+    background: var(--nile-100);
+    border-radius: var(--radius-1);
+  }
+  .callout--caution {
+    background: var(--copper-100);
+  }
+  .callout__h {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    margin: 0 0 var(--s-2);
+    font-size: var(--fs-200);
+    font-weight: 650;
+    color: var(--nile-900);
+  }
+  .callout--caution .callout__h {
+    color: var(--copper-700);
+  }
+  .callout__body :global(p) {
+    margin: 0;
+    font-size: var(--fs-200);
+    color: var(--color-text);
+  }
+  .callout__body :global(p + p) {
+    margin-block-start: var(--s-2);
+  }
+</style>

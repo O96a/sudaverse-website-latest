@@ -1,0 +1,412 @@
+---
+/**
+ * One artifact: a long technical write-up rendered from MDX. The chart and diagram kit
+ * (src/components/artifacts) is available inside the MDX without imports.
+ */
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import Toc from '@/components/docs/Toc.astro';
+import Icon from '@/components/Icon.astro';
+import { artifactComponents } from '@/components/artifacts';
+import { artifactPaths, artifactsFor, readingMinutes, type Artifact } from '@/lib/artifacts';
+import { directionById, publications } from '@/data/research';
+import { productBySlug } from '@/data/products';
+import { team } from '@/data/team';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export async function getStaticPaths() {
+  return artifactPaths();
+}
+const locale = Astro.params.lang as Locale;
+const { entry, translated } = Astro.props as { entry: Artifact; translated: boolean };
+const d = entry.data;
+const { Content, headings } = await render(entry);
+
+const copy = {
+  en: {
+    contents: 'On this page',
+    min: (n: number) => `${n} min read`,
+    by: 'By',
+    notTranslated: 'This artifact is available in English only.',
+    direction: 'Direction',
+    projects: 'Related projects',
+    paper: 'Related paper',
+    cite: 'Cite this artifact',
+    prev: 'Newer',
+    next: 'Older',
+    all: 'All artifacts',
+    updated: 'Updated',
+  },
+  ar: {
+    contents: 'في هذه الصفحة',
+    min: (n: number) => `${n} دقيقة قراءة`,
+    by: 'بقلم',
+    notTranslated: 'هذا المقال متاح بالإنجليزية فقط.',
+    direction: 'الاتجاه',
+    projects: 'مشاريع ذات صلة',
+    paper: 'ورقة ذات صلة',
+    cite: 'استشهد بهذا المقال',
+    prev: 'الأحدث',
+    next: 'الأقدم',
+    all: 'كل المقالات',
+    updated: 'حُدّث',
+  },
+}[locale];
+
+const lang = d.lang;
+const dir = lang === 'ar' ? 'rtl' : 'ltr';
+const direction = directionById(d.direction)!;
+const authors = d.authors.map((s) => team.find((p) => p.slug === s)!);
+const paper = d.paper ? publications.find((p) => p.id === d.paper) : undefined;
+const fmt = (x: Date) => x.toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : 'en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const toc = headings.filter((h) => h.depth === 2).map((h) => ({ id: h.slug, label: h.text }));
+
+const list = await artifactsFor(locale);
+const i = list.findIndex((a) => a.entry.data.permalink === d.permalink);
+const newer = i > 0 ? list[i - 1].entry : undefined;
+const older = i < list.length - 1 ? list[i + 1].entry : undefined;
+
+const url = `${site.origin}${localePath(locale, `research/artifacts/${d.permalink}`)}`;
+const citation = `${authors.map((a) => a.name).join(', ')} (${d.date.getUTCFullYear()}). ${d.title}. Sudaverse Artifacts. ${url}`;
+const artsHref = localePath(locale, 'research/artifacts');
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: `${site.origin}${localePath(locale)}` },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.artifacts'), item: `${site.origin}${artsHref}` },
+      { '@type': 'ListItem', position: 3, name: d.title, item: url },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: d.title,
+    description: d.summary,
+    inLanguage: lang,
+    datePublished: d.date.toISOString().slice(0, 10),
+    ...(d.updated ? { dateModified: d.updated.toISOString().slice(0, 10) } : {}),
+    author: authors.map((a) => ({ '@type': 'Person', name: a.name, url: a.linkedin })),
+    publisher: { '@type': 'Organization', name: site.name, url: `${site.origin}/` },
+    keywords: d.tags.join(', '),
+  },
+];
+---
+
+<Base title={`${d.title} | Sudaverse`} description={d.summary} nav="research" jsonLd={jsonLd} ogType="article">
+  <article class="doc" lang={lang} dir={dir}>
+    <header class="doc__head">
+      <div class="container">
+        <Crumbs locale={locale} items={[{ label: t(locale, 'nav.artifacts'), href: artsHref }, { label: d.title }]} />
+        {!translated && <p class="doc__note" lang={locale} dir={locale === 'ar' ? 'rtl' : 'ltr'}>{copy.notTranslated}</p>}
+        <div class="doc__title">
+          <a class="doc__dir" href={`${localePath(locale, 'research/directions')}#${direction.id}`} style={`--c:${direction.color}`}>
+            <span class="dot" aria-hidden="true" />{pick(direction.short, lang)}
+          </a>
+          <h1>{d.title}</h1>
+          <p class="t-lead doc__sum">{d.summary}</p>
+        </div>
+        <div class="doc__byline">
+          <ul role="list" class="authors">
+            {
+              authors.map((a) => (
+                <li>
+                  <Image src={a.portrait} alt="" width={96} height={120} class="authors__img" />
+                  <span>
+                    <a href={`${localePath(locale, 'about')}#team`} translate="no">{a.name}</a>
+                    <span class="authors__role" translate="no">{a.role}</span>
+                  </span>
+                </li>
+              ))
+            }
+          </ul>
+          <p class="doc__meta">
+            <time datetime={d.date.toISOString().slice(0, 10)}>{fmt(d.date)}</time>
+            {d.updated && <span>{copy.updated} {fmt(d.updated)}</span>}
+            <span>{copy.min(readingMinutes(entry))}</span>
+          </p>
+        </div>
+      </div>
+    </header>
+
+    <div class="container doc__grid">
+      {toc.length > 2 && <aside class="doc__toc" lang={locale}><Toc label={copy.contents} items={toc} /></aside>}
+      <div class="prose">
+        <Content components={artifactComponents} />
+
+        <footer class="doc__foot">
+          {
+            d.projects.length > 0 && (
+              <section aria-labelledby="rp-h">
+                <h2 id="rp-h" class="doc__k" lang={locale}>{copy.projects}</h2>
+                <ul role="list" class="doc__chips">
+                  {d.projects.map((s) => (
+                    <li>
+                      <a href={localePath(locale, `projects/${s}`)} translate="no">{productBySlug(s)!.name}<Icon name="arrow" size={16} directional /></a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )
+          }
+          {
+            paper && (
+              <section aria-labelledby="pp-h">
+                <h2 id="pp-h" class="doc__k" lang={locale}>{copy.paper}</h2>
+                <p>
+                  <a href={`${localePath(locale, 'research/papers')}#${paper.id}`} lang="en" dir="ltr" translate="no">{paper.title}</a>
+                  <span class="t-meta" translate="no"> · {paper.venue}</span>
+                </p>
+              </section>
+            )
+          }
+          <section aria-labelledby="cite-h">
+            <h2 id="cite-h" class="doc__k" lang={locale}>{copy.cite}</h2>
+            <p class="cite" dir="ltr">{citation}</p>
+          </section>
+          <nav class="doc__pn" aria-label={copy.all} lang={locale}>
+            {newer && <a href={localePath(locale, `research/artifacts/${newer.data.permalink}`)}><span class="t-meta">{copy.prev}</span><span lang={newer.data.lang}>{newer.data.title}</span></a>}
+            {older && <a href={localePath(locale, `research/artifacts/${older.data.permalink}`)}><span class="t-meta">{copy.next}</span><span lang={older.data.lang}>{older.data.title}</span></a>}
+            <a class="textlink" href={artsHref}>{copy.all}<Icon name="arrow" size={18} directional /></a>
+          </nav>
+        </footer>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .doc__head {
+    padding-block: var(--s-4) var(--s-7);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .doc__note {
+    margin-block-start: var(--s-3);
+    padding: var(--s-2) var(--s-4);
+    border-radius: var(--radius-1);
+    background: var(--nile-100);
+    font-size: var(--fs-200);
+    color: var(--nile-900);
+    max-inline-size: none;
+  }
+  .doc__title {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-start: var(--s-6);
+    max-inline-size: 52rem;
+  }
+  .doc__title h1 {
+    font-size: clamp(2rem, 1.2rem + 2.8vw, 3.5rem);
+  }
+  .doc__sum {
+    max-inline-size: 60ch;
+  }
+  .doc__dir {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    justify-self: start;
+    min-block-size: 2.25rem;
+    font-size: var(--fs-200);
+    font-weight: 650;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+  .doc__dir:hover {
+    color: var(--ink);
+  }
+  .dot {
+    inline-size: 0.6rem;
+    block-size: 0.6rem;
+    border-radius: 50%;
+    background: var(--c);
+  }
+  .doc__byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--s-4) var(--s-6);
+    margin-block-start: var(--s-6);
+  }
+  .authors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-4);
+    margin: 0;
+    padding: 0;
+  }
+  .authors li {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+  }
+  .authors :global(.authors__img) {
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+  .authors a {
+    display: block;
+    font-weight: 650;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .authors a:hover {
+    text-decoration: underline;
+  }
+  .authors__role {
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+  .doc__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-1) var(--s-4);
+    font-size: var(--fs-200);
+    color: var(--color-text-meta);
+    max-inline-size: none;
+  }
+  .doc__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--s-6);
+    padding-block: var(--s-7) var(--section-y-tight);
+  }
+  @media (min-width: 64rem) {
+    .doc__grid {
+      grid-template-columns: minmax(0, 15rem) minmax(0, 46rem);
+      justify-content: start;
+      gap: var(--s-8);
+    }
+    .doc__toc {
+      order: 0;
+    }
+  }
+
+  /* ---- Long-form prose ---- */
+  .prose {
+    min-inline-size: 0;
+    font-size: var(--fs-300);
+  }
+  .prose > :global(* + *) {
+    margin-block-start: var(--s-5);
+  }
+  .prose :global(h2) {
+    margin-block-start: var(--s-8);
+    font-size: var(--fs-600);
+    scroll-margin-block-start: calc(var(--header-h) + var(--s-5));
+  }
+  .prose :global(h3) {
+    margin-block-start: var(--s-6);
+    font-size: var(--fs-500);
+  }
+  .prose :global(p),
+  .prose :global(li) {
+    color: var(--color-text);
+  }
+  .prose :global(ul:not([role])),
+  .prose :global(ol:not([role])) {
+    padding-inline-start: 1.25em;
+  }
+  .prose :global(li + li) {
+    margin-block-start: var(--s-2);
+  }
+  .prose :global(:not(pre) > code) {
+    padding: 0.08em 0.35em;
+    border-radius: var(--radius-1);
+    background: var(--paper-2);
+    font-size: 0.88em;
+  }
+  .prose :global(pre) {
+    padding: var(--s-4) var(--s-5);
+    overflow-x: auto;
+    border-radius: var(--radius-1);
+    background: var(--nile-950) !important;
+    color: var(--paper);
+    font-size: 0.875rem;
+    line-height: 1.7;
+    direction: ltr;
+    text-align: start;
+  }
+  .prose :global(blockquote) {
+    padding-inline-start: var(--s-5);
+    border-inline-start: 1px solid var(--color-border-strong);
+    color: var(--color-text-muted);
+  }
+  .prose :global(table:not(.viz-table table)) {
+    font-size: var(--fs-200);
+  }
+  .prose :global(table:not(.viz-table table) th),
+  .prose :global(table:not(.viz-table table) td) {
+    padding: var(--s-2) var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .doc__foot {
+    display: grid;
+    gap: var(--s-6);
+    margin-block-start: var(--s-8);
+    padding-block-start: var(--s-6);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .doc__k {
+    margin: 0 0 var(--s-3) !important;
+    font-size: var(--fs-100) !important;
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+  }
+  .doc__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin: 0;
+    padding: 0;
+  }
+  .doc__chips li + li {
+    margin: 0;
+  }
+  .doc__chips a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 2.5rem;
+    padding-inline: var(--s-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-200);
+    font-weight: 620;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .cite {
+    padding: var(--s-4);
+    background: var(--paper-2);
+    border-radius: var(--radius-1);
+    font-family: var(--font-mono);
+    font-size: var(--fs-100);
+    line-height: 1.6;
+    text-align: left;
+    overflow-wrap: anywhere;
+    max-inline-size: none;
+  }
+  .doc__pn {
+    display: grid;
+    gap: var(--s-3);
+  }
+  .doc__pn a:not(.textlink) {
+    display: grid;
+    gap: var(--s-1);
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    font-weight: 620;
+    text-decoration: none;
+  }
+</style>

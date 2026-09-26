@@ -181,7 +181,7 @@ const OutNodeView = memo(function OutNodeView({ data }: NodeProps<OutNode>) {
                       <span className={`hg-row__stage hg-row__stage--${p.stage}`}>{ui[data.locale][`stage.${p.stage}` as const]}</span>
                     )}
                   </button>
-                  <a className="hg-row__open" href={withBase(`/${data.locale}/products/${w.slug}/`)} aria-label={`${t.open} ${p.name}`}>
+                  <a className="hg-row__open" href={withBase(`/${data.locale}/projects/${w.slug}/`)} aria-label={`${t.open} ${p.name}`}>
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
                       <path d="M4 12h15M13 6l6 6-6 6" />
                     </svg>

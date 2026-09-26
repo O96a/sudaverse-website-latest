@@ -3,8 +3,9 @@ import Button from '@/components/Button.astro';
 import Icon from '@/components/Icon.astro';
 import { site } from '@/config/site';
 import { products } from '@/data/products';
+import { offerings } from '@/data/services';
 import { t } from '@/i18n/utils';
-import type { Locale } from '@/i18n/config';
+import { pick, type Locale } from '@/i18n/config';
 import { topicKeys, topicLabelKey } from './topics';
 
 /**
@@ -25,6 +26,7 @@ const copy = {
     hintMessage: 'What you are building, who it is for, and any timeline you are working to.',
     topicPlaceholder: 'Select a topic',
     prefillProduct: 'I would like to talk about {product}.',
+    prefillService: 'I would like to talk about {service} for our organization.',
     fallback: 'Prefer to write directly? Email',
   },
   ar: {
@@ -34,6 +36,7 @@ const copy = {
     hintMessage: 'ما الذي تبنيه، ولمن هو، وأي جدول زمني تعمل عليه.',
     topicPlaceholder: 'اختر موضوعًا',
     prefillProduct: 'أودّ التحدث معكم بخصوص {product}.',
+    prefillService: 'أودّ التحدث معكم بخصوص خدمة {service} لجهتنا.',
     fallback: 'تفضّل المراسلة المباشرة؟ راسلنا على',
   },
 }[locale];
@@ -46,6 +49,7 @@ const config = {
   email,
   locale,
   products: Object.fromEntries(products.map((p) => [p.slug, p.name])),
+  services: Object.fromEntries(offerings.map((o) => [o.id, pick(o.name, locale) ?? ''])),
   topics: Object.fromEntries(topicKeys.map((k) => [k, t(locale, topicLabelKey(k))])),
   text: {
     required: t(locale, 'contact.required'),
@@ -56,6 +60,7 @@ const config = {
     mailto: t(locale, 'contact.mailto'),
     error: t(locale, 'contact.error'),
     prefillProduct: copy.prefillProduct,
+    prefillService: copy.prefillService,
     labels: {
       name: t(locale, 'contact.name'),
       organization: t(locale, 'contact.organization'),

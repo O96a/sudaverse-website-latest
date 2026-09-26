@@ -13,7 +13,7 @@ interface Props {
   compact?: boolean;
 }
 const { product, locale, compact = false } = Astro.props;
-const href = localePath(locale, `products/${product.slug}`);
+const href = localePath(locale, `projects/${product.slug}`);
 ---
 
 <article class:list={['row', { 'row--compact': compact }]}>

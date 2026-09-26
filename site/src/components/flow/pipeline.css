@@ -1,5 +1,5 @@
 /*
- * Engineering pipeline diagram (React Flow). Same visual language as the hero graph: white cards with a
+ * Step-flow diagrams (React Flow): the homepage pipeline and the project user flows. Same visual language as the hero graph: white cards with a
  * tinted title bar, colourful dashed wires with a travelling pulse. The page supplies the (dotted) canvas,
  * so the React Flow background stays transparent. The diagram is direction-locked to LTR like any
  * diagram; text inside each card follows the page language.
@@ -42,18 +42,82 @@
   inline-size: 100%;
   aspect-ratio: var(--pf-ar-wide);
 }
-/* Before mount the container query picks the layout; after mount the script sets data-layout (same
-   breakpoint as ROW_MIN_REM in pipeline-data.ts). */
-@container pf (max-width: 63.99rem) {
-  .pf:not([data-layout]) .pf__box {
+/* Before mount a container query picks the layout; after mount the script sets data-layout. The breakpoint
+   depends on the number of steps (data-n) and matches ROW_MIN_REM in flow-layout.ts. */
+@container pf (max-width: 31.24rem) {
+  .pf[data-n='3']:not([data-layout]) .pf__box {
     aspect-ratio: var(--pf-ar-narrow);
     max-inline-size: 24rem;
     margin-inline: auto;
   }
-  .pf:not([data-layout]) .pf__list {
+  .pf[data-n='3']:not([data-layout]) .pf__list {
     --pf-w: var(--pf-w-narrow);
   }
-  .pf:not([data-layout]) .pf__item {
+  .pf[data-n='3']:not([data-layout]) .pf__item {
+    --x: var(--nx);
+    --y: var(--ny);
+    --w: var(--nw);
+    --h: var(--nh);
+  }
+}
+@container pf (max-width: 41.99rem) {
+  .pf[data-n='4']:not([data-layout]) .pf__box {
+    aspect-ratio: var(--pf-ar-narrow);
+    max-inline-size: 24rem;
+    margin-inline: auto;
+  }
+  .pf[data-n='4']:not([data-layout]) .pf__list {
+    --pf-w: var(--pf-w-narrow);
+  }
+  .pf[data-n='4']:not([data-layout]) .pf__item {
+    --x: var(--nx);
+    --y: var(--ny);
+    --w: var(--nw);
+    --h: var(--nh);
+  }
+}
+@container pf (max-width: 52.99rem) {
+  .pf[data-n='5']:not([data-layout]) .pf__box {
+    aspect-ratio: var(--pf-ar-narrow);
+    max-inline-size: 24rem;
+    margin-inline: auto;
+  }
+  .pf[data-n='5']:not([data-layout]) .pf__list {
+    --pf-w: var(--pf-w-narrow);
+  }
+  .pf[data-n='5']:not([data-layout]) .pf__item {
+    --x: var(--nx);
+    --y: var(--ny);
+    --w: var(--nw);
+    --h: var(--nh);
+  }
+}
+@container pf (max-width: 63.99rem) {
+  .pf[data-n='6']:not([data-layout]) .pf__box {
+    aspect-ratio: var(--pf-ar-narrow);
+    max-inline-size: 24rem;
+    margin-inline: auto;
+  }
+  .pf[data-n='6']:not([data-layout]) .pf__list {
+    --pf-w: var(--pf-w-narrow);
+  }
+  .pf[data-n='6']:not([data-layout]) .pf__item {
+    --x: var(--nx);
+    --y: var(--ny);
+    --w: var(--nw);
+    --h: var(--nh);
+  }
+}
+@container pf (max-width: 74.99rem) {
+  .pf[data-n='7']:not([data-layout]) .pf__box {
+    aspect-ratio: var(--pf-ar-narrow);
+    max-inline-size: 24rem;
+    margin-inline: auto;
+  }
+  .pf[data-n='7']:not([data-layout]) .pf__list {
+    --pf-w: var(--pf-w-narrow);
+  }
+  .pf[data-n='7']:not([data-layout]) .pf__item {
     --x: var(--nx);
     --y: var(--ny);
     --w: var(--nw);

@@ -15,7 +15,7 @@ interface Props {
   deep?: boolean;
 }
 const { product, locale, capabilities = false, deep = false } = Astro.props;
-const href = localePath(locale, `products/${product.slug}`);
+const href = localePath(locale, `projects/${product.slug}`);
 const caps = capabilities ? (product.capabilities ?? []) : [];
 ---
 
@@ -46,7 +46,7 @@ const caps = capabilities ? (product.capabilities ?? []) : [];
     )
   }
   <div class="cluster pitch__cta">
-    <Button href={href} variant={deep ? 'light' : 'primary'} arrow>{t(locale, 'cta.exploreProduct')}</Button>
+    <Button href={href} variant={deep ? 'light' : 'primary'} arrow>{t(locale, 'cta.exploreProject')}</Button>
     {
       product.url && (
         <a class="pitch__ext" href={product.url} target="_blank" rel="noopener noreferrer">

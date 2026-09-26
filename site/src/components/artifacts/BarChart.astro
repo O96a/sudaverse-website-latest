@@ -1,0 +1,159 @@
+---
+/**
+ * Compare magnitudes across a handful of categories. Horizontal bars (long labels read well), one series in
+ * slot 1, or emphasis mode (one bar in the accent, the rest in gray) when the story is about one category.
+ * HTML and CSS, not SVG, so the bars grow from the inline start and mirror in Arabic for free.
+ * Bars are 20px thick with a 4px rounded data end, the value sits at the tip, and there is a table view and a
+ * hover and focus tooltip. Bars draw in once when scrolled into view.
+ *
+ * <BarChart title="..." data={[{ label: 'A', value: 4.43 }, ...]} decimals={2} unit="tokens per word" source="..." />
+ */
+import './viz.css';
+import { OTHER, SLOTS, fmt, vizLocale, vizText } from './viz-text';
+
+interface Datum {
+  label: string;
+  value: number;
+  /** Optional short note under the label, e.g. the tokenizer family. */
+  note?: string;
+}
+interface Props {
+  title: string;
+  subtitle?: string;
+  data: Datum[];
+  unit?: string;
+  decimals?: number;
+  /** Axis maximum; defaults to the largest value. */
+  max?: number;
+  /** Label of the one bar the story is about: it takes the accent, the others turn gray. */
+  emphasis?: string;
+  /** Header for the value column of the table, e.g. "Tokens per word". */
+  valueLabel?: string;
+  source: string;
+  sourceHref?: string;
+}
+const { title, subtitle, data, unit = '', decimals = 0, max, emphasis, valueLabel, source, sourceHref } = Astro.props;
+const locale = vizLocale(Astro.params.lang);
+const tx = vizText[locale];
+const top = max ?? Math.max(...data.map((d) => d.value), 0);
+const val = (v: number) => fmt(locale, v, decimals);
+const uid = `b${Math.abs([...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7))}`;
+const colorOf = (d: Datum) => (emphasis ? (d.label === emphasis ? SLOTS[0] : OTHER) : SLOTS[0]);
+---
+
+<figure class="viz bars" data-viz aria-labelledby={`${uid}-t`}>
+  <p class="viz__title" id={`${uid}-t`}>{title}</p>
+  {subtitle && <p class="viz__sub">{subtitle}</p>}
+  <ol class="viz__body bars__list" role="list">
+    {
+      data.map((d, i) => (
+        <li class="bars__row">
+          <span class="bars__label">
+            <span class="bars__name">{d.label}</span>
+            {d.note && <span class="bars__note">{d.note}</span>}
+          </span>
+          <span class="bars__track">
+            <span
+              class="bars__bar"
+              style={`--w:${top ? (d.value / top) * 100 : 0}%;--i:${i};--c:${colorOf(d)}`}
+              tabindex="0"
+              aria-label={`${d.label}: ${val(d.value)}${unit ? ` ${unit}` : ''}`}
+              data-tip={`${val(d.value)}${unit ? ` ${unit}` : ''}|${d.label}`}
+              data-color={colorOf(d)}
+            />
+            <span class="bars__value" aria-hidden="true">{val(d.value)}</span>
+          </span>
+        </li>
+      ))
+    }
+  </ol>
+  <details class="viz-table">
+    <summary>{tx.table}</summary>
+    <table>
+      <thead>
+        <tr><th scope="col">{tx.category}</th><th scope="col" class="num">{valueLabel ?? (unit || tx.value)}</th></tr>
+      </thead>
+      <tbody>
+        {data.map((d) => <tr><th scope="row">{d.label}</th><td class="num">{val(d.value)}</td></tr>)}
+      </tbody>
+    </table>
+  </details>
+  <figcaption class="viz__source">
+    {tx.source}: {sourceHref ? <a href={sourceHref} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </figcaption>
+</figure>
+
+<style>
+  .bars__list {
+    display: grid;
+    gap: var(--s-4);
+    margin-inline: 0;
+    padding: 0;
+  }
+  .bars__row {
+    display: grid;
+    gap: var(--s-2);
+  }
+  @media (min-width: 40rem) {
+    .bars__row {
+      grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--s-4);
+    }
+  }
+  .bars__label {
+    display: grid;
+    line-height: 1.3;
+  }
+  .bars__name {
+    font-size: var(--fs-200);
+    font-weight: 620;
+    color: var(--color-text);
+  }
+  .bars__note {
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+  /* The baseline is a hairline at the inline start; each bar grows from it. */
+  .bars__track {
+    display: flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 2rem;
+    padding-inline-end: 3.5rem;
+    border-inline-start: 1px solid var(--color-border-strong);
+  }
+  .bars__bar {
+    flex: none;
+    inline-size: var(--w);
+    min-inline-size: 2px;
+    block-size: 20px;
+    background: var(--c);
+    border-start-end-radius: 4px;
+    border-end-end-radius: 4px;
+    outline-offset: 2px;
+  }
+  .bars__bar:hover,
+  .bars__bar:focus-visible {
+    filter: brightness(1.08);
+  }
+  :global([data-armed]:not(.is-in)) .bars__bar {
+    inline-size: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    :global(.is-in) .bars__bar {
+      transition: inline-size 850ms var(--ease-out) calc(var(--i) * 110ms);
+    }
+  }
+  .bars__value {
+    font-size: var(--fs-200);
+    font-weight: 650;
+    color: var(--color-text);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+  import './viz-runtime';
+</script>

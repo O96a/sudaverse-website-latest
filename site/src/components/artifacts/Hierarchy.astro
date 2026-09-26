@@ -1,0 +1,45 @@
+---
+/**
+ * An animated hierarchy inside an artifact. Nodes name their parents; a node with several parents is shared.
+ * <Hierarchy label="..." nodes={[{ id: 'root', label: 'Tokenizers' }, { id: 'bpe', label: 'BPE', parents: ['root'] }, ...]} caption="..." />
+ */
+import HierarchyFlow from '@/components/flow/HierarchyFlow';
+import type { HierNode } from '@/components/flow/hierarchy-layout';
+import { vizLocale } from './viz-text';
+
+interface Props {
+  label: string;
+  nodes: HierNode[];
+  caption?: string;
+}
+const { label, nodes, caption } = Astro.props;
+const locale = vizLocale(Astro.params.lang);
+const roots = nodes.filter((n) => !n.parents?.length);
+const kids = (id: string) => nodes.filter((n) => n.parents?.includes(id));
+---
+
+<figure class="hier">
+  <HierarchyFlow client:visible locale={locale} nodes={nodes} label={label} />
+  <noscript>
+    <ul>
+      {roots.map((r) => (
+        <li>
+          {r.label}
+          <ul>{kids(r.id).map((k) => <li>{k.label}{kids(k.id).length > 0 && <ul>{kids(k.id).map((g) => <li>{g.label}</li>)}</ul>}</li>)}</ul>
+        </li>
+      ))}
+    </ul>
+  </noscript>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .hier {
+    margin-block: var(--s-7);
+  }
+  .hier figcaption {
+    margin-block-start: var(--s-2);
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+</style>

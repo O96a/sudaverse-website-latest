@@ -1,0 +1,202 @@
+---
+/**
+ * Part-to-whole at a glance, for five parts or fewer (a sixth and later part fold into "Other").
+ * Server-rendered SVG: 2px surface gaps between segments, a legend that doubles as the direct labels
+ * (value and share), a hover and focus tooltip, and a table view. Segments draw in once when scrolled into
+ * view; the final state is always rendered, so nothing depends on JavaScript or motion.
+ *
+ * <DonutChart title="..." data={[{ label: 'A', value: 12 }, ...]} center={{ value: '61', label: 'samples' }} source="..." />
+ */
+import './viz.css';
+import { OTHER, SLOTS, fmt, vizLocale, vizText } from './viz-text';
+
+interface Datum {
+  label: string;
+  value: number;
+}
+interface Props {
+  title: string;
+  subtitle?: string;
+  data: Datum[];
+  /** Short unit for tooltips and the table, e.g. "samples". */
+  unit?: string;
+  /** Headline in the hole: a value and what it counts. */
+  center?: { value: string; label: string };
+  decimals?: number;
+  /** Where the numbers come from. Required by the content rules. */
+  source: string;
+  sourceHref?: string;
+}
+const { title, subtitle, data, unit = '', center, decimals = 0, source, sourceHref } = Astro.props;
+const locale = vizLocale(Astro.params.lang);
+const tx = vizText[locale];
+
+const parts: Datum[] =
+  data.length > SLOTS.length
+    ? [...data.slice(0, SLOTS.length - 1), { label: tx.other, value: data.slice(SLOTS.length - 1).reduce((s, d) => s + d.value, 0) }]
+    : data;
+const total = parts.reduce((s, d) => s + d.value, 0);
+
+const R = 84;
+const C = 2 * Math.PI * R;
+const UNITS = 1000;
+const gap = (2 / C) * UNITS; // 2px surface gap between segments
+let acc = 0;
+const segs = parts.map((d, i) => {
+  const share = total ? d.value / total : 0;
+  const len = Math.max(0, share * UNITS - gap);
+  const seg = {
+    ...d,
+    share,
+    len: len.toFixed(2),
+    off: (-acc).toFixed(2),
+    color: data.length > SLOTS.length && i === parts.length - 1 ? OTHER : SLOTS[i],
+    i,
+  };
+  acc += share * UNITS;
+  return seg;
+});
+const pct = (s: number) => `${fmt(locale, s * 100, 0)}%`;
+const val = (v: number) => `${fmt(locale, v, decimals)}${unit ? ` ${unit}` : ''}`;
+const uid = `d${Math.abs([...title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7))}`;
+---
+
+<figure class="viz donut" data-viz aria-labelledby={`${uid}-t`}>
+  <p class="viz__title" id={`${uid}-t`}>{title}</p>
+  {subtitle && <p class="viz__sub">{subtitle}</p>}
+  <div class="viz__body donut__grid">
+    <div class="donut__plot">
+      <svg viewBox="0 0 220 220" role="img" aria-labelledby={`${uid}-t`} focusable="false">
+        <g transform="rotate(-90 110 110)">
+          {
+            segs.map((s) => (
+              <circle
+                class="donut__seg"
+                cx="110"
+                cy="110"
+                r={R}
+                pathLength={UNITS}
+                style={`--len:${s.len};--off:${s.off};--i:${s.i};--c:${s.color}`}
+                tabindex="0"
+                aria-label={`${s.label}: ${val(s.value)}, ${pct(s.share)}`}
+                data-tip={`${val(s.value)} · ${pct(s.share)}|${s.label}`}
+                data-color={s.color}
+              />
+            ))
+          }
+        </g>
+      </svg>
+      {
+        center && (
+          <p class="donut__center" aria-hidden="true">
+            <span class="donut__cv">{center.value}</span>
+            <span class="donut__cl">{center.label}</span>
+          </p>
+        )
+      }
+    </div>
+    <ul class="viz-legend" role="list">
+      {
+        segs.map((s) => (
+          <li style={`--c:${s.color}`}>
+            <span class="viz-legend__sw" aria-hidden="true" />
+            <span>{s.label}</span>
+            <span class="viz-legend__v">
+              {fmt(locale, s.value, decimals)}
+              <span class="viz-legend__pct">{pct(s.share)}</span>
+            </span>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+  <details class="viz-table">
+    <summary>{tx.table}</summary>
+    <table>
+      <thead>
+        <tr><th scope="col">{tx.category}</th><th scope="col" class="num">{tx.value}</th><th scope="col" class="num">{tx.share}</th></tr>
+      </thead>
+      <tbody>
+        {segs.map((s) => <tr><th scope="row">{s.label}</th><td class="num">{val(s.value)}</td><td class="num">{pct(s.share)}</td></tr>)}
+      </tbody>
+    </table>
+  </details>
+  <figcaption class="viz__source">
+    {tx.source}: {sourceHref ? <a href={sourceHref} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </figcaption>
+</figure>
+
+<style>
+  .donut__grid {
+    display: grid;
+    gap: var(--s-5);
+    align-items: center;
+  }
+  @media (min-width: 40rem) {
+    .donut__grid {
+      grid-template-columns: minmax(0, 15rem) minmax(0, 1fr);
+      gap: var(--s-7);
+    }
+  }
+  .donut__plot {
+    position: relative;
+    inline-size: min(100%, 15rem);
+    margin-inline: auto;
+  }
+  .donut__plot svg {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    overflow: visible;
+  }
+  .donut__seg {
+    fill: none;
+    stroke: var(--c);
+    stroke-width: 28;
+    stroke-dasharray: var(--len) 1000;
+    stroke-dashoffset: var(--off);
+    cursor: default;
+    outline: none;
+  }
+  .donut__seg:hover,
+  .donut__seg:focus-visible {
+    stroke-width: 34;
+  }
+  :global([data-armed]:not(.is-in)) .donut__seg {
+    stroke-dasharray: 0 1000;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .donut__seg {
+      transition: stroke-width var(--dur-2) var(--ease-out);
+    }
+    :global(.is-in) .donut__seg {
+      transition:
+        stroke-dasharray 900ms var(--ease-out) calc(var(--i) * 140ms),
+        stroke-width var(--dur-2) var(--ease-out);
+    }
+  }
+  .donut__center {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    text-align: center;
+    margin: 0;
+    pointer-events: none;
+  }
+  .donut__cv {
+    font-size: clamp(1.75rem, 1.4rem + 1vw, 2.25rem);
+    font-weight: 650;
+    line-height: 1;
+    color: var(--color-text);
+  }
+  .donut__cl {
+    margin-block-start: 0.3rem;
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+</style>
+
+<script>
+  import './viz-runtime';
+</script>

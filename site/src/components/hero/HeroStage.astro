@@ -45,7 +45,7 @@ const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
           return (
             p && (
               <li>
-                <a href={withBase(`/${locale}/products/${w.slug}/`)}>{p.name}</a>: {w.uses.map((u) => CAPS.find((c) => c.id === u)?.label[locale]).join(', ')}
+                <a href={withBase(`/${locale}/projects/${w.slug}/`)}>{p.name}</a>: {w.uses.map((u) => CAPS.find((c) => c.id === u)?.label[locale]).join(', ')}
               </li>
             )
           );

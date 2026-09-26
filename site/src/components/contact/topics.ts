@@ -4,7 +4,7 @@ import { t } from '@/i18n/utils';
 import type { Locale } from '@/i18n/config';
 
 /** The contact topics, in display order. The key is what `?topic=` accepts. */
-export const topicKeys = ['product', 'institutional', 'research', 'data', 'integration', 'other'] as const;
+export const topicKeys = ['product', 'services', 'institutional', 'research', 'data', 'integration', 'other'] as const;
 export type TopicKey = (typeof topicKeys)[number];
 
 export const topicLabelKey = (key: TopicKey) => `topic.${key}` as UiKey;

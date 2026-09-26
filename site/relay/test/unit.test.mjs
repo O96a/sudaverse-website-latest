@@ -219,7 +219,7 @@ describe('validateContact', () => {
 
   test('accepts every documented topic key', () => {
     for (const topic of TOPICS) assert.equal(validateContact({ ...base, topic }).ok, true, topic);
-    assert.deepEqual(TOPICS, ['product', 'institutional', 'research', 'data', 'integration', 'other']);
+    assert.deepEqual(TOPICS, ['product', 'services', 'institutional', 'research', 'data', 'integration', 'other']);
   });
 
   test('accepts realistic addresses and rejects malformed ones', () => {

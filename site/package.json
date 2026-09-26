@@ -16,9 +16,11 @@
     "test:links": "node scripts/check-links.mjs",
     "test:secrets": "node scripts/check-secrets.mjs",
     "test:root": "node scripts/check-root-sync.mjs",
-    "verify": "npm run check && npm run build && npm run test:integrity && npm run test:links && npm run test:secrets"
+    "verify": "npm run check && npm run build && npm run test:integrity && npm run test:links && npm run test:secrets",
+    "new:artifact": "node scripts/new-artifact.mjs"
   },
   "dependencies": {
+    "@astrojs/mdx": "^8.0.2",
     "@astrojs/react": "^6.0.6",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",

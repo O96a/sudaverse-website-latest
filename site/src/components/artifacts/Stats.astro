@@ -1,0 +1,72 @@
+---
+/**
+ * A short row of headline figures (two to four). Each is a value and what it counts; the source line is
+ * required, as for every chart. Proportional figures at display size.
+ *
+ * <Stats items={[{ value: '61', label: 'dialect samples' }, ...]} source="..." />
+ */
+import { vizLocale, vizText } from './viz-text';
+
+interface Props {
+  items: { value: string; label: string }[];
+  source: string;
+  sourceHref?: string;
+}
+const { items, source, sourceHref } = Astro.props;
+const tx = vizText[vizLocale(Astro.params.lang)];
+---
+
+<figure class="stats">
+  <dl class="stats__list">
+    {
+      items.map((it) => (
+        <div class="stats__item">
+          <dt>{it.label}</dt>
+          <dd>{it.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+  <figcaption class="stats__source">
+    {tx.source}: {sourceHref ? <a href={sourceHref} target="_blank" rel="noopener noreferrer">{source}</a> : source}
+  </figcaption>
+</figure>
+
+<style>
+  .stats {
+    margin-block: var(--s-7);
+  }
+  .stats__list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+    margin: 0;
+    border-block: 1px solid var(--color-border-strong);
+  }
+  .stats__item {
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: flex-end;
+    gap: var(--s-1);
+    padding: var(--s-4) var(--s-4) var(--s-4) 0;
+  }
+  .stats__item + .stats__item {
+    padding-inline-start: var(--s-4);
+    border-inline-start: 1px solid var(--color-border);
+  }
+  .stats dd {
+    margin: 0;
+    font-size: clamp(1.75rem, 1.3rem + 1.4vw, 2.5rem);
+    font-weight: 650;
+    line-height: 1.05;
+    color: var(--color-text);
+  }
+  .stats dt {
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+  }
+  .stats__source {
+    margin-block-start: var(--s-2);
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+</style>

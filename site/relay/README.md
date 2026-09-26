@@ -22,7 +22,7 @@ visitor's browser ── POST /contact (JSON) ──▶ relay ──┬─ SMTP 
 | `name` | required, 1 to 120 characters (line breaks and control characters are replaced by spaces) |
 | `organization` | optional, up to 160 characters |
 | `email` | required, up to 254 characters, must look like an address |
-| `topic` | required: `product`, `institutional`, `research`, `data`, `integration` or `other` |
+| `topic` | required: `product`, `services`, `institutional`, `research`, `data`, `integration` or `other` |
 | `message` | required, 1 to 5000 characters |
 | `locale` | `en` or `ar`; anything else becomes `en` |
 | `website` | honeypot: real visitors leave it empty (see below) |

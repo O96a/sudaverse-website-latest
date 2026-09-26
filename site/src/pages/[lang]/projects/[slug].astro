@@ -1,0 +1,496 @@
+---
+/**
+ * Project page. Every project follows the same four blocks, in this order (owner direction, 2026-09-26):
+ * 1. hero: what it is, next to its logo; 2. the problem and how the project tackles it;
+ * 3. the user flow as an animated diagram; 4. a small "get involved" band with the contact channels.
+ */
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import StageBadge from '@/components/StageBadge.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import ProductArt from '@/components/products/ProductArt.astro';
+import FlowDiagram from '@/components/flow/FlowDiagram';
+import type { FlowStepData } from '@/components/flow/flow-layout';
+import { products, type Product } from '@/data/products';
+import { directions } from '@/data/research';
+import { site } from '@/config/site';
+import { localePath, t } from '@/i18n/utils';
+import { locales, pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return locales.flatMap((lang) => products.map((product) => ({ params: { lang, slug: product.slug }, props: { product } })));
+}
+const locale = Astro.params.lang as Locale;
+const { product } = Astro.props as { product: Product };
+const L = (v: Parameters<typeof pick>[0]) => (pick(v as never, locale) as string | undefined) ?? '';
+
+const copy = {
+  en: {
+    siteName: 'Sudaverse',
+    openSite: 'Open project site',
+    repo: 'View on GitHub',
+    involved: 'Get involved',
+    problem: 'The problem',
+    approach: (n: string) => `How ${n} tackles it`,
+    capabilities: 'What it does',
+    flowH: 'How it works',
+    flowLead: (n: string) => `The path a user takes through ${n}, step by step.`,
+    flowLabel: (n: string) => `${n} user flow`,
+    getH: 'Get involved',
+    getLead: (n: string) => `Want to use ${n}, pilot it in your organization, or build on it with us? Reach the team on any of these channels.`,
+    email: 'Email',
+    form: 'Message form',
+    whatsapp: 'WhatsApp',
+    telegram: 'Telegram',
+    signal: 'Signal',
+    subject: (n: string) => `About ${n}`,
+    directions: 'Research behind it',
+    all: 'All projects',
+  },
+  ar: {
+    siteName: 'سودافيرس',
+    openSite: 'افتح موقع المشروع',
+    repo: 'عرض على GitHub',
+    involved: 'شارك معنا',
+    problem: 'المشكلة',
+    approach: (n: string) => `كيف يعالجها ${n}`,
+    capabilities: 'ما الذي يقدّمه',
+    flowH: 'كيف يعمل',
+    flowLead: (n: string) => `المسار الذي يسلكه المستخدم في ${n}، خطوة بخطوة.`,
+    flowLabel: (n: string) => `مسار المستخدم في ${n}`,
+    getH: 'شارك معنا',
+    getLead: (n: string) => `تريد استخدام ${n}، أو تجربته في مؤسستك، أو البناء عليه معنا؟ تواصل مع الفريق عبر أي من هذه القنوات.`,
+    email: 'البريد الإلكتروني',
+    form: 'نموذج الرسائل',
+    whatsapp: 'واتساب',
+    telegram: 'تيليجرام',
+    signal: 'سيجنال',
+    subject: (n: string) => `بخصوص ${n}`,
+    directions: 'البحث وراءه',
+    all: 'كل المشاريع',
+  },
+}[locale];
+
+const name = product.name;
+const tagline = L(product.tagline);
+const summary = L(product.summary);
+const nm = `<bdi translate="no">${name}</bdi>`;
+
+function metaDescription(text: string) {
+  if (text.length <= 160) return text;
+  let out = '';
+  for (const s of text.match(/[^.]+\.?/g) ?? [text]) {
+    if ((out + s).trim().length > 160) break;
+    out += s;
+  }
+  return (out || text.slice(0, 157) + '...').trim();
+}
+const fullTitle = `${name}: ${tagline.replace(/\.$/, '')} | ${copy.siteName}`;
+const title = fullTitle.length <= 80 ? fullTitle : `${name}: ${t(locale, `category.${product.category}` as const)} | ${copy.siteName}`;
+const description = metaDescription(summary);
+
+const projectsHref = localePath(locale, 'projects');
+const formHref = `${localePath(locale, 'contact')}?topic=product&product=${product.slug}`;
+const steps: FlowStepData[] = (product.flow ?? []).map((s) => ({ id: s.id, title: s.title, desc: s.desc }));
+const related = directions.filter((d) => d.projects.includes(product.slug));
+
+const externals = [
+  product.url && { href: product.url, label: copy.openSite },
+  product.docs && { href: product.docs, label: copy.repo },
+].filter(Boolean) as { href: string; label: string }[];
+
+const c = site.contact;
+const channels = [
+  { icon: 'mail', label: copy.email, detail: c.email, href: `mailto:${c.email}?subject=${encodeURIComponent(copy.subject(name))}`, ltr: true },
+  { icon: 'edit', label: copy.form, detail: '', href: formHref },
+  c.whatsapp && { icon: 'whatsapp', label: copy.whatsapp, detail: '', href: `https://wa.me/${c.whatsapp}?text=${encodeURIComponent(`${t(locale, 'wa.prefill')}${name}`)}`, external: true },
+  c.telegram && { icon: 'telegram', label: copy.telegram, detail: `@${c.telegram}`, href: `https://t.me/${c.telegram}`, external: true, ltr: true },
+  c.signal && { icon: 'signal', label: copy.signal, detail: '', href: c.signal, external: true },
+  { icon: 'linkedin', label: 'LinkedIn', detail: '', href: site.social.linkedin, external: true },
+  { icon: 'github', label: 'GitHub', detail: '', href: site.social.github, external: true },
+].filter(Boolean) as { icon: 'mail' | 'edit' | 'whatsapp' | 'telegram' | 'signal' | 'linkedin' | 'github'; label: string; detail: string; href: string; external?: boolean; ltr?: boolean }[];
+
+const abs = (path: string) => `${site.origin}${path}`;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.projects'), item: abs(projectsHref) },
+      { '@type': 'ListItem', position: 3, name, item: abs(localePath(locale, `projects/${product.slug}`)) },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'SoftwareApplication',
+    name,
+    description: summary,
+    applicationCategory: product.slug === 'sudatutor' ? 'EducationalApplication' : 'BusinessApplication',
+    ...(product.languages?.length ? { inLanguage: product.languages } : {}),
+    ...(product.url ? { url: product.url } : {}),
+    publisher: { '@type': 'Organization', name: site.name, url: `${site.origin}/` },
+  },
+];
+---
+
+<Base title={title} description={description} nav="projects" jsonLd={jsonLd}>
+  <!-- 1. Hero: what it is, next to its logo -->
+  <section class="hero" aria-labelledby="hero-h">
+    <div class="container">
+      <Crumbs locale={locale} items={[{ label: t(locale, 'nav.projects'), href: projectsHref }, { label: name }]} />
+      <div class="hero__grid">
+        <div class="hero__text">
+          <div class="hero__head">
+            <h1 id="hero-h" translate="no">{name}</h1>
+            <StageBadge stage={product.stage} locale={locale} />
+          </div>
+          <p class="hero__tag">{tagline}</p>
+          <p class="hero__sum">{summary}</p>
+          <div class="cluster hero__cta">
+            <Button href="#involved" variant="primary" arrow>{copy.involved}</Button>
+            {
+              externals.map((e) => (
+                <a class="ext" href={e.href} target="_blank" rel="noopener noreferrer">
+                  {e.label}
+                  <Icon name="external" size={16} />
+                  <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                </a>
+              ))
+            }
+          </div>
+        </div>
+        <div class="hero__logo">
+          <div class="logo-tile glass">
+            <ProductArt slug={product.slug} bare />
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. The problem, and how the project tackles it -->
+  {
+    (product.problem || product.approach) && (
+      <section class="section section--tight pa" aria-labelledby="pa-h">
+        <h2 id="pa-h" class="sr-only">
+          {copy.problem}
+        </h2>
+        <div class="container pa__grid">
+          {product.problem && (
+            <div class="pa__col" data-reveal>
+              <h3 class="pa__k">{copy.problem}</h3>
+              <p class="pa__lead">{L(product.problem)}</p>
+            </div>
+          )}
+          {product.approach && (
+            <div class="pa__col" data-reveal>
+              <h3 class="pa__k" set:html={copy.approach(nm)} />
+              <p class="pa__lead">{L(product.approach)}</p>
+              {product.capabilities && product.capabilities.length > 0 && (
+                <ul role="list" class="caps" aria-label={copy.capabilities}>
+                  {product.capabilities.map((cap) => (
+                    <li>
+                      <Icon name="check" size={18} />
+                      <span>{L(cap)}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 3. The user flow, animated -->
+  {
+    steps.length >= 3 && (
+      <section class="section section--alt flow" aria-labelledby="flow-h">
+        <div class="container">
+          <div class="flow__head" data-reveal>
+            <h2 id="flow-h">{copy.flowH}</h2>
+            <p class="t-lead" set:html={copy.flowLead(nm)} />
+          </div>
+          <FlowDiagram client:visible locale={locale} steps={steps} label={copy.flowLabel(name)} names={[name]} />
+          {related.length > 0 && (
+            <p class="flow__dir">
+              <span class="t-meta">{copy.directions}:</span>
+              {related.map((d) => (
+                <a href={`${localePath(locale, 'research/directions')}#${d.id}`} style={`--c:${d.color}`}>
+                  <span class="dot" aria-hidden="true" />
+                  {L(d.title)}
+                </a>
+              ))}
+            </p>
+          )}
+        </div>
+      </section>
+    )
+  }
+
+  <!-- 4. Get involved -->
+  <section class="section section--tight involved" id="involved" aria-labelledby="inv-h">
+    <div class="container involved__grid">
+      <div class="involved__text">
+        <h2 id="inv-h">{copy.getH}</h2>
+        <p class="t-lead" set:html={copy.getLead(nm)} />
+        <a class="textlink" href={projectsHref}>
+          {copy.all}
+          <Icon name="arrow" size={18} directional />
+        </a>
+      </div>
+      <ul role="list" class="channels">
+        {
+          channels.map((ch) => (
+            <li>
+              <a class="ch" href={ch.href} {...(ch.external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
+                <span class="ch__icon"><Icon name={ch.icon} size={20} /></span>
+                <span class="ch__label">{ch.label}</span>
+                {ch.detail && <span class="ch__detail" dir={ch.ltr ? 'ltr' : undefined}>{ch.detail}</span>}
+                <Icon name={ch.external ? 'external' : 'arrow'} size={16} directional={!ch.external} class="ch__go" />
+                {ch.external && <span class="sr-only"> ({t(locale, 'a11y.external')})</span>}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-block-size: 2.75rem;
+    font-weight: 620;
+    text-decoration: none;
+  }
+  .ext:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+
+  /* ---- 1. Hero ---- */
+  .hero {
+    padding-block: var(--s-4) var(--section-y-tight);
+  }
+  .hero__grid {
+    display: grid;
+    gap: var(--s-7);
+    align-items: center;
+    margin-block-start: var(--s-5);
+  }
+  .hero__text {
+    display: grid;
+    gap: var(--s-4);
+    justify-items: start;
+  }
+  .hero__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-3) var(--s-4);
+  }
+  .hero__tag {
+    font-size: var(--fs-500);
+    font-weight: 620;
+    line-height: var(--lh-snug);
+    color: var(--color-text);
+    max-inline-size: 30ch;
+  }
+  .hero__sum {
+    color: var(--color-text-muted);
+    max-inline-size: 58ch;
+  }
+  .hero__cta {
+    margin-block-start: var(--s-2);
+  }
+  /* The logo tile: glass over a pale wash of the logo's own blue and green (owner-pinned material). */
+  .hero__logo {
+    position: relative;
+    isolation: isolate;
+    min-inline-size: 0;
+  }
+  .hero__logo::before {
+    content: '';
+    position: absolute;
+    inset: -8%;
+    z-index: -1;
+    background:
+      radial-gradient(40% 50% at 30% 40%, color-mix(in srgb, var(--brand-blue) 30%, transparent), transparent 70%),
+      radial-gradient(40% 50% at 72% 64%, color-mix(in srgb, var(--brand-green) 24%, transparent), transparent 70%);
+    filter: blur(20px);
+  }
+  .logo-tile {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 4 / 3;
+    padding: clamp(1.5rem, 1rem + 3vw, 3.5rem);
+    border-radius: var(--radius-3);
+  }
+  .logo-tile :global(.logo-bare) {
+    max-block-size: 100%;
+    inline-size: auto;
+    max-inline-size: min(100%, 22rem) !important;
+    object-fit: contain;
+  }
+  .logo-tile :global(.plate) {
+    border: 0;
+    background: transparent;
+  }
+  @media (min-width: 64rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: var(--s-8);
+    }
+  }
+
+  /* ---- 2. Problem and approach ---- */
+  .pa__grid {
+    display: grid;
+    gap: var(--s-7);
+  }
+  .pa__col {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+    padding-block-start: var(--s-4);
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .pa__k {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+  }
+  .pa__lead {
+    font-size: var(--fs-400);
+    line-height: 1.5;
+    color: var(--color-text);
+  }
+  .caps {
+    display: grid;
+    gap: 0;
+    margin-block-start: var(--s-3);
+    padding: 0;
+  }
+  .caps li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--s-3);
+    padding-block: var(--s-3);
+    border-block-end: 1px solid var(--color-border);
+    font-size: var(--fs-200);
+  }
+  .caps :global(svg) {
+    margin-block-start: 0.2rem;
+    color: var(--sage-700);
+  }
+  @media (min-width: 48rem) {
+    .pa__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--s-8);
+    }
+  }
+
+  /* ---- 3. User flow ---- */
+  .flow__head {
+    display: grid;
+    gap: var(--s-3);
+    margin-block-end: var(--s-6);
+  }
+  .flow__dir {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-4);
+    margin-block-start: var(--s-5);
+    max-inline-size: none;
+  }
+  .flow__dir a {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 2.75rem;
+    font-size: var(--fs-200);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .flow__dir a:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .dot {
+    inline-size: 0.6rem;
+    block-size: 0.6rem;
+    border-radius: 50%;
+    background: var(--c);
+  }
+
+  /* ---- 4. Get involved ---- */
+  .involved__grid {
+    display: grid;
+    gap: var(--s-6);
+  }
+  .involved__text {
+    display: grid;
+    gap: var(--s-3);
+    align-content: start;
+    justify-items: start;
+  }
+  .channels {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .ch {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--s-3);
+    min-block-size: 3.25rem;
+    padding-inline: var(--s-1);
+    border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .ch:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .ch__icon {
+    display: grid;
+    place-items: center;
+    color: var(--nile-700);
+  }
+  .ch__label {
+    font-weight: 620;
+  }
+  .ch__detail {
+    color: var(--color-text-meta);
+    font-size: var(--fs-200);
+    justify-self: start;
+  }
+  .ch :global(.ch__go) {
+    grid-column: 4;
+    color: var(--color-text-meta);
+  }
+  @media (min-width: 48rem) {
+    .channels {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-6);
+    }
+  }
+  @media (min-width: 64rem) {
+    .involved__grid {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: var(--s-8);
+    }
+  }
+</style>

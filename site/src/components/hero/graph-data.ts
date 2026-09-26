@@ -83,9 +83,9 @@ export const mirrorX = (l: Layout, x: number, w: number, rtl: boolean) => (rtl ?
 
 export const TEXT: Record<Locale, { group: string; hint: string; out: string; idle: string; pause: string; play: string; open: string; uses: string }> = {
   en: {
-    group: 'Interactive map: Sudaverse products and the capabilities they draw on',
-    hint: 'Select a product, or switch a capability on, to see how they connect.',
-    out: 'Products',
+    group: 'Interactive map: Sudaverse projects and the capabilities they draw on',
+    hint: 'Select a project, or switch a capability on, to see how they connect.',
+    out: 'Projects',
     idle: 'Showing every connection',
     pause: 'Pause animation',
     play: 'Play animation',
@@ -93,9 +93,9 @@ export const TEXT: Record<Locale, { group: string; hint: string; out: string; id
     uses: 'Uses',
   },
   ar: {
-    group: 'خريطة تفاعلية: منتجات سودافيرس والقدرات التي تعتمد عليها',
-    hint: 'اختر منتجًا، أو فعّل قدرة، لترى كيف يرتبطان.',
-    out: 'المنتجات',
+    group: 'خريطة تفاعلية: مشاريع سودافيرس والقدرات التي تعتمد عليها',
+    hint: 'اختر مشروعًا، أو فعّل قدرة، لترى كيف يرتبطان.',
+    out: 'المشاريع',
     idle: 'عرض كل الارتباطات',
     pause: 'إيقاف الحركة',
     play: 'تشغيل الحركة',

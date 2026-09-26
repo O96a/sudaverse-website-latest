@@ -1,0 +1,165 @@
+/*
+ * Shared chrome for the Artifacts chart kit: figure, title, source line, legend, data table and the tooltip.
+ * Marks carry the series colour; every piece of text stays in the ink tokens.
+ */
+.viz {
+  margin-block: var(--s-7);
+  padding: var(--s-5);
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-1);
+}
+.viz__title {
+  margin: 0;
+  font-size: var(--fs-300);
+  font-weight: 650;
+  line-height: var(--lh-snug);
+  color: var(--color-text);
+  max-inline-size: none;
+}
+.viz__sub {
+  margin: var(--s-1) 0 0;
+  font-size: var(--fs-200);
+  color: var(--color-text-muted);
+}
+.viz__body {
+  margin-block: var(--s-5) var(--s-4);
+}
+.viz__source {
+  margin: 0;
+  padding-block-start: var(--s-3);
+  border-block-start: 1px solid var(--color-border);
+  font-size: var(--fs-100);
+  line-height: 1.5;
+  color: var(--color-text-meta);
+  max-inline-size: none;
+}
+.viz__source a {
+  color: var(--color-link);
+}
+
+/* Legend: a swatch that mirrors the mark, the label, then the value. Doubles as the direct labels. */
+.viz-legend {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--fs-200);
+}
+.viz-legend li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s-3);
+  min-block-size: 2.5rem;
+  border-block-end: 1px solid var(--color-border);
+}
+.viz-legend li:first-child {
+  border-block-start: 1px solid var(--color-border);
+}
+.viz-legend__sw {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+  border-radius: 2px;
+  background: var(--c);
+}
+.viz-legend__v {
+  font-variant-numeric: tabular-nums;
+  font-weight: 620;
+  color: var(--color-text);
+}
+.viz-legend__pct {
+  margin-inline-start: var(--s-2);
+  font-weight: 400;
+  color: var(--color-text-meta);
+}
+
+/* Table view: the WCAG-clean twin of every chart, one click away. */
+.viz-table {
+  margin-block-start: var(--s-3);
+  font-size: var(--fs-200);
+}
+.viz-table > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-2);
+  min-block-size: 2.75rem;
+  color: var(--color-link);
+  font-weight: 620;
+  cursor: pointer;
+  list-style: none;
+}
+.viz-table > summary::-webkit-details-marker {
+  display: none;
+}
+.viz-table > summary::before {
+  content: '';
+  inline-size: 0.45rem;
+  block-size: 0.45rem;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  rotate: -45deg;
+  transition: rotate var(--dur-2) var(--ease-out);
+}
+[dir='rtl'] .viz-table > summary::before {
+  rotate: 135deg;
+}
+.viz-table[open] > summary::before {
+  rotate: 45deg;
+}
+.viz-table table {
+  margin-block-start: var(--s-2);
+}
+.viz-table th,
+.viz-table td {
+  padding: var(--s-2) var(--s-3);
+  border-block-end: 1px solid var(--color-border);
+  text-align: start;
+}
+.viz-table td.num,
+.viz-table th.num {
+  text-align: end;
+  font-variant-numeric: tabular-nums;
+}
+.viz-table thead th {
+  font-size: var(--fs-100);
+  color: var(--color-text-meta);
+  font-weight: 650;
+  border-block-end-color: var(--color-border-strong);
+}
+
+/* Tooltip: value first and strong, the label after it, keyed by a short line in the series colour. */
+.viz-tip {
+  position: fixed;
+  z-index: var(--z-popover);
+  display: grid;
+  gap: 0.1rem;
+  max-inline-size: 18rem;
+  padding: 0.5rem 0.75rem 0.5rem 1rem;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2);
+  box-shadow: var(--shadow-pop);
+  font-size: var(--fs-100);
+  line-height: 1.4;
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+.viz-tip[hidden] {
+  display: none;
+}
+.viz-tip::before {
+  content: '';
+  position: absolute;
+  inset-block: 0.6rem;
+  inset-inline-start: 0.45rem;
+  inline-size: 2px;
+  border-radius: 1px;
+  background: var(--c);
+}
+.viz-tip strong {
+  font-size: var(--fs-200);
+  color: var(--color-text);
+  font-variant-numeric: tabular-nums;
+}

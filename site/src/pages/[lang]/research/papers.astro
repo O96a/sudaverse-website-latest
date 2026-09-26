@@ -1,0 +1,494 @@
+---
+import Base from '@/layouts/Base.astro';
+import Button from '@/components/Button.astro';
+import Icon from '@/components/Icon.astro';
+import TraceArt from '@/components/TraceArt.astro';
+import { directionById, openWork, publications } from '@/data/research';
+import { productBySlug } from '@/data/products';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+
+const copy = {
+  en: {
+    title: 'Published papers | Sudaverse',
+    description:
+      'Peer-reviewed papers from the Sudaverse team, including two at IEEE FITAT 2026, and the open-source releases and benchmarks behind them.',
+    h1: 'Published papers',
+    lead: 'Peer-reviewed work from the Sudaverse team, and the open-source code behind it, public to inspect, run and build on.',
+    direction: 'Direction',
+    project: 'Project',
+    abstract: 'Abstract',
+    doi: 'DOI',
+    pdf: 'PDF',
+    publisher: 'Publisher page',
+    releases: 'Open-source releases',
+    papers: 'Papers and reports',
+    license: 'License',
+    updated: 'Last public update',
+    github: 'View on GitHub',
+    docs: 'Documentation',
+    product: 'Product page',
+    kind: { paper: 'Paper', preprint: 'Preprint', report: 'Report' },
+    cta: {
+      h2: 'Working on related problems?',
+      body: 'We welcome collaboration proposals from researchers and institutions.',
+      primary: 'Propose a collaboration',
+      secondary: 'Research directions',
+    },
+    crumbs: ['Home', 'Research', 'Published papers'],
+  },
+  ar: {
+    title: 'الأوراق المنشورة | سودافيرس',
+    description:
+      'أوراق محكّمة من فريق سودافيرس، منها ورقتان في مؤتمر IEEE FITAT 2026، والإصدارات المفتوحة المصدر ومعايير القياس التي تقف خلفها.',
+    h1: 'الأوراق المنشورة',
+    lead: 'أعمال محكّمة من فريق سودافيرس، والشيفرة المفتوحة المصدر التي تقف خلفها، متاحة للفحص والتشغيل والبناء عليها.',
+    direction: 'الاتجاه',
+    project: 'المشروع',
+    abstract: 'الملخص',
+    doi: 'DOI',
+    pdf: 'PDF',
+    publisher: 'صفحة الناشر',
+    releases: 'إصدارات مفتوحة المصدر',
+    papers: 'الأوراق والتقارير',
+    license: 'الترخيص',
+    updated: 'آخر تحديث علني',
+    github: 'عرض على GitHub',
+    docs: 'التوثيق',
+    product: 'صفحة المنتج',
+    kind: { paper: 'ورقة بحثية', preprint: 'نسخة أولية', report: 'تقرير' },
+    cta: {
+      h2: 'تعمل على مشكلات مرتبطة؟',
+      body: 'نرحّب بمقترحات التعاون من الباحثين والمؤسسات.',
+      primary: 'اقترح تعاونًا',
+      secondary: 'الاتجاهات البحثية',
+    },
+    crumbs: ['الرئيسية', 'الأبحاث', 'الأوراق المنشورة'],
+  },
+}[locale];
+
+const month = (ym: string) => {
+  const [y, m] = ym.split('-').map(Number);
+  return new Date(Date.UTC(y, m - 1, 1)).toLocaleDateString(locale === 'ar' ? 'ar-u-nu-latn' : 'en', {
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+};
+
+const abs = (path: string) => new URL(path, Astro.site).href;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: copy.crumbs[0], item: abs(localePath(locale)) },
+      { '@type': 'ListItem', position: 2, name: copy.crumbs[1], item: abs(localePath(locale, 'research')) },
+      { '@type': 'ListItem', position: 3, name: copy.crumbs[2], item: abs(localePath(locale, 'research/papers')) },
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: [
+      ...publications.map((p) => ({
+        '@type': 'ScholarlyArticle',
+        headline: p.title,
+        ...(p.authors?.length ? { author: p.authors.map((name) => ({ '@type': 'Person', name })) } : {}),
+        datePublished: String(p.year),
+        publisher: { '@type': 'Organization', name: 'IEEE' },
+        ...(p.doi ? { sameAs: `https://doi.org/${p.doi}` } : {}),
+      })),
+    ],
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    itemListElement: openWork.map((w, i) => ({
+      '@type': 'ListItem',
+      position: i + 1,
+      item: {
+        '@type': 'SoftwareSourceCode',
+        name: w.name,
+        description: pick(w.description, locale),
+        codeRepository: w.href,
+        ...(w.license === 'MIT' ? { license: 'https://opensource.org/licenses/MIT' } : {}),
+      },
+    })),
+  },
+];
+
+const contactHref = `${localePath(locale, 'contact')}?topic=research`;
+/** Newest first; grouped by year once papers span more than one year. */
+const sorted = [...publications].sort((a, b) => b.year - a.year);
+const years = [...new Set(sorted.map((p) => p.year))];
+---
+
+<Base title={copy.title} description={copy.description} nav="research" jsonLd={jsonLd}>
+  <section class="head" aria-labelledby="pub-h">
+    <div class="container head__grid">
+      <div class="head__text">
+        <h1 id="pub-h">{copy.h1}</h1>
+        <p class="t-lead">{copy.lead}</p>
+      </div>
+      <div class="head__art" aria-hidden="true">
+        <TraceArt seed={64} tone="sage" traces={9} leaves={12} thread />
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight" aria-labelledby="paper-h">
+    <div class="container">
+      <h2 id="paper-h" class="sr-only">{copy.papers}</h2>
+      {
+        years.map((y) => (
+          <div class="year">
+            <h3 class="year__h">{y}</h3>
+            <ul class="rows rows--papers" role="list">
+              {sorted
+                .filter((p) => p.year === y)
+                .map((p) => {
+                  const dir = directionById(p.direction);
+                  return (
+                    <li class="paper" id={p.id} data-reveal>
+                      <div class="paper__meta">
+                        <span class="row__kind">{copy.kind[p.kind]}</span>
+                        <span class="paper__venue" translate="no">{p.venue}</span>
+                      </div>
+                      <h4 class="paper__t" translate="no" lang="en" dir="ltr">
+                        {p.href ? (
+                          <a href={p.href} target="_blank" rel="noopener noreferrer">
+                            {p.title}
+                            <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                          </a>
+                        ) : (
+                          p.title
+                        )}
+                      </h4>
+                      {p.authors && p.authors.length > 0 && <p class="paper__authors" dir="ltr" translate="no">{p.authors.join(', ')}</p>}
+                      <p class="paper__sum">{pick(p.summary, locale)}</p>
+                      {p.abstract && (
+                        <details class="paper__abs">
+                          <summary>{copy.abstract}</summary>
+                          <p>{pick(p.abstract, locale)}</p>
+                        </details>
+                      )}
+                      <div class="paper__links">
+                        {dir && (
+                          <a class="chip" href={`${localePath(locale, 'research/directions')}#${dir.id}`} style={`--c:${dir.color}`}>
+                            <span class="chip__dot" aria-hidden="true" />
+                            {copy.direction}: {pick(dir.short, locale)}
+                          </a>
+                        )}
+                        {(p.projects ?? []).map((slug) => {
+                          const pr = productBySlug(slug);
+                          return pr && (
+                            <a class="chip" href={localePath(locale, `projects/${slug}`)}>
+                              {copy.project}: <span translate="no">{pr.name}</span>
+                            </a>
+                          );
+                        })}
+                        {p.doi && (
+                          <a class="textlink" href={`https://doi.org/${p.doi}`} target="_blank" rel="noopener noreferrer">
+                            {copy.doi} <span dir="ltr">{p.doi}</span>
+                            <Icon name="external" size={16} />
+                            <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                          </a>
+                        )}
+                        {p.pdf && (
+                          <a class="textlink" href={p.pdf} target="_blank" rel="noopener noreferrer">
+                            {copy.pdf}
+                            <Icon name="external" size={16} />
+                            <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                          </a>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
+            </ul>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section section--tight section--alt" aria-labelledby="rel-h">
+    <div class="container">
+      <h2 id="rel-h">{copy.releases}</h2>
+      <ul class="rows" role="list">
+        {
+          openWork.map((w) => (
+            <li class="row" data-reveal>
+              <div class="row__id">
+                <span class="row__kind">{pick(w.kind, locale)}</span>
+                <h3 translate="no">{w.name}</h3>
+              </div>
+              <p class="row__desc">{pick(w.description, locale)}</p>
+              <dl class="row__meta">
+                {
+                  w.license && (
+                    <div>
+                      <dt>{copy.license}</dt>
+                      <dd>{w.license}</dd>
+                    </div>
+                  )
+                }
+                <div>
+                  <dt>{copy.updated}</dt>
+                  <dd>{month(w.updated)}</dd>
+                </div>
+              </dl>
+              <div class="row__links">
+                <a class="textlink" href={w.href} target="_blank" rel="noopener noreferrer">
+                  {copy.github}
+                  <Icon name="external" size={16} />
+                  <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                </a>
+                {w.id === 'llmcorpuskit' && (
+                  <>
+                    <a class="textlink" href={localePath(locale, 'projects/llmcorpuskit')}>
+                      {copy.product}
+                      <Icon name="arrow" size={16} directional />
+                    </a>
+                  </>
+                )}
+              </div>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section section--deep on-deep cta" aria-labelledby="pub-cta-h">
+    <div class="container cta__inner">
+      <h2 id="pub-cta-h">{copy.cta.h2}</h2>
+      <p class="t-lead cta__body">{copy.cta.body}</p>
+      <div class="cluster">
+        <Button href={contactHref} variant="light" arrow>{copy.cta.primary}</Button>
+        <Button href={localePath(locale, 'research/directions')} variant="outline-deep">{copy.cta.secondary}</Button>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: clamp(2.5rem, 1rem + 5vw, 5rem) var(--section-y-tight);
+  }
+  .head__grid {
+    display: grid;
+    gap: var(--s-6);
+    align-items: center;
+  }
+  .head__text {
+    display: grid;
+    gap: var(--s-5);
+    justify-items: start;
+  }
+  .head h1 {
+    font-size: clamp(2.375rem, 1.1rem + 3.5vw, 4rem);
+    line-height: var(--lh-tight);
+    max-inline-size: 12ch;
+  }
+  .head__art {
+    aspect-ratio: 16 / 9;
+    min-inline-size: 0;
+    opacity: 0.9;
+  }
+  @media (min-width: 64rem) {
+    .head__grid {
+      grid-template-columns: minmax(0, 6fr) minmax(0, 5fr);
+      gap: var(--s-8);
+    }
+  }
+
+  h2 {
+    max-inline-size: 20ch;
+  }
+  .rows {
+    margin-block-start: var(--s-6);
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .row {
+    display: grid;
+    gap: var(--s-3);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .row__id {
+    display: grid;
+    gap: var(--s-2);
+    justify-items: start;
+    align-content: start;
+  }
+  .row__id h3 {
+    font-size: var(--fs-500);
+  }
+  .row__kind {
+    padding: 0.15rem 0.6rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-stage-dev-bg);
+    color: var(--color-stage-dev);
+    font-size: var(--fs-100);
+    font-weight: 650;
+    line-height: var(--lh-snug);
+  }
+  .row__desc {
+    color: var(--color-text-muted);
+  }
+  .row__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-6);
+    margin: 0;
+  }
+  .row__meta dt {
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+  .row__meta dd {
+    margin: 0;
+    font-weight: 620;
+  }
+  .row__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2) var(--s-5);
+    align-items: center;
+  }
+  .year + .year {
+    margin-block-start: var(--s-7);
+  }
+  .year__h {
+    font-size: var(--fs-100);
+    font-weight: 650;
+    letter-spacing: var(--tracking-meta);
+    color: var(--color-text-meta);
+  }
+  .rows--papers {
+    margin-block-start: var(--s-3);
+  }
+  .paper {
+    display: grid;
+    gap: var(--s-3);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .paper__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+  }
+  .paper__venue {
+    font-size: var(--fs-200);
+    font-weight: 650;
+    color: var(--color-text-muted);
+  }
+  .paper__t {
+    font-size: var(--fs-500);
+    line-height: var(--lh-snug);
+    max-inline-size: 48ch;
+    text-align: start;
+  }
+  [dir='rtl'] .paper__t {
+    text-align: end;
+  }
+  .paper__t a {
+    color: var(--ink);
+  }
+  .paper__authors {
+    font-size: var(--fs-200);
+    color: var(--color-text-muted);
+  }
+  .paper__sum {
+    color: var(--color-text-muted);
+  }
+  .paper__abs summary {
+    min-block-size: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-link);
+    font-weight: 620;
+    cursor: pointer;
+  }
+  .paper__links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-2) var(--s-3);
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 2.25rem;
+    padding-inline: var(--s-3);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-100);
+    font-weight: 620;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .chip:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .chip__dot {
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--c);
+  }
+  @media (min-width: 64rem) {
+    .row {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 5fr) minmax(0, 3fr);
+      grid-template-areas:
+        'id desc meta'
+        'id desc links';
+      column-gap: var(--s-7);
+    }
+    .row--paper {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      grid-template-areas: 'id desc';
+    }
+    .row__id {
+      grid-area: id;
+    }
+    .row__desc {
+      grid-area: desc;
+    }
+    .row__meta {
+      grid-area: meta;
+      align-content: start;
+    }
+    .row__links {
+      grid-area: links;
+      align-content: start;
+    }
+  }
+
+  .cta__inner {
+    display: grid;
+    gap: var(--s-5);
+  }
+  .cta h2 {
+    font-size: clamp(2rem, 1.3rem + 2.6vw, 3.25rem);
+    line-height: var(--lh-tight);
+    letter-spacing: var(--tracking-h1);
+    max-inline-size: 16ch;
+  }
+  .cta__body {
+    color: var(--color-text-on-deep-muted);
+    max-inline-size: 52ch;
+  }
+</style>

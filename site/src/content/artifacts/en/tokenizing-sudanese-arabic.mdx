@@ -1,0 +1,119 @@
+---
+title: 'Tokenizing Sudanese Arabic: what a public benchmark shows'
+summary: 'Four widely used tokenizers, 61 samples of Sudanese dialect text, and a simple question: how many pieces does each one cut a Sudanese word into? The answer is the case for a dialect-specific tokenizer.'
+permalink: tokenizing-sudanese-arabic
+lang: en
+date: 2026-09-26
+authors: [aamer-mihaysi]
+direction: arabic-nlp
+projects: [sudanizer, llmcorpuskit, urri]
+paper: sudanizer-bpe
+tags: [tokenization, BPE, Sudanese Arabic, benchmark]
+---
+
+Every language model reads text as tokens, not words. Before a model sees a sentence, a tokenizer cuts it into pieces from a fixed vocabulary. When the vocabulary was built mostly from other languages, a word it has rarely seen gets cut into many small fragments. That costs more compute and a longer context for the same text, and it gives the model a less meaningful unit to learn from.
+
+Sudanese Arabic is exactly the kind of text that falls through: a low-resource dialect, written informally, with its own vocabulary for food, family, places, music and everyday life. This artifact looks at how much that costs today, using the public [Sudanese Dialect Tokenizer Benchmark](https://github.com/sudaverse/sudanese-dialect-tokenizer-benchmark).
+
+## The benchmark
+
+The benchmark is a set of short Sudanese dialect texts, each a list of words or phrases on one theme, from greetings and proverbs to dishes, instruments and transport. The script sends every text through four tokenizers and counts the tokens.
+
+<Stats
+  items={[
+    { value: '61', label: 'dialect text samples' },
+    { value: '853', label: 'words across all samples' },
+    { value: '4', label: 'tokenizers compared' },
+  ]}
+  source="Sudanese Dialect Tokenizer Benchmark, dataset.json and benchmark_results.csv at commit f0e69b9. Words counted by whitespace."
+  sourceHref="https://github.com/sudaverse/sudanese-dialect-tokenizer-benchmark/tree/f0e69b97f8e15690bcccbc4ba45c528ecc782720"
+/>
+
+The samples cover the vocabulary people actually use. Grouped by theme from their file names, they look like this:
+
+<DonutChart
+  title="What the 61 samples are about"
+  subtitle="Samples per theme, grouped by Sudaverse from the benchmark's file names"
+  data={[
+    { label: 'Places, nature and weather', value: 16 },
+    { label: 'Society and daily life', value: 15 },
+    { label: 'Everyday language and proverbs', value: 12 },
+    { label: 'Culture and celebration', value: 12 },
+    { label: 'Food and drink', value: 6 },
+  ]}
+  unit="samples"
+  center={{ value: '61', label: 'samples' }}
+  source="Sudanese Dialect Tokenizer Benchmark, samples/ at commit f0e69b9"
+  sourceHref="https://github.com/sudaverse/sudanese-dialect-tokenizer-benchmark/tree/f0e69b97f8e15690bcccbc4ba45c528ecc782720/samples"
+/>
+
+## Four tokenizers, four families
+
+The four tokenizers come from different design traditions, which matters for how they treat Arabic.
+
+<Hierarchy
+  label="The tokenizers in the benchmark, grouped by family"
+  nodes={[
+    { id: 'root', label: 'Subword tokenizers' },
+    { id: 'bbpe', label: 'Byte-level BPE', parents: ['root'] },
+    { id: 'sp', label: 'SentencePiece', parents: ['root'] },
+    { id: 'wp', label: 'WordPiece', parents: ['root'] },
+    { id: 'gpt4', label: 'GPT-4 (cl100k_base)', parents: ['bbpe'] },
+    { id: 'deepseek', label: 'DeepSeek LLM 7B', parents: ['bbpe'] },
+    { id: 'gemma', label: 'Gemma 7B', parents: ['sp'] },
+    { id: 'arabert', label: 'AraBERT v0.2', parents: ['wp'] },
+  ]}
+  caption="GPT-4 is counted with tiktoken's encoding for gpt-4; the others with their Hugging Face tokenizers, as in benchmark.py."
+/>
+
+Byte-level BPE works on raw bytes, so it never meets an unknown character, but an Arabic letter already takes two bytes in UTF-8, and a rare word falls apart into many merges. SentencePiece learns its pieces from raw text in the same way for every script. AraBERT's WordPiece vocabulary was built for Arabic, and that shows.
+
+## Tokens per word
+
+Dividing each tokenizer's total token count by the 853 words gives its fertility: how many tokens it spends on an average word of Sudanese dialect.
+
+<BarChart
+  title="Tokens per word on Sudanese dialect text"
+  subtitle="Total tokens across the 61 samples divided by 853 words. Lower means fewer, larger pieces."
+  data={[
+    { label: 'DeepSeek LLM 7B', note: 'Byte-level BPE', value: 5.00 },
+    { label: 'GPT-4 (cl100k_base)', note: 'Byte-level BPE', value: 4.43 },
+    { label: 'Gemma 7B', note: 'SentencePiece', value: 2.79 },
+    { label: 'AraBERT v0.2', note: 'WordPiece, Arabic vocabulary', value: 1.40 },
+  ]}
+  decimals={2}
+  unit="tokens per word"
+  valueLabel="Tokens per word"
+  source="Sudanese Dialect Tokenizer Benchmark, benchmark_results.csv at commit f0e69b9 (totals 4,263, 3,781, 2,383 and 1,193 tokens)"
+  sourceHref="https://github.com/sudaverse/sudanese-dialect-tokenizer-benchmark/blob/f0e69b97f8e15690bcccbc4ba45c528ecc782720/benchmark_results.csv"
+/>
+
+The spread is wide. The two byte-level BPE tokenizers spend between 4.4 and 5 tokens on an average Sudanese word, more than three times what the Arabic-specific vocabulary needs. Across individual samples, GPT-4's tokenizer used between 2.2 and 5 times as many tokens as AraBERT's for the same text.
+
+<Callout kind="caution" title="What this does and does not measure">
+Token counts measure efficiency, not quality. Fewer tokens is not automatically better: AraBERT is an encoder built for understanding tasks, not a generative model, and a vocabulary can also be too coarse. The benchmark is small, 61 short samples, and it counts tokens without special tokens. It shows the size of the gap, not a ranking of models.
+</Callout>
+
+## Why a dialect-specific tokenizer
+
+The gap is the motivation for [Sudanizer](/en/projects/sudanizer/), our byte-pair encoding tokenizer for Sudanese dialects, presented in *Sudanizer: A Dialect-Specific Byte-Pair Encoding Tokenizer for NLP Arabic* (IEEE FITAT 2026). The idea is simple: learn the vocabulary from Sudanese dialect text itself, so that distinctive words and expressions become whole tokens instead of fragments.
+
+Building a dialect-specific BPE tokenizer follows a well-known recipe. What changes is the text it learns from, and how carefully that text is prepared.
+
+<Steps
+  label="How a dialect-specific BPE tokenizer is built"
+  steps={[
+    { title: 'Collect', desc: 'Gather Sudanese dialect text, as people actually write it.' },
+    { title: 'Normalize', desc: 'Handle spelling variation, word forms and emoji consistently.' },
+    { title: 'Learn merges', desc: 'Learn byte-pair merges from the dialect text itself.' },
+    { title: 'Evaluate', desc: 'Measure tokens per word against the public benchmark.' },
+    { title: 'Use', desc: 'Feed language models and research on the dialect.' },
+  ]}
+  caption="The general recipe. Corpus preparation is the work behind our open LLMCorpusKit and Sudaverse Normalizer."
+/>
+
+Corpus preparation is where most of the effort goes. [LLMCorpusKit](/en/projects/llmcorpuskit/) cleans and repairs large Arabic corpora while keeping dialect vocabulary, and the Sudaverse Normalizer standardizes spelling without translating the dialect into Modern Standard Arabic. A tokenizer is only as good as the text it learned from.
+
+## Reproduce it
+
+Everything above can be rerun from the public repository: the samples are in `samples/`, the dataset in `dataset.json`, and `benchmark.py` produces the counts. Word counts here split each sample on whitespace. If you run the benchmark on other tokenizers or other Sudanese text, we would like to hear what you find.

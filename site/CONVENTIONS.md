@@ -19,7 +19,7 @@ Never commit, push, or edit files you do not own (see ownership in your brief).
 - Links: always `localePath(locale, 'products/terab')`; never hard-code `/en/`.
 - Arabic is native MSA copy, not a mirror. Brand and product names stay Latin: wrap in `translate="no"`. Emails, code, URLs inside Arabic text get `dir="ltr"` on their own element.
 - Use CSS logical properties only (`margin-inline`, `padding-block`, `inset-inline-start`, `text-align: start`, `border-inline-start`). No `left/right`, no `ml/mr`. Directional icons: `<Icon directional />` (mirrors in RTL).
-- Layout wrapper: `import Base from '@/layouts/Base.astro'` with props `title`, `description` (both per locale, unique per page), `nav` (`'products'|'solutions'|'research'|'company'|'resources'|'contact'`), optional `jsonLd` (array of schema.org objects), `image`, `noChat`.
+- Layout wrapper: `import Base from '@/layouts/Base.astro'` with props `title`, `description` (both per locale, unique per page), `nav` (`'home'|'projects'|'research'|'about'|'contact'`), optional `jsonLd` (array of schema.org objects), `image`, `noChat`.
 
 ## Design system (tokens live in `src/styles/tokens.css`; use only these)
 
@@ -56,11 +56,20 @@ One `h1` per page, ordered headings, each `section` has `aria-labelledby`, landm
 
 ## Images
 
-Photography goes through `astro:assets` (`<Picture>`/`<Image>`) from `src/assets/`, with `widths`, `sizes`, `loading="lazy"` below the fold, explicit alt. The legacy photos are LOW resolution (about 700px wide): use them only in constrained frames, never full-bleed. Team portraits: consistent crop and tone (see Company brief). The Company hero uses an owner-supplied illustration (generated, with mock product screens); it must keep its visible "Illustration" caption and must not be presented as the real team or real product screens. The R&D hero uses a cropped owner-supplied illustration (generated): the crop deliberately excludes the projected screen, which shows invented papers, journals and repositories with star counts. Never use the uncropped version, since Sudaverse has published no papers.
+Photography goes through `astro:assets` (`<Picture>`/`<Image>`) from `src/assets/`, with `widths`, `sizes`, `loading="lazy"` below the fold, explicit alt. The legacy photos are LOW resolution (about 700px wide): use them only in constrained frames, never full-bleed. Team portraits: consistent crop and tone (see Company brief). The Company hero uses an owner-supplied illustration (generated, with mock product screens); it must keep its visible "Illustration" caption and must not be presented as the real team or real product screens. The R&D hero uses a cropped owner-supplied illustration (generated): the crop deliberately excludes the projected screen, which shows invented papers, journals and repositories with star counts. Never use the uncropped version: its papers, journals and repositories are invented.
 
 ## Contact contract
 
 `/[lang]/contact/` accepts `?topic=product|institutional|research|data|integration|other` and `?product=<slug>` and pre-fills the topic and message. Anything that wants a conversation links there, e.g. `` `${localePath(locale,'contact')}?topic=product&product=terab` ``.
+
+## Site structure (owner direction, 2026-09-26)
+
+- Header: exactly three dropdowns, **Projects** (grouped by category), **Research** (Published papers, Artifacts, Directions) and **About** (Who we are, Mission and vision, Team). Same glass popover style.
+- Home: the services band (`src/data/services.ts`, `#services`) sits directly under the hero.
+- Every project page (`/projects/<slug>/`) follows the same four blocks: hero with logo, the problem and the approach, the animated user flow (`FlowDiagram`, data in `products.ts` `flow`), get involved.
+- Research: `research/papers/` (publications in `src/data/research.ts`: two IEEE FITAT 2026 papers), `research/artifacts/` (MDX in `src/content/artifacts/`, see `ARTIFACTS.md`), `research/directions/` (six directions, `HierarchyFlow` map).
+- Solutions, audience (`for/`), News and Resources pages were retired; their URLs redirect (`astro.config.mjs` and nginx).
+- Artifact charts: numbers only from a cited source; colours only from `--chart-1..5`.
 
 ## Report format
 

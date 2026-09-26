@@ -16,6 +16,8 @@ interface Config {
   locale: string;
   /** slug -> Latin product name, for ?product= prefill. */
   products: Record<string, string>;
+  /** service id -> localized service name, for ?service= prefill. */
+  services: Record<string, string>;
   /** topic key -> localized label, for ?topic= prefill and the email subject. */
   topics: Record<string, string>;
   text: {
@@ -28,6 +30,8 @@ interface Config {
     error: string;
     /** Contains a {product} placeholder. */
     prefillProduct: string;
+    /** Contains a {service} placeholder. */
+    prefillService: string;
     labels: { name: string; organization: string; email: string };
   };
 }
@@ -64,17 +68,22 @@ function init(form: HTMLFormElement) {
 
   let busy = false;
 
-  /* ---------- prefill from ?topic= and ?product= ---------- */
+  /* ---------- prefill from ?topic=, ?product= and ?service= ---------- */
   const params = new URLSearchParams(location.search);
   const topicParam = params.get('topic') ?? '';
   const productParam = params.get('product') ?? '';
+  const serviceParam = params.get('service') ?? '';
   const productName = Object.hasOwn(cfg.products, productParam) ? cfg.products[productParam] : '';
+  const serviceName = Object.hasOwn(cfg.services, serviceParam) ? cfg.services[serviceParam] : '';
   let topic = Object.hasOwn(cfg.topics, topicParam) ? topicParam : '';
   if (!topic && productName) topic = 'product';
+  if (!topic && serviceName) topic = 'services';
   if (topic) field('topic').value = topic;
   const message = field('message') as HTMLTextAreaElement;
   if (productName && !message.value.trim()) {
     message.value = cfg.text.prefillProduct.replace('{product}', productName);
+  } else if (serviceName && !message.value.trim()) {
+    message.value = cfg.text.prefillService.replace('{service}', serviceName);
   }
 
   /* ---------- validation ---------- */

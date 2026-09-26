@@ -10,8 +10,9 @@ import ProductPitch from '@/components/ProductPitch.astro';
 import StageBadge from '@/components/StageBadge.astro';
 import PipelineFlow from '@/components/flow/PipelineFlow';
 import { productBySlug, products } from '@/data/products';
-import { solutions } from '@/data/solutions';
-import { openWork, directions } from '@/data/research';
+import { artifactsFor } from '@/lib/artifacts';
+import { offerings } from '@/data/services';
+import { openWork, directions, publications } from '@/data/research';
 import { team } from '@/data/team';
 import { localePath, localeStaticPaths, t } from '@/i18n/utils';
 import { pick, type Locale } from '@/i18n/config';
@@ -47,27 +48,29 @@ const copy = {
       h2: 'Local context, engineering depth, applied research.',
       points: ['Arabic-first AI', 'Local and private deployment options', 'Applied AI engineering', 'Domain-specific systems', 'Research-driven development'],
     },
-    products: {
-      h2: 'Products',
-      lead: 'Every product below is live today.',
-      more: 'More from Sudaverse',
+    services: {
+      h2: 'What we do',
+      lead: 'From infrastructure to applied AI, Sudaverse works with institutions and companies along the whole path. Every engagement starts with a conversation about the problem.',
+      cta: 'Discuss your needs',
     },
-    solutions: {
-      h2: 'Problems we can help solve',
+    products: {
+      h2: 'Projects',
+      lead: 'Every project below is live today.',
+      more: 'More from Sudaverse',
     },
     eng: {
       h2: 'From raw text to a deployed model',
-      lead: 'The pipeline behind Sudaverse language products, from collection to deployment.',
-      more: 'See the capabilities behind each solution',
+      lead: 'The pipeline behind Sudaverse language projects, from collection to deployment.',
+      more: 'See the research directions behind it',
     },
     research: {
       h2: 'Research that becomes infrastructure.',
-      lead: 'Open tools and a benchmark on GitHub that feed directly into Sudaverse products.',
-      open: 'Open work',
+      lead: 'Peer-reviewed papers, open tools and six research directions that feed directly into Sudaverse projects.',
+      papers: 'Published papers',
+      allPapers: 'All papers',
       dir: 'Research directions',
-      dirNote: 'Directions under investigation. Not yet published.',
-      license: 'License',
-      repo: 'View on GitHub',
+      allDir: 'Explore the directions',
+      artifact: 'Latest artifact',
     },
     company: 'Sudanese-founded. Globally connected. Building technology around local realities.',
     cta: {
@@ -92,27 +95,29 @@ const copy = {
       h2: 'سياق محلي وعمق هندسي وبحث تطبيقي.',
       points: ['ذكاء اصطناعي عربي أولاً', 'خيارات نشر محلية وخاصة', 'هندسة ذكاء اصطناعي تطبيقي', 'أنظمة متخصصة بالمجال', 'تطوير مدفوع بالبحث'],
     },
-    products: {
-      h2: 'المنتجات',
-      lead: 'كل المنتجات أدناه متاحة اليوم.',
-      more: 'المزيد من سودافيرس',
+    services: {
+      h2: 'ما نقدّمه',
+      lead: 'من البنية التحتية إلى الذكاء الاصطناعي التطبيقي، تعمل سودافيرس مع المؤسسات والشركات على امتداد الطريق كله. ويبدأ كل تعاون بحديث عن المشكلة.',
+      cta: 'ناقش احتياجاتك',
     },
-    solutions: {
-      h2: 'مشكلات نساعد في حلّها',
+    products: {
+      h2: 'المشاريع',
+      lead: 'كل المشاريع أدناه متاحة اليوم.',
+      more: 'المزيد من سودافيرس',
     },
     eng: {
       h2: 'من النص الخام إلى نموذج منشور',
-      lead: 'خط المعالجة وراء منتجات سودافيرس اللغوية، من الجمع حتى النشر.',
-      more: 'اطلع على القدرات الداعمة لكل حل',
+      lead: 'خط المعالجة وراء مشاريع سودافيرس اللغوية، من الجمع حتى النشر.',
+      more: 'اطلع على الاتجاهات البحثية وراءه',
     },
     research: {
       h2: 'بحث يتحول إلى بنية تحتية.',
-      lead: 'أدوات ومعيار قياس مفتوحة على GitHub تغذّي منتجات سودافيرس مباشرة.',
-      open: 'أعمال مفتوحة',
-      dir: 'اتجاهات بحثية',
-      dirNote: 'اتجاهات قيد الاستكشاف. لم تُنشر بعد.',
-      license: 'الترخيص',
-      repo: 'عرض على GitHub',
+      lead: 'أوراق محكّمة وأدوات مفتوحة وستة اتجاهات بحثية تغذّي مشاريع سودافيرس مباشرة.',
+      papers: 'الأوراق المنشورة',
+      allPapers: 'كل الأوراق',
+      dir: 'الاتجاهات البحثية',
+      allDir: 'استكشف الاتجاهات',
+      artifact: 'أحدث مقال تقني',
     },
     company: 'تأسست في السودان. متصلة بالعالم. تبني التقنية حول الواقع المحلي.',
     cta: {
@@ -133,8 +138,11 @@ const counts: Counts = {
   dev: products.filter((p) => p.stage === 'development').length,
   repos: openWork.length,
 };
-const productsHref = localePath(locale, 'products');
+const productsHref = localePath(locale, 'projects');
 const contactHref = localePath(locale, 'contact');
+const servicesHref = `${contactHref}?topic=services`;
+const latestArtifact = (await artifactsFor(locale))[0]?.entry;
+const artifactHref = latestArtifact ? localePath(locale, `research/artifacts/${latestArtifact.data.permalink}`) : '';
 ---
 
 <Base title={copy.title} description={copy.description} nav="home">
@@ -145,7 +153,7 @@ const contactHref = localePath(locale, 'contact');
         <h1 id="hero-h">{copy.hero.h1[0]}<span class="hero__accent">{copy.hero.h1[1]}</span>{copy.hero.h1[2]}</h1>
         <p class="t-lead hero__lead">{copy.hero.lead}</p>
         <div class="cluster hero__cta">
-          <Button href={productsHref} variant="primary" arrow>{t(locale, 'cta.exploreProducts')}</Button>
+          <Button href={productsHref} variant="primary" arrow>{t(locale, 'cta.exploreProjects')}</Button>
           <Button href={contactHref} variant="secondary">{t(locale, 'cta.talkToSudaverse')}</Button>
         </div>
         <a class="textlink" href={localePath(locale, 'research')}>
@@ -159,13 +167,42 @@ const contactHref = localePath(locale, 'contact');
     </div>
   </section>
 
+  <!-- 1a. Services at a glance -->
+  <section class="svc" id="services" aria-labelledby="svc-h">
+    <div class="container svc__grid">
+      <div class="svc__head" data-reveal>
+        <h2 id="svc-h">{copy.services.h2}</h2>
+        <p class="t-lead">{copy.services.lead}</p>
+        <Button href={servicesHref} variant="secondary" arrow>{copy.services.cta}</Button>
+      </div>
+      <ul role="list" class="svc__list" data-reveal>
+        {
+          offerings.map((o, i) => (
+            <li>
+              <a class="svc__row" href={`${servicesHref}&service=${o.id}`}>
+                <span class="svc__icon" data-tone={i % 3}>
+                  <Icon name={o.icon} size={22} />
+                </span>
+                <span class="svc__text">
+                  <span class="svc__name">{L(o.name)}</span>
+                  <span class="svc__sum">{L(o.summary)}</span>
+                </span>
+                <Icon name="arrow" size={18} directional class="svc__arrow" />
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
   <!-- 1b. Company statement and what sets the work apart, in one band (every number is counted from data) -->
   <section class="about" aria-label={copy.about.label}>
     <div class="container about__grid">
       <div class="about__main">
         <p class="about__lead">{copy.company}</p>
         <p class="about__detail">{copy.about.detail(counts)}</p>
-        <a class="textlink" href={localePath(locale, 'company')}>
+        <a class="textlink" href={`${localePath(locale, 'about')}#team`}>
           {t(locale, 'cta.meetTeam')}
           <Icon name="arrow" size={18} directional />
         </a>
@@ -239,7 +276,7 @@ const contactHref = localePath(locale, 'contact');
         {
           more.map((p) => (
             <li>
-              <a class="more__row" href={localePath(locale, `products/${p.slug}`)}>
+              <a class="more__row" href={localePath(locale, `projects/${p.slug}`)}>
                 <span class="more__logo" aria-hidden="true">{p.logo && <Image src={p.logo} alt="" width={120} loading="lazy" />}</span>
                 <span class="more__name" translate="no">{p.name}</span>
                 <span class="more__tag">{L(p.tagline)}</span>
@@ -250,29 +287,7 @@ const contactHref = localePath(locale, 'contact');
           ))
         }
       </ul>
-      <p class="more__all"><a class="textlink" href={productsHref}>{t(locale, 'cta.seeAllProducts')}<Icon name="arrow" size={18} directional /></a></p>
-    </div>
-  </section>
-
-  <!-- 4. Solutions: titles only, with the link to all of them under the table -->
-  <section class="section section--alt" aria-labelledby="solutions-h">
-    <div class="container">
-      <div class="head" data-reveal>
-        <h2 id="solutions-h">{copy.solutions.h2}</h2>
-      </div>
-      <ul role="list" class="sol" data-reveal>
-        {
-          solutions.map((s) => (
-            <li>
-              <a class="sol__row" href={`${localePath(locale, 'solutions')}#${s.slug}`}>
-                <span class="sol__title">{L(s.title)}</span>
-                <Icon name="arrow" size={20} directional class="sol__arrow" />
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-      <p class="head__cta"><Button href={localePath(locale, 'solutions')} variant="secondary" arrow>{t(locale, 'cta.seeAllSolutions')}</Button></p>
+      <p class="more__all"><a class="textlink" href={productsHref}>{t(locale, 'cta.seeAllProjects')}<Icon name="arrow" size={18} directional /></a></p>
     </div>
   </section>
 
@@ -287,7 +302,7 @@ const contactHref = localePath(locale, 'contact');
         <PipelineFlow client:visible locale={locale} />
       </div>
       <p class="head__cta">
-        <a class="textlink" href={localePath(locale, 'solutions')}>
+        <a class="textlink" href={localePath(locale, 'research/directions')}>
           {copy.eng.more}
           <Icon name="arrow" size={18} directional />
         </a>
@@ -304,34 +319,52 @@ const contactHref = localePath(locale, 'contact');
       </div>
       <div class="res">
         <div class="res__open" data-reveal>
-          <h3 class="res__h">{copy.research.open}</h3>
+          <h3 class="res__h">{copy.research.papers}</h3>
           <ul role="list" class="res__list">
             {
-              openWork.map((w) => (
+              publications.map((p) => (
                 <li class="res__item">
-                  <div class="res__meta">
-                    <span class="res__kind t-meta">{L(w.kind)}</span>
-                    {w.license && <span class="res__lic t-meta">{copy.research.license}: {w.license}</span>}
-                  </div>
-                  <h4 class="res__name" translate="no">{w.name}</h4>
-                  <a class="textlink" href={w.href} target="_blank" rel="noopener noreferrer">
-                    {copy.research.repo}
-                    <Icon name="external" size={16} />
-                    <span class="sr-only"> ({t(locale, 'a11y.external')})</span>
+                  <p class="res__meta t-meta">
+                    <span translate="no">{p.venue}</span>
+                  </p>
+                  <h4 class="res__name" translate="no">{p.title}</h4>
+                  <p class="res__sum">{L(p.summary)}</p>
+                </li>
+              ))
+            }
+          </ul>
+          <a class="textlink" href={localePath(locale, 'research/papers')}>
+            {copy.research.allPapers}
+            <Icon name="arrow" size={18} directional />
+          </a>
+          {
+            latestArtifact && (
+              <div class="res__art">
+                <h3 class="res__h">{copy.research.artifact}</h3>
+                <a class="art__row" href={artifactHref} lang={latestArtifact.data.lang} dir={latestArtifact.data.lang === 'ar' ? 'rtl' : 'ltr'}>
+                  <span class="art__title">{latestArtifact.data.title}</span>
+                  <span class="art__sum">{latestArtifact.data.summary}</span>
+                </a>
+              </div>
+            )
+          }
+        </div>
+        <div class="res__dir" data-reveal>
+          <h3 class="res__h">{copy.research.dir}</h3>
+          <ul role="list" class="dir">
+            {
+              directions.map((d) => (
+                <li>
+                  <a class="dir__row" href={`${localePath(locale, 'research/directions')}#${d.id}`} style={`--c:${d.color}`}>
+                    <span class="dir__dot" aria-hidden="true" />
+                    <span class="dir__t">{L(d.title)}</span>
                   </a>
                 </li>
               ))
             }
           </ul>
-        </div>
-        <div class="res__dir" data-reveal>
-          <h3 class="res__h">{copy.research.dir}</h3>
-          <p class="t-small t-muted">{copy.research.dirNote}</p>
-          <ul role="list" class="dir">
-            {directions.map((d) => <li><span class="dir__t">{L(d.title)}</span></li>)}
-          </ul>
-          <a class="textlink" href={localePath(locale, 'research')}>
-            {t(locale, 'cta.researchEngineering')}
+          <a class="textlink" href={localePath(locale, 'research/directions')}>
+            {copy.research.allDir}
             <Icon name="arrow" size={18} directional />
           </a>
         </div>
@@ -347,7 +380,7 @@ const contactHref = localePath(locale, 'contact');
       <p class="t-lead cta__body">{copy.cta.body}</p>
       <div class="cluster">
         <Button href={contactHref} variant="light" arrow>{t(locale, 'cta.talk')}</Button>
-        <Button href={productsHref} variant="outline-deep">{t(locale, 'cta.exploreProducts')}</Button>
+        <Button href={productsHref} variant="outline-deep">{t(locale, 'cta.exploreProjects')}</Button>
       </div>
     </div>
   </section>
@@ -434,9 +467,138 @@ const contactHref = localePath(locale, 'contact');
     }
   }
 
+  /* ---- Services ---- */
+  .svc {
+    padding-block: var(--section-y-tight);
+    background: var(--color-bg-alt);
+  }
+  .svc__grid {
+    display: grid;
+    gap: var(--s-7);
+  }
+  .svc__head {
+    display: grid;
+    gap: var(--s-4);
+    align-content: start;
+    justify-items: start;
+  }
+  .svc__head h2 {
+    max-inline-size: 14ch;
+  }
+  .svc__list {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .svc__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--s-4);
+    block-size: 100%;
+    padding-block: var(--s-5);
+    padding-inline: var(--s-1);
+    border-block-end: 1px solid var(--color-border-strong);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  /* A copper hairline draws in along the row's lower edge on hover and focus. */
+  .svc__row::after {
+    content: '';
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: -1px;
+    block-size: 1px;
+    background: var(--color-accent-thread);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  [dir='rtl'] .svc__row::after {
+    transform-origin: right;
+  }
+  .svc__row:hover::after,
+  .svc__row:focus-visible::after {
+    transform: scaleX(1);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .svc__row::after {
+      transition: transform var(--dur-4) var(--ease-out);
+    }
+    .svc__row :global(.svc__arrow) {
+      transition: translate var(--dur-3) var(--ease-out), color var(--dur-2) var(--ease-out);
+    }
+  }
+  .svc__row:hover {
+    color: var(--ink);
+  }
+  .svc__icon {
+    display: grid;
+    place-items: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    border-radius: var(--radius-2);
+    background: color-mix(in srgb, var(--brand-blue) 16%, var(--white));
+    color: var(--brand-blue-700);
+  }
+  .svc__icon[data-tone='1'] {
+    background: color-mix(in srgb, var(--brand-green) 18%, var(--white));
+    color: var(--brand-green-700);
+  }
+  .svc__icon[data-tone='2'] {
+    background: var(--nile-100);
+    color: var(--nile-800);
+  }
+  .svc__text {
+    display: grid;
+    gap: var(--s-1);
+    min-inline-size: 0;
+  }
+  .svc__name {
+    font-size: var(--fs-400);
+    font-weight: 650;
+    line-height: var(--lh-snug);
+    letter-spacing: var(--tracking-h3);
+  }
+  .svc__sum {
+    font-size: var(--fs-200);
+    line-height: 1.55;
+    color: var(--color-text-muted);
+  }
+  .svc__row :global(.svc__arrow) {
+    margin-block-start: 0.35rem;
+    color: var(--color-text-meta);
+  }
+  .svc__row:hover :global(.svc__arrow),
+  .svc__row:focus-visible :global(.svc__arrow) {
+    color: var(--copper-700);
+    translate: 0.2rem 0;
+  }
+  [dir='rtl'] .svc__row:hover :global(.svc__arrow),
+  [dir='rtl'] .svc__row:focus-visible :global(.svc__arrow) {
+    translate: -0.2rem 0;
+  }
+  @media (min-width: 48rem) {
+    .svc__list {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: var(--s-7);
+    }
+  }
+  @media (min-width: 64rem) {
+    .svc__grid {
+      grid-template-columns: minmax(0, 4fr) minmax(0, 8fr);
+      gap: var(--s-8);
+    }
+    .svc__head {
+      position: sticky;
+      inset-block-start: calc(var(--header-h) + var(--s-6));
+    }
+  }
+
   /* ---- Company statement and what sets the work apart ---- */
   .about {
-    padding-block: 0 var(--section-y-tight);
+    padding-block: var(--section-y-tight);
   }
   .about__grid {
     display: grid;
@@ -648,44 +810,6 @@ const contactHref = localePath(locale, 'contact');
     max-inline-size: none;
   }
 
-  /* ---- Solutions ---- */
-  .sol {
-    padding: 0;
-    border-block-start: 1px solid var(--color-border-strong);
-  }
-  .sol__row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: var(--s-4);
-    min-block-size: 3.5rem;
-    padding-block: var(--s-3);
-    border-block-end: 1px solid var(--color-border-strong);
-    color: var(--ink);
-    text-decoration: none;
-  }
-  .sol__row:hover {
-    background: color-mix(in srgb, var(--paper) 60%, transparent);
-    color: var(--ink);
-  }
-  .sol__title {
-    font-size: var(--fs-400);
-    font-weight: 620;
-    line-height: var(--lh-snug);
-    letter-spacing: var(--tracking-h3);
-  }
-  .sol__row :global(.sol__arrow) {
-    flex: none;
-    color: var(--nile-700);
-  }
-  @media (min-width: 48rem) {
-    .sol {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      column-gap: var(--s-8);
-    }
-  }
-
   /* ---- Engineering ---- */
   .flow {
     margin-block-start: var(--s-6);
@@ -722,6 +846,37 @@ const contactHref = localePath(locale, 'contact');
     font-size: var(--fs-500);
     font-weight: 650;
   }
+  .res__sum {
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+  }
+  .res__open > .textlink {
+    margin-block-start: var(--s-3);
+  }
+  .res__art {
+    margin-block-start: var(--s-7);
+  }
+  .art__row {
+    display: grid;
+    gap: var(--s-2);
+    padding-block: var(--s-5);
+    border-block: 1px solid var(--color-border-strong);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .art__row:hover .art__title {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .art__title {
+    font-size: var(--fs-500);
+    font-weight: 650;
+    line-height: var(--lh-snug);
+  }
+  .art__sum {
+    color: var(--color-text-muted);
+    font-size: var(--fs-200);
+  }
   .dir {
     display: grid;
     gap: 0;
@@ -729,9 +884,26 @@ const contactHref = localePath(locale, 'contact');
     margin-block: var(--s-4);
     border-block-start: 1px solid var(--color-border-strong);
   }
-  .dir li {
+  .dir__row {
+    display: flex;
+    align-items: center;
+    gap: var(--s-3);
+    min-block-size: 3rem;
     padding-block: var(--s-3);
     border-block-end: 1px solid var(--color-border);
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .dir__row:hover .dir__t {
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+  }
+  .dir__dot {
+    flex: none;
+    inline-size: 0.625rem;
+    block-size: 0.625rem;
+    border-radius: 50%;
+    background: var(--c);
   }
   .dir__t {
     font-weight: 560;

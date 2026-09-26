@@ -1,0 +1,261 @@
+---
+/** Artifacts index: newest first, filterable by research direction (links work without JavaScript). */
+import Base from '@/layouts/Base.astro';
+import Crumbs from '@/components/docs/Crumbs.astro';
+import { artifactsFor, readingMinutes } from '@/lib/artifacts';
+import { directions, directionById } from '@/data/research';
+import { site } from '@/config/site';
+import { localePath, localeStaticPaths, t } from '@/i18n/utils';
+import { pick, type Locale } from '@/i18n/config';
+
+export function getStaticPaths() {
+  return localeStaticPaths();
+}
+const locale = Astro.params.lang as Locale;
+const copy = {
+  en: {
+    title: 'Artifacts: technical write-ups | Sudaverse',
+    description: 'Long technical write-ups from the Sudaverse team, with data, diagrams and code: benchmarks, system design and what the research shows.',
+    h1: 'Artifacts',
+    lead: 'Long technical write-ups from the team, with the data, diagrams and code behind them. Every number in a chart comes from a cited source.',
+    all: 'All directions',
+    min: (n: number) => `${n} min read`,
+    inLang: { en: 'In English', ar: 'بالعربية' },
+    empty: 'No artifacts in this direction yet.',
+    filter: 'Filter by direction',
+  },
+  ar: {
+    title: 'مقالات تقنية | سودافيرس',
+    description: 'كتابات تقنية مطوّلة من فريق سودافيرس بالبيانات والمخططات والشيفرة: معايير قياس، وتصميم أنظمة، وما يكشفه البحث.',
+    h1: 'مقالات تقنية',
+    lead: 'كتابات تقنية مطوّلة من الفريق، مع البيانات والمخططات والشيفرة التي تقف خلفها. كل رقم في مخطط مأخوذ من مصدر مذكور.',
+    all: 'كل الاتجاهات',
+    min: (n: number) => `${n} دقيقة قراءة`,
+    inLang: { en: 'In English', ar: 'بالعربية' },
+    empty: 'لا توجد مقالات في هذا الاتجاه بعد.',
+    filter: 'تصفية حسب الاتجاه',
+  },
+}[locale];
+
+const items = await artifactsFor(locale);
+const used = directions.filter((d) => items.some((i) => i.entry.data.direction === d.id));
+const date = (d: Date, l: string) => d.toLocaleDateString(l === 'ar' ? 'ar-u-nu-latn' : 'en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: t(locale, 'misc.home'), item: `${site.origin}${localePath(locale)}` },
+      { '@type': 'ListItem', position: 2, name: t(locale, 'nav.research'), item: `${site.origin}${localePath(locale, 'research')}` },
+      { '@type': 'ListItem', position: 3, name: copy.h1, item: `${site.origin}${localePath(locale, 'research/artifacts')}` },
+    ],
+  },
+];
+---
+
+<Base title={copy.title} description={copy.description} nav="research" jsonLd={jsonLd}>
+  <section class="head" aria-labelledby="art-h">
+    <div class="container">
+      <Crumbs locale={locale} items={[{ label: t(locale, 'nav.research'), href: localePath(locale, 'research') }, { label: copy.h1 }]} />
+      <div class="head__text">
+        <h1 id="art-h">{copy.h1}</h1>
+        <p class="t-lead">{copy.lead}</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--tight list" aria-labelledby="art-h">
+    <div class="container">
+      {
+        used.length > 1 && (
+          <nav class="filters" aria-label={copy.filter} data-filters>
+            <a href="#" class="f is-on" data-f="">{copy.all}</a>
+            {used.map((d) => (
+              <a href={`#${d.id}`} class="f" data-f={d.id} style={`--c:${d.color}`}>
+                <span class="f__dot" aria-hidden="true" />
+                {pick(d.short, locale)}
+              </a>
+            ))}
+          </nav>
+        )
+      }
+      <ol role="list" class="arts">
+        {
+          items.map(({ entry, translated }) => {
+            const d = directionById(entry.data.direction)!;
+            const l = entry.data.lang;
+            return (
+              <li class="art" data-dir={d.id} data-reveal>
+                <p class="art__meta">
+                  <time datetime={entry.data.date.toISOString().slice(0, 10)}>{date(entry.data.date, locale)}</time>
+                  <span class="art__dir" style={`--c:${d.color}`}><span class="f__dot" aria-hidden="true" />{pick(d.short, locale)}</span>
+                  <span>{copy.min(readingMinutes(entry))}</span>
+                  {!translated && <span class="art__lang">{copy.inLang[l]}</span>}
+                </p>
+                <h2 class="art__t" lang={l} dir={l === 'ar' ? 'rtl' : 'ltr'}>
+                  <a href={localePath(locale, `research/artifacts/${entry.data.permalink}`)}>{entry.data.title}</a>
+                </h2>
+                <p class="art__sum" lang={l} dir={l === 'ar' ? 'rtl' : 'ltr'}>{entry.data.summary}</p>
+                {entry.data.tags.length > 0 && (
+                  <ul role="list" class="art__tags" lang={l}>
+                    {entry.data.tags.map((tg) => <li>{tg}</li>)}
+                  </ul>
+                )}
+              </li>
+            );
+          })
+        }
+      </ol>
+      <p class="empty" hidden data-empty>{copy.empty}</p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .head {
+    padding-block: var(--s-4) var(--s-5);
+  }
+  .head__text {
+    display: grid;
+    gap: var(--s-4);
+    margin-block-start: var(--s-5);
+  }
+  .list {
+    padding-block-start: var(--s-5);
+  }
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin-block-end: var(--s-6);
+  }
+  .f {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    min-block-size: 2.5rem;
+    padding-inline: var(--s-4);
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-200);
+    font-weight: 600;
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .f:hover {
+    background: var(--paper-2);
+    color: var(--ink);
+  }
+  .f.is-on {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper);
+  }
+  .f__dot {
+    display: inline-block;
+    inline-size: 0.55rem;
+    block-size: 0.55rem;
+    border-radius: 50%;
+    background: var(--c);
+  }
+  .arts {
+    margin: 0;
+    padding: 0;
+    border-block-start: 1px solid var(--color-border-strong);
+  }
+  .art {
+    display: grid;
+    gap: var(--s-3);
+    padding-block: var(--s-6);
+    border-block-end: 1px solid var(--color-border);
+  }
+  .art[hidden] {
+    display: none;
+  }
+  .art__meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--s-1) var(--s-4);
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+    max-inline-size: none;
+  }
+  .art__dir {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--s-2);
+    font-weight: 620;
+    color: var(--color-text-muted);
+  }
+  .art__lang {
+    padding: 0.1rem 0.55rem;
+    border-radius: var(--radius-pill);
+    background: var(--color-stage-dev-bg);
+    color: var(--color-stage-dev);
+    font-weight: 650;
+  }
+  .art__t {
+    font-size: var(--fs-600);
+    max-inline-size: 28ch;
+  }
+  .art__t a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+  .art__t a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.15em;
+  }
+  .art__sum {
+    font-size: var(--fs-400);
+    color: var(--color-text-muted);
+  }
+  .art__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin: 0;
+    padding: 0;
+  }
+  .art__tags li {
+    padding: 0.15rem 0.6rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-pill);
+    font-size: var(--fs-100);
+    color: var(--color-text-muted);
+  }
+</style>
+
+<script>
+  // Direction filter: progressive enhancement over plain anchor links. Nothing moves.
+  const nav = document.querySelector<HTMLElement>('[data-filters]');
+  if (nav) {
+    const chips = [...nav.querySelectorAll<HTMLAnchorElement>('[data-f]')];
+    const rows = [...document.querySelectorAll<HTMLElement>('.art[data-dir]')];
+    const empty = document.querySelector<HTMLElement>('[data-empty]');
+    const apply = (id: string) => {
+      chips.forEach((c) => {
+        const on = c.dataset.f === id;
+        c.classList.toggle('is-on', on);
+        if (on) c.setAttribute('aria-current', 'true');
+        else c.removeAttribute('aria-current');
+      });
+      let shown = 0;
+      rows.forEach((r) => {
+        r.hidden = Boolean(id) && r.dataset.dir !== id;
+        if (!r.hidden) shown++;
+      });
+      if (empty) empty.hidden = shown > 0;
+    };
+    chips.forEach((c) =>
+      c.addEventListener('click', (e) => {
+        e.preventDefault();
+        apply(c.dataset.f ?? '');
+        history.replaceState(null, '', c.dataset.f ? `#${c.dataset.f}` : location.pathname);
+      }),
+    );
+    apply(location.hash.slice(1));
+  }
+</script>

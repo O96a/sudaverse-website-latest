@@ -1,0 +1,44 @@
+---
+# Copy this file to src/content/artifacts/en/<your-slug>.mdx (or ar/), or run: npm run new:artifact -- "Title"
+# Files that start with _ never build.
+title: 'A clear, specific title'
+summary: 'One or two sentences, 40 to 320 characters: what the reader will learn and why it matters.'
+permalink: my-artifact
+lang: en
+date: 2026-01-01
+authors: [aamer-mihaysi]
+direction: arabic-nlp
+projects: []
+tags: []
+draft: true
+---
+
+Open with the question the artifact answers, in plain words.
+
+## A section
+
+Prose in Markdown. Every chart needs a real, cited source.
+
+<Stats items={[{ value: '61', label: 'samples' }, { value: '4', label: 'tokenizers' }]} source="Where the numbers come from" sourceHref="https://..." />
+
+<BarChart
+  title="Chart title"
+  subtitle="What is measured, and how"
+  data={[{ label: 'A', value: 4.4 }, { label: 'B', value: 1.4 }]}
+  decimals={1}
+  unit="tokens per word"
+  source="Where the numbers come from"
+/>
+
+<DonutChart title="Part of a whole" data={[{ label: 'A', value: 12 }, { label: 'B', value: 6 }]} center={{ value: '18', label: 'items' }} source="Where the numbers come from" />
+
+<Hierarchy label="What the diagram shows" nodes={[{ id: 'root', label: 'Root' }, { id: 'a', label: 'Child A', parents: ['root'] }, { id: 'b', label: 'Child B', parents: ['root'] }]} />
+
+<Steps label="What the flow shows" steps={[{ title: 'One', desc: 'First step.' }, { title: 'Two', desc: 'Second step.' }, { title: 'Three', desc: 'Third step.' }]} />
+
+<Callout kind="note" title="Optional title">A short aside.</Callout>
+
+```bash
+# Code blocks use normal Markdown fences.
+npm run build
+```

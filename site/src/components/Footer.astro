@@ -3,10 +3,9 @@ import Logo from './Logo.astro';
 import LangSwitch from './LangSwitch.astro';
 import Icon from './Icon.astro';
 import { products } from '@/data/products';
-import { solutions } from '@/data/solutions';
 import { site } from '@/config/site';
 import { localePath, t } from '@/i18n/utils';
-import { pick, type Locale } from '@/i18n/config';
+import type { Locale } from '@/i18n/config';
 
 interface Props {
   locale: Locale;
@@ -14,15 +13,18 @@ interface Props {
 const { locale } = Astro.props;
 const year = new Date().getFullYear();
 
-const company = [
-  { label: t(locale, 'nav.company'), href: localePath(locale, 'company') },
-  { label: t(locale, 'nav.audience'), href: localePath(locale, 'for') },
-  { label: t(locale, 'nav.news'), href: localePath(locale, 'news') },
-  { label: t(locale, 'nav.rd'), href: localePath(locale, 'research') },
-  { label: t(locale, 'nav.published'), href: localePath(locale, 'research/published') },
-  { label: t(locale, 'nav.resources'), href: localePath(locale, 'resources') },
-  { label: t(locale, 'nav.documentation'), href: localePath(locale, 'resources/documentation') },
-  { label: t(locale, 'nav.faq'), href: localePath(locale, 'resources/faq') },
+const aboutHref = localePath(locale, 'about');
+const research = [
+  { label: t(locale, 'nav.researchHub'), href: localePath(locale, 'research') },
+  { label: t(locale, 'nav.papers'), href: localePath(locale, 'research/papers') },
+  { label: t(locale, 'nav.artifacts'), href: localePath(locale, 'research/artifacts') },
+  { label: t(locale, 'nav.directions'), href: localePath(locale, 'research/directions') },
+];
+const about = [
+  { label: t(locale, 'nav.who'), href: `${aboutHref}#who` },
+  { label: t(locale, 'nav.mission'), href: `${aboutHref}#mission` },
+  { label: t(locale, 'nav.team'), href: `${aboutHref}#team` },
+  { label: t(locale, 'nav.services'), href: `${localePath(locale)}#services` },
   { label: t(locale, 'nav.contact'), href: localePath(locale, 'contact') },
 ];
 const social = [
@@ -49,13 +51,13 @@ const social = [
         </a>
       </div>
 
-      <nav aria-label={t(locale, 'nav.products')}>
-        <h2>{t(locale, 'nav.products')}</h2>
+      <nav aria-label={t(locale, 'nav.projects')}>
+        <h2>{t(locale, 'nav.projects')}</h2>
         <ul role="list">
           {
             products.map((p) => (
               <li>
-                <a href={localePath(locale, `products/${p.slug}`)} translate="no">
+                <a href={localePath(locale, `projects/${p.slug}`)} translate="no">
                   {p.name}
                 </a>
               </li>
@@ -64,23 +66,17 @@ const social = [
         </ul>
       </nav>
 
-      <nav aria-label={t(locale, 'nav.solutions')}>
-        <h2>{t(locale, 'nav.solutions')}</h2>
+      <nav aria-label={t(locale, 'nav.research')}>
+        <h2>{t(locale, 'nav.research')}</h2>
         <ul role="list">
-          {
-            solutions.map((s) => (
-              <li>
-                <a href={`${localePath(locale, 'solutions')}#${s.slug}`}>{pick(s.title, locale)}</a>
-              </li>
-            ))
-          }
+          {research.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
         </ul>
       </nav>
 
-      <nav aria-label={t(locale, 'nav.company')}>
-        <h2>{t(locale, 'nav.company')}</h2>
+      <nav aria-label={t(locale, 'nav.about')}>
+        <h2>{t(locale, 'nav.about')}</h2>
         <ul role="list">
-          {company.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+          {about.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
         </ul>
       </nav>
     </div>
@@ -124,7 +120,7 @@ const social = [
   }
   @media (min-width: 64rem) {
     .grid {
-      grid-template-columns: 1.4fr 1fr 1.3fr 1fr;
+      grid-template-columns: 1.4fr 1fr 1.1fr 1fr;
     }
     .brandcol {
       grid-column: auto;

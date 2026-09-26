@@ -1,0 +1,58 @@
+/*
+ * Hierarchy diagram (React Flow). Shares the card, wire and control styles of pipeline.css (.pf, .pf-card,
+ * .pf-wire, .pf__pause); this file adds the reserved box and the title-only card.
+ */
+.hf__box {
+  position: relative;
+  inline-size: 100%;
+  aspect-ratio: var(--hf-ar-wide);
+}
+.pf.hf[data-layout='narrow'] .hf__box {
+  aspect-ratio: var(--hf-ar-narrow);
+  max-inline-size: 26rem;
+  margin-inline: auto;
+}
+/* Before mount the container query picks the layout, per width bucket (HIER_BUCKETS in hierarchy-layout.ts). */
+@container pf (max-width: 35.99rem) { .pf.hf[data-min='36']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 43.99rem) { .pf.hf[data-min='44']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 51.99rem) { .pf.hf[data-min='52']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 59.99rem) { .pf.hf[data-min='60']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 67.99rem) { .pf.hf[data-min='68']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 75.99rem) { .pf.hf[data-min='76']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+@container pf (max-width: 83.99rem) { .pf.hf[data-min='84']:not([data-layout]) .hf__box { aspect-ratio: var(--hf-ar-narrow); max-inline-size: 26rem; margin-inline: auto; } }
+
+.hf-node {
+  inline-size: 100%;
+  block-size: 100%;
+}
+.hf-card--title .hf-card__head {
+  block-size: 100%;
+  border-block-end: 0;
+}
+.hf-card__head {
+  white-space: nowrap;
+}
+.hf-link {
+  color: var(--ink);
+  text-decoration: none;
+}
+/* Stretched link: the whole card is the target. */
+.hf-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+}
+.hf-card.has-link {
+  cursor: pointer;
+}
+.hf-card.has-link:hover .hf-link {
+  text-decoration: underline;
+  text-underline-offset: 0.22em;
+}
+.hf-link:focus-visible {
+  outline: none;
+}
+.hf-card:has(.hf-link:focus-visible) {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}

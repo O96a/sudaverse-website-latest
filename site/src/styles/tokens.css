@@ -58,6 +58,17 @@
     --viz-gold: #c08a1e;
     --viz-copper: #b25a2c;
 
+    /* Categorical chart slots for Artifacts (assigned in this order, never cycled; a 6th series folds into
+       "Other" in --chart-other). Validated with the dataviz palette checks on the paper surface, first and
+       last slot adjacent (donut): lightness band, chroma floor, CVD separation 18.3 (deutan), normal-vision
+       floor 25.3. Slots 1, 2 and 4 sit under 3:1 on paper, so every chart shows direct labels and a table. */
+    --chart-1: var(--viz-sky);
+    --chart-2: var(--viz-gold);
+    --chart-3: var(--viz-navy);
+    --chart-4: var(--brand-green);
+    --chart-5: var(--copper-700);
+    --chart-other: var(--line-strong);
+
     --red-700: #a3241b;
     --white: #ffffff;
 

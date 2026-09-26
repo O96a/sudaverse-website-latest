@@ -1,0 +1,35 @@
+---
+/**
+ * An animated step flow inside an artifact (same component as the project user flows): 3 to 7 steps in the
+ * artifact's language.
+ * <Steps label="How the tokenizer is trained" steps={[{ title: 'Collect', desc: '...' }, ...]} caption="..." />
+ */
+import FlowDiagram from '@/components/flow/FlowDiagram';
+import type { FlowStepData } from '@/components/flow/flow-layout';
+import { vizLocale } from './viz-text';
+
+interface Props {
+  label: string;
+  steps: { title: string; desc: string }[];
+  caption?: string;
+}
+const { label, steps, caption } = Astro.props;
+const locale = vizLocale(Astro.params.lang);
+const data: FlowStepData[] = steps.map((s, i) => ({ id: `s${i}`, title: { en: s.title, ar: s.title }, desc: { en: s.desc, ar: s.desc } }));
+---
+
+<figure class="steps">
+  <FlowDiagram client:visible locale={locale} steps={data} label={label} />
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<style>
+  .steps {
+    margin-block: var(--s-7);
+  }
+  .steps figcaption {
+    margin-block-start: var(--s-2);
+    font-size: var(--fs-100);
+    color: var(--color-text-meta);
+  }
+</style>
