@@ -13,11 +13,8 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import './hero-graph.css';
-import { products } from '@/data/products';
-import { ui } from '@/i18n/ui';
-import { withBase } from '@/i18n/base';
 import type { Locale } from '@/i18n/config';
-import { CAPS, LAYOUTS, TEXT, WIRING, capById, capY, handleTop, mirrorX, type CapId, type Layout, type LayoutName } from './graph-data';
+import { CAPS, LAYOUTS, SECTORS, TEXT, capById, capY, handleTop, mirrorX, type CapId, type Layout, type LayoutName } from './graph-data';
 
 type Level = 'strong' | 'soft' | 'off';
 
@@ -91,7 +88,7 @@ const CapNodeView = memo(function CapNodeView({ data }: NodeProps<CapNode>) {
   );
 });
 
-/* ---------- output card: a few static leaves + the product list ---------- */
+/* ---------- output card: a few static leaves + the sector list ---------- */
 
 /** Hand-placed baobab "leaves" (percent of the leaf area, px size, rotation), so they never overlap. */
 const LEAVES = [
@@ -152,40 +149,28 @@ const OutNodeView = memo(function OutNodeView({ data }: NodeProps<OutNode>) {
           ))}
         </div>
         <ul className={`hg-list${data.lit.length ? ' is-focused' : ''}`} role="list">
-          {WIRING.map((w) => {
-            const p = products.find((x) => x.slug === w.slug);
-            if (!p) return null;
-            const lit = data.litSlugs.has(w.slug);
-            const sel = data.selected.includes(w.slug);
+          {SECTORS.map((sec) => {
+            const lit = data.litSlugs.has(sec.id);
+            const sel = data.selected.includes(sec.id);
             return (
               <li
-                key={w.slug}
+                key={sec.id}
                 className={`${lit ? 'is-lit' : 'is-dim'}${sel ? ' is-selected' : ''}`}
-                onMouseEnter={() => data.onHover(w.slug)}
+                onMouseEnter={() => data.onHover(sec.id)}
                 onMouseLeave={() => data.onHover(null)}
-                onFocus={() => data.onHover(w.slug)}
+                onFocus={() => data.onHover(sec.id)}
                 onBlur={() => data.onHover(null)}
               >
                 <div className="hg-row">
-                  <button type="button" className="hg-row__pick" aria-pressed={sel} onClick={() => data.onSelect(w.slug)}>
-                    <span className="hg-row__name" translate="no">
-                      {p.name}
-                    </span>
+                  <button type="button" className="hg-row__pick" aria-pressed={sel} onClick={() => data.onSelect(sec.id)}>
+                    <span className="hg-row__name">{sec.label[data.locale]}</span>
                     <span className="hg-row__chips" aria-hidden="true">
-                      {w.uses.map((u) => (
+                      {sec.uses.map((u) => (
                         <i key={u} style={{ ['--c' as string]: capById(u).color }} />
                       ))}
                     </span>
-                    <span className="sr-only">{`${t.uses}: ${w.uses.map((u) => capById(u).label[data.locale]).join(', ')}`}</span>
-                    {!data.compact && (
-                      <span className={`hg-row__stage hg-row__stage--${p.stage}`}>{ui[data.locale][`stage.${p.stage}` as const]}</span>
-                    )}
+                    <span className="sr-only">{`${t.uses}: ${sec.uses.map((u) => capById(u).label[data.locale]).join(', ')}`}</span>
                   </button>
-                  <a className="hg-row__open" href={withBase(`/${data.locale}/projects/${w.slug}/`)} aria-label={`${t.open} ${p.name}`}>
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">
-                      <path d="M4 12h15M13 6l6 6-6 6" />
-                    </svg>
-                  </a>
                 </div>
               </li>
             );
@@ -244,8 +229,7 @@ function Graph({
   const onHold = useCallback((on: boolean) => setHold((n) => Math.max(0, n + (on ? 1 : -1))), []);
 
   // Auto-play: after a still first look, fire one capability at a time. It yields to any interaction, stops
-  // when scrolled out of view or when the tab is hidden, can be paused by the visitor, and never runs
-  // under reduced motion (the parent passes animate=false).
+  // when scrolled out of view or when the tab is hidden, and never runs under reduced motion (the parent passes animate=false).
   const acted = picked.length > 0 || selected.length > 0 || hoverProd !== null || hold > 0;
   useEffect(() => {
     if (!animate || !visible || acted) {
@@ -292,11 +276,11 @@ function Graph({
   }, [fitView]);
 
   const { nodes, edges, summary } = useMemo(() => {
-    // Which capabilities light up (wires, switches) and which product rows are highlighted.
-    // Selecting a product highlights only that product; switching a capability highlights the products
+    // Which capabilities light up (wires, switches) and which sector rows are highlighted.
+    // Selecting a sector highlights only that sector; switching a capability highlights the sectors
     // that use it. Ambient and autoplay states light everything or one capability at a time.
-    const usesOf = (slugs: string[]) => WIRING.filter((w) => slugs.includes(w.slug)).flatMap((w) => w.uses);
-    const byCaps = (caps: CapId[]) => WIRING.filter((w) => w.uses.some((u) => caps.includes(u))).map((w) => w.slug);
+    const usesOf = (ids: string[]) => SECTORS.filter((w) => ids.includes(w.id)).flatMap((w) => w.uses);
+    const byCaps = (caps: CapId[]) => SECTORS.filter((w) => w.uses.some((u) => caps.includes(u))).map((w) => w.id);
     let lit: CapId[];
     let rowSlugs: string[];
     let focused = true;
@@ -311,7 +295,7 @@ function Graph({
       rowSlugs = byCaps([auto]);
     } else {
       lit = CAPS.map((c) => c.id);
-      rowSlugs = WIRING.map((w) => w.slug);
+      rowSlugs = SECTORS.map((w) => w.id);
       focused = false;
     }
     const litSlugs = new Set(rowSlugs);
@@ -379,7 +363,7 @@ function Graph({
     let summary = t.idle;
     if (focused && acted) {
       const capNames = lit.map((c) => capById(c).label[locale]).join(', ');
-      const prodNames = (slugs: string[]) => slugs.map((sl) => products.find((p) => p.slug === sl)?.name).filter(Boolean).join(', ');
+      const prodNames = (ids: string[]) => ids.map((id) => SECTORS.find((x) => x.id === id)?.label[locale]).filter(Boolean).join(', ');
       summary = selected.length ? `${prodNames(selected)}: ${capNames}` : `${capNames}: ${prodNames(rowSlugs)}`;
     }
     return { nodes: ns, edges: es, summary };
@@ -408,7 +392,7 @@ function Graph({
         zoomOnDoubleClick={false}
         preventScrolling={false}
         colorMode="light"
-        attributionPosition={rtl ? 'bottom-left' : 'bottom-right'}
+        proOptions={{ hideAttribution: true }}
       />
       <p className="sr-only" aria-live="polite">
         {summary}
@@ -423,7 +407,6 @@ export default function HeroGraph({ locale }: { locale: Locale }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [layoutName, setLayoutName] = useState<LayoutName>('wide');
   const [motion, setMotion] = useState(false);
-  const [paused, setPaused] = useState(false);
   const [ready, setReady] = useState(false);
   const t = TEXT[locale];
 
@@ -453,16 +436,8 @@ export default function HeroGraph({ locale }: { locale: Locale }) {
   return (
     <div ref={wrapRef} className="hg" role="group" aria-label={t.group} data-rtl={locale === 'ar' ? '' : undefined}>
       <ReactFlowProvider key={layoutName}>
-        <Graph locale={locale} layout={LAYOUTS[layoutName]} layoutName={layoutName} animate={motion && !paused} ready={ready} />
+        <Graph locale={locale} layout={LAYOUTS[layoutName]} layoutName={layoutName} animate={motion} ready={ready} />
       </ReactFlowProvider>
-      {motion && ready && (
-        <button type="button" className="hg-pause" onClick={() => setPaused((p) => !p)}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-            {paused ? <path d="M7 4.5v15l12-7.5z" /> : <path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" />}
-          </svg>
-          <span>{paused ? t.play : t.pause}</span>
-        </button>
-      )}
     </div>
   );
 }

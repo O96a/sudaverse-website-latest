@@ -35,10 +35,6 @@ export interface FlowDiagramProps {
 
 type Level = 'strong' | 'soft';
 
-const PAUSE: Record<Locale, [string, string]> = {
-  en: ['Pause animation', 'Play animation'],
-  ar: ['إيقاف الحركة', 'تشغيل الحركة'],
-};
 
 interface StepData extends Record<string, unknown> {
   step: FlowStepData;
@@ -288,6 +284,7 @@ function Flow({
         selectionKeyCode={null}
         multiSelectionKeyCode={null}
         colorMode="light"
+        proOptions={{ hideAttribution: true }}
       />
     </div>
   );
@@ -312,7 +309,6 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
   const [held, setHeld] = useState<number | null>(null);
   const [ready, setReady] = useState(false);
   const [listGone, setListGone] = useState(false);
-  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     const el = rootRef.current;
@@ -362,7 +358,7 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
 
   // The "signal": one step lit at a time, in sequence. Pauses while a card is hovered or focused, when the
   // diagram is scrolled out of view or the tab is hidden, and never runs under reduced motion.
-  const cycling = mounted && ready && motion && !paused && inView && pageVisible && held === null;
+  const cycling = mounted && ready && motion && inView && pageVisible && held === null;
   useEffect(() => {
     if (!cycling) return;
     const timer = window.setInterval(() => setCursor((c) => (c + 1) % steps.length), CYCLE_MS);
@@ -371,7 +367,7 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
 
   const onHold = useCallback((index: number | null) => setHeld(index), []);
   const active = held ?? (motion ? cursor : null);
-  const animate = motion && !paused && inView && pageVisible;
+  const animate = motion && inView && pageVisible;
 
   const wide = layouts.wide;
   const narrow = layouts.narrow;
@@ -409,16 +405,6 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
           </ol>
         )}
       </div>
-      {motion && mounted && ready && (
-        <div className="pf__controls" dir={locale === 'ar' ? 'rtl' : 'ltr'}>
-          <button type="button" className="pf__pause" onClick={() => setPaused((p) => !p)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-              {paused ? <path d="M7 4.5v15l12-7.5z" /> : <path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" />}
-            </svg>
-            <span>{PAUSE[locale][paused ? 1 : 0]}</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

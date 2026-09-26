@@ -67,6 +67,27 @@ const projectGroups: MenuGroup[] = categoryOrder.map((id) => ({
   })),
 }));
 
+/**
+ * Grouped menus render as two independent columns, so a short category never leaves an empty block
+ * beside a long one. Categories keep their order; the split point is the one that best balances the
+ * item counts of the two columns.
+ */
+const balanceColumns = (groups: MenuGroup[]): MenuGroup[][] => {
+  const total = groups.reduce((n, g) => n + g.items.length, 0);
+  let best = 1;
+  let bestDiff = Infinity;
+  let left = 0;
+  groups.forEach((g, i) => {
+    left += g.items.length;
+    const diff = Math.abs(total - 2 * left);
+    if (i < groups.length - 1 && diff < bestDiff) {
+      bestDiff = diff;
+      best = i + 1;
+    }
+  });
+  return [groups.slice(0, best), groups.slice(best)];
+};
+
 const aboutHref = localePath(locale, 'about');
 
 const menus: Menu[] = [
@@ -131,28 +152,32 @@ const menus: Menu[] = [
                 <div class="panel" data-cols={m.cols}>
                   {m.groups && (
                     <div class="panel__groups">
-                      {m.groups.map((g, gi) => (
-                        <section class="panel__group" aria-label={g.label}>
-                          <p class="panel__label" aria-hidden="true">{g.label}</p>
-                          <ul role="list" class="panel__list">
-                            {g.items.map((it) => (
-                              <li>
-                                <a class="mi" href={it.href}>
-                                  <span class="mi__icon" data-tone={gi % 3}>
-                                    <Icon name={it.icon} size={20} />
-                                  </span>
-                                  <span class="mi__text">
-                                    <span class="mi__title">
-                                      <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                                      {it.stage && <StageBadge stage={it.stage} locale={locale} />}
-                                    </span>
-                                    <span class="mi__desc">{it.desc}</span>
-                                  </span>
-                                </a>
-                              </li>
-                            ))}
-                          </ul>
-                        </section>
+                      {balanceColumns(m.groups).map((col, ci) => (
+                        <div class="panel__col">
+                          {col.map((g, gi) => (
+                            <section class="panel__group" aria-label={g.label}>
+                              <p class="panel__label" aria-hidden="true">{g.label}</p>
+                              <ul role="list" class="panel__list">
+                                {g.items.map((it) => (
+                                  <li>
+                                    <a class="mi" href={it.href}>
+                                      <span class="mi__icon" data-tone={(ci * 2 + gi) % 3}>
+                                        <Icon name={it.icon} size={20} />
+                                      </span>
+                                      <span class="mi__text">
+                                        <span class="mi__title">
+                                          <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
+                                          {it.stage && <StageBadge stage={it.stage} locale={locale} />}
+                                        </span>
+                                        <span class="mi__desc">{it.desc}</span>
+                                      </span>
+                                    </a>
+                                  </li>
+                                ))}
+                              </ul>
+                            </section>
+                          ))}
+                        </div>
                       ))}
                     </div>
                   )}
@@ -442,11 +467,18 @@ const menus: Menu[] = [
   .panel[data-cols='2'] > .panel__list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  /* Grouped menu (Projects): categories in a two-column grid, each a labelled single-column list. */
+  /* Grouped menu (Projects): two independent columns of labelled lists, balanced by item count, so a short
+     category never leaves an empty block beside a long one. */
   .panel__groups {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 0.35rem 0.25rem;
+    align-items: start;
+    gap: 0.25rem;
+  }
+  .panel__col {
+    display: grid;
+    align-content: start;
+    gap: 0.35rem;
   }
   .panel__group {
     display: grid;

@@ -2,11 +2,12 @@ import type { Locale } from '@/i18n/config';
 
 /**
  * Data and layout for the hero graph. Capability cards (inputs, each with a real switch) are wired into
- * one "products" output card. Which products light up follows the same true product-to-capability
- * relationships as the rest of the site. This is a simplified view of the portfolio, not a system
- * architecture. Colours come from the logo-derived tokens; wires are neutral until a capability is active.
+ * one "sectors" output card: the sectors Sudaverse works in (owner direction, 2026-09-26: the home page
+ * shows sectors and services, not products). A sector lights up when a capability it draws on is active.
+ * This is a simplified view of how the capabilities apply, not a list of clients or deployments.
+ * Colours come from the logo-derived tokens; wires are neutral until a capability is active.
  */
-export type CapId = 'language' | 'geo' | 'models' | 'data' | 'security';
+export type CapId = 'ai' | 'language' | 'data' | 'security' | 'infra';
 
 export interface Cap {
   id: CapId;
@@ -17,22 +18,30 @@ export interface Cap {
 }
 
 export const CAPS: Cap[] = [
-  { id: 'language', color: 'var(--viz-sky)', label: { en: 'Language', ar: 'اللغة' }, hint: { en: 'Sudanese Arabic', ar: 'العربية السودانية' } },
-  { id: 'geo', color: 'var(--viz-green)', label: { en: 'Geospatial', ar: 'جغرافي مكاني' }, hint: { en: 'Maps and places', ar: 'الخرائط والأماكن' } },
-  { id: 'models', color: 'var(--viz-navy)', label: { en: 'Models', ar: 'النماذج' }, hint: { en: 'Language models', ar: 'نماذج لغوية' } },
-  { id: 'data', color: 'var(--viz-gold)', label: { en: 'Data', ar: 'البيانات' }, hint: { en: 'Data pipelines', ar: 'خطوط معالجة البيانات' } },
-  { id: 'security', color: 'var(--viz-copper)', label: { en: 'Security', ar: 'الأمن' }, hint: { en: 'Threat detection', ar: 'كشف التهديدات' } },
+  { id: 'ai', color: 'var(--viz-navy)', label: { en: 'Applied AI', ar: 'الذكاء الاصطناعي' }, hint: { en: 'Models and automation', ar: 'النماذج والأتمتة' } },
+  { id: 'language', color: 'var(--viz-sky)', label: { en: 'Arabic AI', ar: 'اللغة العربية' }, hint: { en: 'Arabic-first language tools', ar: 'أدوات لغوية عربية أولًا' } },
+  { id: 'data', color: 'var(--viz-gold)', label: { en: 'Data', ar: 'البيانات' }, hint: { en: 'Pipelines and analytics', ar: 'المعالجة والتحليلات' } },
+  { id: 'security', color: 'var(--viz-copper)', label: { en: 'Security', ar: 'الأمن' }, hint: { en: 'Assessment and monitoring', ar: 'التقييم والمراقبة' } },
+  { id: 'infra', color: 'var(--viz-green)', label: { en: 'Infrastructure', ar: 'البنية التحتية' }, hint: { en: 'Cloud and on-premises', ar: 'سحابية ومحلية' } },
 ];
 
 export const capById = (id: CapId) => CAPS.find((c) => c.id === id)!;
 
-/** Which capabilities each product draws on (true relationships only). */
-export const WIRING: { slug: string; uses: CapId[] }[] = [
-  { slug: 'sudatutor', uses: ['language', 'models'] },
-  { slug: 'terab', uses: ['language', 'models', 'geo'] },
-  { slug: 'sudan-monitor', uses: ['data', 'geo'] },
-  { slug: 'sudaflood', uses: ['data', 'models', 'geo'] },
-  { slug: 'sudandr', uses: ['models', 'security'] },
+export interface Sector {
+  id: string;
+  label: Record<Locale, string>;
+  /** The capabilities work in this sector draws on. */
+  uses: CapId[];
+}
+
+export const SECTORS: Sector[] = [
+  { id: 'healthcare', label: { en: 'Healthcare', ar: 'الرعاية الصحية' }, uses: ['ai', 'data', 'security'] },
+  { id: 'agriculture', label: { en: 'Agriculture', ar: 'الزراعة' }, uses: ['ai', 'data'] },
+  { id: 'education', label: { en: 'Education', ar: 'التعليم' }, uses: ['ai', 'language'] },
+  { id: 'geospatial', label: { en: 'Geospatial', ar: 'المعلومات الجغرافية' }, uses: ['data', 'ai', 'infra'] },
+  { id: 'ai-adoption', label: { en: 'AI adoption', ar: 'تبنّي الذكاء الاصطناعي' }, uses: ['ai', 'language', 'infra'] },
+  { id: 'cybersecurity', label: { en: 'Cybersecurity', ar: 'الأمن السيبراني' }, uses: ['security', 'infra'] },
+  { id: 'training', label: { en: 'Training', ar: 'التدريب' }, uses: ['ai', 'data', 'security'] },
 ];
 
 export type LayoutName = 'wide' | 'narrow';
@@ -56,9 +65,9 @@ export const LAYOUTS: Record<LayoutName, Layout> = {
     h: 646,
     compact: false,
     cap: { w: 236, h: 84, x: 0, y0: 14, dy: 118 },
-    out: { w: 452, h: 540, x: 428, y: 35 },
+    out: { w: 452, h: 600, x: 428, y: 23 },
     squares: 7,
-    canopyH: 96,
+    canopyH: 80,
   },
   narrow: {
     w: 360,
@@ -67,7 +76,7 @@ export const LAYOUTS: Record<LayoutName, Layout> = {
     cap: { w: 128, h: 66, x: 0, y0: 14, dy: 104 },
     out: { w: 204, h: 520, x: 156, y: 8 },
     squares: 5,
-    canopyH: 72,
+    canopyH: 56,
   },
 };
 
@@ -81,25 +90,19 @@ export const handleTop = (l: Layout, i: number) => (l.compact ? 40 + i * 20 : 58
 /** Mirror a horizontal position inside the scene for right-to-left reading. */
 export const mirrorX = (l: Layout, x: number, w: number, rtl: boolean) => (rtl ? l.w - x - w : x);
 
-export const TEXT: Record<Locale, { group: string; hint: string; out: string; idle: string; pause: string; play: string; open: string; uses: string }> = {
+export const TEXT: Record<Locale, { group: string; hint: string; out: string; idle: string; uses: string }> = {
   en: {
-    group: 'Interactive map: Sudaverse projects and the capabilities they draw on',
-    hint: 'Select a project, or switch a capability on, to see how they connect.',
-    out: 'Projects',
+    group: 'Interactive map: the sectors Sudaverse works in and the capabilities behind them',
+    hint: 'Select a sector, or switch a capability on, to see how they connect.',
+    out: 'Sectors we serve',
     idle: 'Showing every connection',
-    pause: 'Pause animation',
-    play: 'Play animation',
-    open: 'Open',
-    uses: 'Uses',
+    uses: 'Draws on',
   },
   ar: {
-    group: 'خريطة تفاعلية: مشاريع سودافيرس والقدرات التي تعتمد عليها',
-    hint: 'اختر مشروعًا، أو فعّل قدرة، لترى كيف يرتبطان.',
-    out: 'المشاريع',
+    group: 'خريطة تفاعلية: القطاعات التي تعمل فيها سودافيرس والقدرات التي تقوم عليها',
+    hint: 'اختر قطاعًا، أو فعّل قدرة، لترى كيف يرتبطان.',
+    out: 'القطاعات التي نخدمها',
     idle: 'عرض كل الارتباطات',
-    pause: 'إيقاف الحركة',
-    play: 'تشغيل الحركة',
-    open: 'افتح',
-    uses: 'يستخدم',
+    uses: 'يعتمد على',
   },
 };

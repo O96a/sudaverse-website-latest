@@ -190,7 +190,6 @@
   --xy-edge-stroke-default: var(--line-strong);
   --xy-handle-background-color-default: var(--ink-3);
   --xy-handle-border-color-default: #fff;
-  --xy-attribution-background-color-default: transparent;
   background: transparent;
   font-family: var(--font-sans);
 }
@@ -206,16 +205,6 @@
 .pf .react-flow__node {
   pointer-events: auto !important;
   cursor: default;
-}
-.pf .react-flow__attribution {
-  background: transparent;
-  font-size: 12px;
-  margin: 0;
-  padding: 2px 6px;
-}
-.pf .react-flow__attribution a {
-  color: var(--ink-3);
-  text-decoration: none;
 }
 .pf-node {
   inline-size: 100%;
@@ -375,34 +364,6 @@
   }
 }
 
-/* ---------- pause control (WCAG 2.2.2) ---------- */
-.pf__controls {
-  display: flex;
-  justify-content: flex-start;
-  margin-block-start: 0.25rem;
-}
-.pf__pause {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-block-size: 2.75rem;
-  padding-inline: 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-3);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 560;
-  cursor: pointer;
-}
-.pf__pause:hover {
-  color: var(--ink);
-}
-.pf__pause:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .pf__flow,

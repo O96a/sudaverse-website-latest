@@ -1,6 +1,6 @@
 /*
  * Hierarchy diagram (React Flow). Shares the card, wire and control styles of pipeline.css (.pf, .pf-card,
- * .pf-wire, .pf__pause); this file adds the reserved box and the title-only card.
+ * .pf-wire); this file adds the reserved box and the title-only card.
  */
 .hf__box {
   position: relative;

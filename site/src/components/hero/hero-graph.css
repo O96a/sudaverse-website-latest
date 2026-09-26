@@ -46,16 +46,6 @@
 .hg svg {
   max-width: none;
 }
-.hg .react-flow__attribution {
-  background: transparent;
-  font-size: 12px;
-  margin: 0;
-  padding: 2px 6px;
-}
-.hg .react-flow__attribution a {
-  color: var(--ink-3);
-  text-decoration: none;
-}
 
 /* ---------- capability card ---------- */
 .hg-cap {
@@ -228,7 +218,7 @@
   border-radius: 10px;
   transition: background-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
 }
-/* The row is a real selector (button, aria-pressed); the arrow beside it is the link to the product page. */
+/* The row is a real selector (button, aria-pressed). */
 .hg-row__pick {
   appearance: none;
   flex: 1;
@@ -247,30 +237,11 @@
   text-align: start;
   cursor: pointer;
 }
-.hg-row__pick:focus-visible,
-.hg-row__open:focus-visible {
+.hg-row__pick:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: -2px;
 }
-.hg-row__open {
-  flex: none;
-  display: grid;
-  place-items: center;
-  inline-size: 2rem;
-  block-size: 2rem;
-  border-radius: 50%;
-  color: var(--ink-3);
-  text-decoration: none;
-  transition: background-color 0.2s var(--ease-out), color 0.2s var(--ease-out);
-}
-.hg-row__open:hover {
-  color: var(--ink);
-  background: color-mix(in srgb, var(--ink) 8%, transparent);
-}
-.hg [dir='rtl'] .hg-row__open svg {
-  transform: scaleX(-1);
-}
-/* Hover, selection and "this product uses the active capability" share one soft highlight, so clicking
+/* Hover, selection and "this sector draws on the active capability" share one soft highlight, so clicking
    feels like hovering: the row simply stays lit. */
 .hg-row:hover,
 .hg-list.is-focused li.is-lit .hg-row,
@@ -296,21 +267,6 @@
 .hg-list li.is-dim .hg-row__name {
   color: var(--ink-3);
   font-weight: 600;
-}
-.hg-row__stage {
-  margin-inline-start: auto;
-  padding: 3px 10px;
-  border-radius: 999px;
-  font-size: 12px;
-  font-weight: 650;
-  line-height: 1.3;
-  white-space: nowrap;
-  background: var(--color-stage-dev-bg);
-  color: var(--color-stage-dev);
-}
-.hg-row__stage--live {
-  background: var(--color-stage-live-bg);
-  color: var(--color-stage-live);
 }
 
 /* ---------- wires: each in its capability colour, soft until active ---------- */
@@ -342,37 +298,6 @@
   }
 }
 
-/* ---------- pause control (WCAG 2.2.2) ---------- */
-.hg-pause {
-  position: absolute;
-  inset-block-end: 2px;
-  left: 0;
-  z-index: 5;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-block-size: 2.75rem;
-  padding-inline: 12px;
-  border: 0;
-  border-radius: 999px;
-  background: transparent;
-  color: var(--ink-3);
-  font: inherit;
-  font-size: 13px;
-  font-weight: 560;
-  cursor: pointer;
-}
-.hg[data-rtl] .hg-pause {
-  left: auto;
-  right: 0;
-}
-.hg-pause:hover {
-  color: var(--ink);
-}
-.hg-pause:focus-visible {
-  outline: 2px solid var(--ink);
-  outline-offset: 2px;
-}
 
 @media (prefers-reduced-motion: reduce) {
   .hg-flow,
@@ -380,8 +305,7 @@
   .hg-switch,
   .hg-switch i,
   .hg-wire__line,
-  .hg-row,
-  .hg-row__open {
+  .hg-row {
     transition-duration: 0.01ms;
   }
 }
@@ -402,10 +326,6 @@
   padding-inline: 6px;
   gap: 6px;
   font-size: 14px;
-}
-.hg-flow[data-layout='narrow'] .hg-row__open {
-  inline-size: 1.5rem;
-  block-size: 1.5rem;
 }
 .hg-flow[data-layout='narrow'] .hg-row__chips i {
   inline-size: 7px;

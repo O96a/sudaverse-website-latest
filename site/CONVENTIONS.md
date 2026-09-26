@@ -56,7 +56,7 @@ One `h1` per page, ordered headings, each `section` has `aria-labelledby`, landm
 
 ## Images
 
-Photography goes through `astro:assets` (`<Picture>`/`<Image>`) from `src/assets/`, with `widths`, `sizes`, `loading="lazy"` below the fold, explicit alt. The legacy photos are LOW resolution (about 700px wide): use them only in constrained frames, never full-bleed. Team portraits: consistent crop and tone (see Company brief). The Company hero uses an owner-supplied illustration (generated, with mock product screens); it must keep its visible "Illustration" caption and must not be presented as the real team or real product screens. The R&D hero uses a cropped owner-supplied illustration (generated): the crop deliberately excludes the projected screen, which shows invented papers, journals and repositories with star counts. Never use the uncropped version: its papers, journals and repositories are invented.
+Photography goes through `astro:assets` (`<Picture>`/`<Image>`) from `src/assets/`, with `widths`, `sizes`, `loading="lazy"` below the fold, explicit alt. The legacy photos are LOW resolution (about 700px wide): use them only in constrained frames, never full-bleed. Team portraits: consistent crop and tone (see Company brief). The Company hero uses an owner-supplied illustration (generated, with mock product screens); it must not be presented as the real team or real product screens (its alt text starts with "Illustration:"; the visible caption was removed at the owner's request, 2026-09-26). The R&D hero uses a cropped owner-supplied illustration (generated): the crop deliberately excludes the projected screen, which shows invented papers, journals and repositories with star counts. Never use the uncropped version: its papers, journals and repositories are invented.
 
 ## Contact contract
 
@@ -65,7 +65,8 @@ Photography goes through `astro:assets` (`<Picture>`/`<Image>`) from `src/assets
 ## Site structure (owner direction, 2026-09-26)
 
 - Header: exactly three dropdowns, **Projects** (grouped by category), **Research** (Published papers, Artifacts, Directions) and **About** (Who we are, Mission and vision, Team). Same glass popover style.
-- Home: the services band (`src/data/services.ts`, `#services`) sits directly under the hero.
+- Home (owner direction, 2026-09-26): a corporate front door about services, sectors, values and how we work. It never names or lists products or projects (those live under Projects in the header). The hero graph wires capabilities into the sectors we serve (`src/components/hero/graph-data.ts`); the services band (`src/data/services.ts`, `#services`) sits directly under the hero.
+- Diagrams: no visible pause button and no React Flow attribution badge (owner request, 2026-09-26). Autoplay still stops on hover, focus, off screen, in hidden tabs and under reduced motion.
 - Every project page (`/projects/<slug>/`) follows the same four blocks: hero with logo, the problem and the approach, the animated user flow (`FlowDiagram`, data in `products.ts` `flow`), get involved.
 - Research: `research/papers/` (publications in `src/data/research.ts`: two IEEE FITAT 2026 papers), `research/artifacts/` (MDX in `src/content/artifacts/`, see `ARTIFACTS.md`), `research/directions/` (six directions, `HierarchyFlow` map).
 - Solutions, audience (`for/`), News and Resources pages were retired; their URLs redirect (`astro.config.mjs` and nginx).

@@ -21,7 +21,7 @@ import { buildHierarchy, wideMinRem, type HierLayout, type HierLayoutName, type 
 /**
  * A hierarchy in the Sudaverse diagram style: glass cards, dashed wires in each branch's colour, and a signal
  * that walks the branches one at a time, lighting a branch and everything it feeds. Pauses on hover and focus,
- * off screen and in hidden tabs; never moves under reduced motion; has a pause control (WCAG 2.2.2).
+ * off screen and in hidden tabs; never moves under reduced motion.
  * The cards are exposed as a list; wires are decorative.
  */
 export interface HierarchyFlowProps {
@@ -31,10 +31,6 @@ export interface HierarchyFlowProps {
   label: string;
 }
 
-const PAUSE: Record<Locale, [string, string]> = {
-  en: ['Pause animation', 'Play animation'],
-  ar: ['إيقاف الحركة', 'تشغيل الحركة'],
-};
 const CYCLE_MS = 2800;
 const HEAD_MID = 20;
 
@@ -191,6 +187,7 @@ function Graph({ layout, active, animate, rtl, onHold }: { layout: HierLayout; a
         selectionKeyCode={null}
         multiSelectionKeyCode={null}
         colorMode="light"
+        proOptions={{ hideAttribution: true }}
       />
     </div>
   );
@@ -209,7 +206,6 @@ export default function HierarchyFlow({ locale, nodes, label }: HierarchyFlowPro
   const [held, setHeld] = useState<number | null>(null);
   const [heldAll, setHeldAll] = useState(false);
   const [ready, setReady] = useState(false);
-  const [paused, setPaused] = useState(false);
   const rtl = locale === 'ar';
 
   useEffect(() => {
@@ -248,7 +244,7 @@ export default function HierarchyFlow({ locale, nodes, label }: HierarchyFlowPro
   }, [mounted, layoutName]);
 
   const holding = held !== null || heldAll;
-  const cycling = mounted && ready && motion && !paused && inView && pageVisible && !holding && built.branchCount > 1;
+  const cycling = mounted && ready && motion && inView && pageVisible && !holding && built.branchCount > 1;
   useEffect(() => {
     if (!cycling) return;
     const timer = window.setInterval(() => setCursor((c) => (c + 1) % built.branchCount), CYCLE_MS);
@@ -260,7 +256,7 @@ export default function HierarchyFlow({ locale, nodes, label }: HierarchyFlowPro
     setHeldAll(false);
   }, []);
   const active = held ?? (motion && built.branchCount ? cursor : null);
-  const animate = motion && !paused && inView && pageVisible;
+  const animate = motion && inView && pageVisible;
 
   const vars: Record<string, string | number> = {
     '--hf-ar-wide': `${built.wide.w} / ${built.wide.h}`,
@@ -279,16 +275,6 @@ export default function HierarchyFlow({ locale, nodes, label }: HierarchyFlowPro
           </div>
         )}
       </div>
-      {motion && mounted && ready && built.branchCount > 1 && (
-        <div className="pf__controls" dir={rtl ? 'rtl' : 'ltr'}>
-          <button type="button" className="pf__pause" onClick={() => setPaused((p) => !p)}>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">
-              {paused ? <path d="M7 4.5v15l12-7.5z" /> : <path d="M6.5 4.5h4v15h-4zM13.5 4.5h4v15h-4z" />}
-            </svg>
-            <span>{PAUSE[locale][paused ? 1 : 0]}</span>
-          </button>
-        </div>
-      )}
     </div>
   );
 }

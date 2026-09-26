@@ -24,7 +24,6 @@ const copy = {
     h1: 'Research',
     lead: 'Research that becomes infrastructure. We choose our directions because our projects depend on the answers, and we publish what the work shows.',
     alt: 'Illustration: researchers seated in a lecture hall with laptops open, one showing a map of Sudan.',
-    caption: 'Illustration',
     papers: { h: 'Published papers', d: 'Peer-reviewed papers from the Sudaverse team, with the open-source releases behind them.', all: 'All papers' },
     artifacts: { h: 'Artifacts', d: 'Long technical write-ups with data, diagrams and code, from benchmarks to system design.', all: 'All artifacts' },
     dirs: { h: 'Directions', d: 'Six research directions, and the projects each one feeds.', all: 'All directions' },
@@ -36,7 +35,6 @@ const copy = {
     h1: 'الأبحاث',
     lead: 'بحث يتحول إلى بنية تحتية. نختار اتجاهاتنا لأن مشاريعنا تعتمد على إجاباتها، وننشر ما يكشفه العمل.',
     alt: 'رسم توضيحي: باحثون جالسون في قاعة محاضرات وحواسيبهم مفتوحة، يعرض أحدها خريطة السودان.',
-    caption: 'رسم توضيحي',
     papers: { h: 'الأوراق المنشورة', d: 'أوراق محكّمة من فريق سودافيرس، والإصدارات المفتوحة المصدر التي تقف خلفها.', all: 'كل الأوراق' },
     artifacts: { h: 'مقالات تقنية', d: 'كتابات تقنية مطوّلة بالبيانات والمخططات والشيفرة، من معايير القياس إلى تصميم الأنظمة.', all: 'كل المقالات' },
     dirs: { h: 'الاتجاهات البحثية', d: 'ستة اتجاهات بحثية، والمشاريع التي يغذّيها كل منها.', all: 'كل الاتجاهات' },
@@ -69,7 +67,6 @@ const jsonLd = [
       </div>
       <figure class="hero__photo">
         <Picture src={researchHall} formats={['avif', 'webp']} widths={[640, 960, 1040]} sizes="(min-width: 64rem) 46vw, 92vw" alt={copy.alt} loading="eager" fetchpriority="high" />
-        <figcaption class="t-small t-muted">{copy.caption}</figcaption>
       </figure>
     </div>
   </section>
@@ -161,9 +158,6 @@ const jsonLd = [
     inline-size: 100%;
     block-size: auto;
     border-radius: var(--radius-1);
-  }
-  .hero__photo figcaption {
-    margin-block-start: var(--s-2);
   }
   @media (min-width: 64rem) {
     .hero__grid {

@@ -5,9 +5,7 @@
  * fallback for visitors without JavaScript.
  */
 import HeroGraph from './HeroGraph';
-import { CAPS, WIRING, LAYOUTS, TEXT } from './graph-data';
-import { products } from '@/data/products';
-import { withBase } from '@/i18n/base';
+import { CAPS, SECTORS, LAYOUTS, TEXT } from './graph-data';
 import type { Locale } from '@/i18n/config';
 
 interface Props {
@@ -39,18 +37,7 @@ const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
   <noscript>
     <p>{TEXT[locale].hint}</p>
     <ul>
-      {
-        WIRING.map((w) => {
-          const p = products.find((x) => x.slug === w.slug);
-          return (
-            p && (
-              <li>
-                <a href={withBase(`/${locale}/projects/${w.slug}/`)}>{p.name}</a>: {w.uses.map((u) => CAPS.find((c) => c.id === u)?.label[locale]).join(', ')}
-              </li>
-            )
-          );
-        })
-      }
+      {SECTORS.map((sec) => <li>{sec.label[locale]}: {sec.uses.map((u) => CAPS.find((c) => c.id === u)?.label[locale]).join(', ')}</li>)}
     </ul>
   </noscript>
 </div>
