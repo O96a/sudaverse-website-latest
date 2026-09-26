@@ -49,7 +49,7 @@ Name: Sudaverse. Logo: a baobab tree grown from circuit traces with blue and gre
 
 ## Evidence on Hand
 
-Real: current site copy, a 12-person team with roles, short bios and LinkedIn profiles (`team.md`, `images/` portraits), photography (`images/pic01`, `pic02`, `pic03`, `pic05`), the SudaTutor public URL, public GitHub repositories under the `sudaverse` organization (LLMCorpusKit and a Sudanese dialect tokenizer benchmark), partner logos currently shown on the live site (SIPAQ, SRF: relationship type unverified), contact `info@sudaverse.com`, social profiles (LinkedIn, GitHub, YouTube, X, Instagram, Facebook).
+Real: current site copy, a 7-person team with roles (reduced from 12 by the owner, 2026-09-26), short bios and LinkedIn profiles (`team.md`, `images/` portraits), photography (`images/pic01`, `pic02`, `pic03`, `pic05`), the SudaTutor public URL, public GitHub repositories under the `sudaverse` organization (LLMCorpusKit and a Sudanese dialect tokenizer benchmark), partner logos currently shown on the live site (SIPAQ, SRF: relationship type unverified), contact `info@sudaverse.com`, social profiles (LinkedIn, GitHub, YouTube, X, Instagram, Facebook).
 Absent, must not be fabricated: customers, case studies, publications beyond the two IEEE FITAT 2026 papers, certifications, metrics, approved product screenshots, WhatsApp number, legal pages, published datasets or models.
 
 ## Product Principles

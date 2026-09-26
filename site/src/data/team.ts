@@ -5,14 +5,9 @@ import anour from '@/assets/team/anour-dafaalla.jpg';
 import aamer from '@/assets/team/aamer-mihaysi.jpg';
 import tamir from '@/assets/team/tamir-s.jpg';
 import salma from '@/assets/team/salma-mahgoub.jpg';
-import adil from '@/assets/team/mohammed-adil-yassin.jpg';
-import abdalgader from '@/assets/team/abdalgader-abubaker.jpg';
 import altayeb from '@/assets/team/mohamed-altayeb.jpg';
 import elmustafa from '@/assets/team/mohammed-el-mustafa.jpg';
 import gafer from '@/assets/team/mustafa-gafer.jpg';
-import samahir from '@/assets/team/samahir-elzaki.jpg';
-import maram from '@/assets/team/maram-mohamed.jpg';
-import hiba from '@/assets/team/hiba-eljozouly.jpg';
 
 /**
  * Team roster. Names, roles and LinkedIn profiles come from the owner's own team list and are
@@ -82,30 +77,6 @@ export const team: Person[] = [
     portrait: salma,
   },
   {
-    slug: 'mohammed-adil-yassin',
-    name: 'Mohammed Adil Yassin',
-    role: 'AI Consultant',
-    group: 'team',
-    linkedin: 'https://www.linkedin.com/in/mohammed-adil-yassin-b6a835111/',
-    summary: {
-      en: 'Focused on strategic AI adoption, business transformation and the integration of practical AI solutions.',
-      ar: 'يركّز على تبنّي الذكاء الاصطناعي استراتيجيًا، والتحوّل في الأعمال، ودمج حلول الذكاء الاصطناعي العملية.',
-    },
-    portrait: adil,
-  },
-  {
-    slug: 'abdalgader-abubaker',
-    name: 'Abdalgader Abubaker',
-    role: 'Senior AI Engineer',
-    group: 'team',
-    linkedin: 'https://www.linkedin.com/in/abdalgader-abubaker/',
-    summary: {
-      en: 'Former Meta AI Resident, specializing in graph neural networks, self-supervised learning and large-scale model development.',
-      ar: 'مقيم سابق في Meta AI، متخصص في الشبكات العصبية الرسومية والتعلّم ذاتي الإشراف وتطوير النماذج واسعة النطاق.',
-    },
-    portrait: abdalgader,
-  },
-  {
     slug: 'mohamed-altayeb',
     name: 'Mohamed Altayeb',
     role: 'AI Researcher',
@@ -140,42 +111,6 @@ export const team: Person[] = [
       ar: 'حاصل على شهادة CISSP، ويقدّم الاستشارات في تطبيقات المؤسسات وحوكمة الأمن السيبراني وإدارة البيانات.',
     },
     portrait: gafer,
-  },
-  {
-    slug: 'samahir-elzaki',
-    name: 'Samahir Elzaki',
-    role: 'MSc Researcher',
-    group: 'team',
-    linkedin: 'https://www.linkedin.com/in/samahir-elzaki-701825292/',
-    summary: {
-      en: 'Researcher in IT management and data analyst, exploring generative AI, human-AI collaboration and digital transformation strategies.',
-      ar: 'باحثة في إدارة تقنية المعلومات ومحلّلة بيانات، تستكشف الذكاء الاصطناعي التوليدي والتعاون بين الإنسان والذكاء الاصطناعي واستراتيجيات التحوّل الرقمي.',
-    },
-    portrait: samahir,
-  },
-  {
-    slug: 'maram-mohamed',
-    name: 'Maram A. Mohamed',
-    role: 'PhD Researcher',
-    group: 'team',
-    linkedin: 'https://www.linkedin.com/in/maram-a-mohamed-5a2720b0/',
-    summary: {
-      en: 'Researcher at the Insight Centre (DCU) specializing in computer vision and generative AI, with a focus on accessible technology such as sign language translation systems.',
-      ar: 'باحثة في Insight Centre (DCU) متخصصة في الرؤية الحاسوبية والذكاء الاصطناعي التوليدي، وتركّز على التقنيات الميسّرة مثل أنظمة ترجمة لغة الإشارة.',
-    },
-    portrait: maram,
-  },
-  {
-    slug: 'hiba-eljozouly',
-    name: 'Hiba Eljozouly',
-    role: 'Founder of GDG',
-    group: 'team',
-    linkedin: 'https://www.linkedin.com/in/hibaeljozouly',
-    summary: {
-      en: 'Founder and organizer of GDG on Campus at SUST, and a cloud and machine learning enthusiast who supports students through technology community building and industry connections.',
-      ar: 'مؤسِّسة ومنظِّمة GDG on Campus في SUST، ومهتمة بالحوسبة السحابية والتعلّم الآلي، وتدعم الطلاب ببناء المجتمعات التقنية وربطهم بالصناعة.',
-    },
-    portrait: hiba,
   },
 ];
 
