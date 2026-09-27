@@ -7,7 +7,6 @@
 import Base from '@/layouts/Base.astro';
 import Button from '@/components/Button.astro';
 import Icon from '@/components/Icon.astro';
-import StageBadge from '@/components/StageBadge.astro';
 import Crumbs from '@/components/docs/Crumbs.astro';
 import ProductArt from '@/components/products/ProductArt.astro';
 import FlowDiagram from '@/components/flow/FlowDiagram';
@@ -144,7 +143,6 @@ const jsonLd = [
         <div class="hero__text">
           <div class="hero__head">
             <h1 id="hero-h" translate="no">{name}</h1>
-            <StageBadge stage={product.stage} locale={locale} />
           </div>
           <p class="hero__tag">{tagline}</p>
           <p class="hero__sum">{summary}</p>

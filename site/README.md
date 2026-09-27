@@ -48,7 +48,7 @@ Nothing may be published that is not supported by evidence: no customers, contra
 
 ## Internationalisation
 
-`/en/` and `/ar/` are separate static routes with `lang`, `dir`, `hreflang` alternates and localized metadata. Styles use logical properties so layouts mirror without overrides; directional icons flip through `.icon-dir`. Arabic pages switch to IBM Plex Sans Arabic and drop letter-spacing. All Arabic copy is a first draft for the architecture: have a native editor review it before launch.
+`/en/` and `/ar/` are separate static routes with `lang`, `dir`, `hreflang` alternates and localized metadata. Styles use logical properties so layouts mirror without overrides; directional icons flip through `.icon-dir`. Arabic pages set Arabic text in Times New Roman (with self-hosted Noto Naskh Arabic as the fallback where it is not installed) and drop letter-spacing. All Arabic copy is a first draft for the architecture: have a native editor review it before launch.
 
 ## Deployment (GitHub Pages)
 

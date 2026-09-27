@@ -4,8 +4,7 @@ import Icon from './Icon.astro';
 import Button from './Button.astro';
 import Logo from './Logo.astro';
 import LangSwitch from './LangSwitch.astro';
-import StageBadge from './StageBadge.astro';
-import { categoryOrder, productsByCategory, type Stage } from '@/data/products';
+import { categoryOrder, productsByCategory } from '@/data/products';
 import { site } from '@/config/site';
 import type { NavKey } from '@/config/nav';
 import { localePath, t } from '@/i18n/utils';
@@ -25,7 +24,6 @@ interface MenuItem {
   desc: string;
   /** Brand names stay Latin and are shielded from translation. */
   brand?: boolean;
-  stage?: Stage;
 }
 interface MenuGroup {
   label: string;
@@ -63,7 +61,6 @@ const projectGroups: MenuGroup[] = categoryOrder.map((id) => ({
     title: p.name,
     desc: pick(p.tagline, locale) ?? '',
     brand: true,
-    stage: p.stage,
   })),
 }));
 
@@ -167,7 +164,6 @@ const menus: Menu[] = [
                                       <span class="mi__text">
                                         <span class="mi__title">
                                           <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                                          {it.stage && <StageBadge stage={it.stage} locale={locale} />}
                                         </span>
                                         <span class="mi__desc">{it.desc}</span>
                                       </span>
@@ -192,7 +188,6 @@ const menus: Menu[] = [
                             <span class="mi__text">
                               <span class="mi__title">
                                 <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                                {it.stage && <StageBadge stage={it.stage} locale={locale} />}
                               </span>
                               <span class="mi__desc">{it.desc}</span>
                             </span>
@@ -272,7 +267,6 @@ const menus: Menu[] = [
                         <li>
                           <a class="m-link" href={it.href}>
                             <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                            {it.stage && <StageBadge stage={it.stage} locale={locale} />}
                           </a>
                         </li>
                       ))}
@@ -284,7 +278,6 @@ const menus: Menu[] = [
                   <li>
                     <a class="m-link" href={it.href}>
                       <span translate={it.brand ? 'no' : undefined}>{it.title}</span>
-                      {it.stage && <StageBadge stage={it.stage} locale={locale} />}
                     </a>
                   </li>
                 ))}

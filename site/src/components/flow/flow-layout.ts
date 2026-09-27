@@ -3,8 +3,9 @@ import type { Locale } from '@/i18n/config';
 /**
  * Layout for the step-flow diagrams (the home pipeline and every project's user flow). A flow is a row of
  * 3 to 7 cards on wide containers and a zig-zag stack on narrow ones. Everything here is pure geometry in
- * virtual pixels: the React Flow viewport scales the scene to the container, and the server placeholder
- * list uses the same numbers, so the placeholder cards land exactly where the graph cards will.
+ * virtual pixels: the React Flow viewport scales the scene to the container. The server placeholder list
+ * uses heights estimated from the text length; once the island mounts it measures the real cards and
+ * lays the scene out again, so no card is taller than its text needs.
  */
 export type StepLink =
   | { kind: 'external'; href: string; label: Record<Locale, string> }
@@ -59,10 +60,15 @@ const LINK = 26;
 const longest = (s: FlowStepData) => Math.max(s.desc.en.length, s.desc.ar.length);
 const cardH = (s: FlowStepData, charsPerLine: number) => Math.round(HEAD + PAD + Math.ceil(longest(s) / charsPerLine) * LINE + (s.link ? LINK : 0) + 4);
 
-function buildWide(steps: FlowStepData[], fixedH?: number): Layout {
+/** Card widths (virtual px) in each layout; FlowDiagram measures the real card heights at these widths. */
+export const CARD_W: Record<LayoutName, number> = { wide: 176, narrow: 292 };
+/** Card heights read from the DOM once the island mounts, so every card fits its own text exactly. */
+export type MeasuredHeights = Record<LayoutName, number[]>;
+
+function buildWide(steps: FlowStepData[], fixedH?: number, measured?: number[]): Layout {
   const n = steps.length;
-  const cw = 176;
-  const ch = fixedH ?? Math.max(110, ...steps.map((s) => cardH(s, 21)));
+  const cw = CARD_W.wide;
+  const ch = fixedH ?? (measured ? Math.max(...measured) : Math.max(110, ...steps.map((s) => cardH(s, 21))));
   const gap = 60;
   const rise = 14; // each step sits a little higher than the last, so the row reads as progress
   const padX = 12;
@@ -76,8 +82,8 @@ function buildWide(steps: FlowStepData[], fixedH?: number): Layout {
   };
 }
 
-function buildNarrow(steps: FlowStepData[]): Layout {
-  const cw = 292;
+function buildNarrow(steps: FlowStepData[], measured?: number[]): Layout {
+  const cw = CARD_W.narrow;
   const gap = 34;
   const dx = 24; // alternate cards shift sideways so the wires curve
   const padX = 12;
@@ -85,7 +91,7 @@ function buildNarrow(steps: FlowStepData[]): Layout {
   const padBottom = 20;
   let y = padTop;
   const slots: Slot[] = steps.map((s, i) => {
-    const h = cardH(s, 39);
+    const h = measured?.[i] ?? cardH(s, 39);
     const slot = { x: padX + (i % 2) * dx, y, w: cw, h };
     y += h + gap;
     return slot;
@@ -93,6 +99,6 @@ function buildNarrow(steps: FlowStepData[]): Layout {
   return { name: 'narrow', w: padX * 2 + cw + dx, h: y - gap + padBottom, slots };
 }
 
-export function buildLayouts(steps: FlowStepData[], opts: { wideCardH?: number } = {}): Record<LayoutName, Layout> {
-  return { wide: buildWide(steps, opts.wideCardH), narrow: buildNarrow(steps) };
+export function buildLayouts(steps: FlowStepData[], opts: { wideCardH?: number; measured?: MeasuredHeights | null } = {}): Record<LayoutName, Layout> {
+  return { wide: buildWide(steps, opts.wideCardH, opts.measured?.wide), narrow: buildNarrow(steps, opts.measured?.narrow) };
 }

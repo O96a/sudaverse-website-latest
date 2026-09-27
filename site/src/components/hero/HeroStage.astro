@@ -5,17 +5,13 @@
  * fallback for visitors without JavaScript.
  */
 import HeroGraph from './HeroGraph';
-import { CAPS, SECTORS, LAYOUTS, TEXT } from './graph-data';
+import { CAPS, SECTORS, TEXT } from './graph-data';
 import type { Locale } from '@/i18n/config';
 
 interface Props {
   locale: Locale;
 }
 const { locale } = Astro.props;
-const wide = LAYOUTS.wide;
-const narrow = LAYOUTS.narrow;
-const rtl = locale === 'ar';
-const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
 ---
 
 <div class="stage">
@@ -23,14 +19,8 @@ const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
   <div class="stage__dots" aria-hidden="true"></div>
   <div class="stage__box">
     <div class="stage__poster" aria-hidden="true">
-      <svg class="poster poster--wide" viewBox={`0 0 ${wide.w} ${wide.h}`} preserveAspectRatio="xMidYMid meet">
-        {CAPS.map((_, i) => <rect x={mx(wide.cap.x, wide.cap.w, wide.w)} y={wide.cap.y0 + i * wide.cap.dy} width={wide.cap.w} height={wide.cap.h} rx="14" />)}
-        <rect x={mx(wide.out.x, wide.out.w, wide.w)} y={wide.out.y} width={wide.out.w} height={wide.out.h} rx="18" />
-      </svg>
-      <svg class="poster poster--narrow" viewBox={`0 0 ${narrow.w} ${narrow.h}`} preserveAspectRatio="xMidYMid meet">
-        {CAPS.map((_, i) => <rect x={mx(narrow.cap.x, narrow.cap.w, narrow.w)} y={narrow.cap.y0 + i * narrow.cap.dy} width={narrow.cap.w} height={narrow.cap.h} rx="14" />)}
-        <rect x={mx(narrow.out.x, narrow.out.w, narrow.w)} y={narrow.out.y} width={narrow.out.w} height={narrow.out.h} rx="18" />
-      </svg>
+      <div class="poster__caps">{CAPS.map(() => <span />)}</div>
+      <div class="poster__out"></div>
     </div>
     <HeroGraph client:only="react" locale={locale} />
   </div>
@@ -71,41 +61,48 @@ const mx = (x: number, w: number, scene: number) => (rtl ? scene - x - w : x);
     background-size: 22px 22px;
     mask-image: radial-gradient(closest-side, #000 52%, transparent);
   }
+  /* The island sets the exact height once it has measured its cards; until then this estimate reserves
+     the space, and a quiet skeleton stands in. */
   .stage__box {
     position: relative;
     z-index: 2;
-    aspect-ratio: 880 / 646;
+    block-size: 30rem;
   }
   .stage__poster {
     position: absolute;
-    inset: 0;
+    inset: 0.625rem;
+    display: grid;
+    grid-template-columns: 34% 1fr;
+    gap: 14%;
     transition: opacity 0.5s var(--ease-out), visibility 0s linear 0.5s;
   }
   .stage__box[data-ready] .stage__poster {
     opacity: 0;
     visibility: hidden;
   }
-  .poster {
-    inline-size: 100%;
-    block-size: 100%;
+  .poster__caps {
+    display: grid;
+    gap: 1rem;
   }
-  .poster rect {
-    fill: var(--glass-bg);
-    stroke: var(--glass-border);
-    stroke-width: 1.5;
+  .poster__caps span,
+  .poster__out {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 14px;
   }
-  .poster--narrow {
-    display: none;
+  .poster__out {
+    border-radius: 18px;
   }
   @container (max-width: 559px) {
     .stage__box {
-      aspect-ratio: 360 / 540;
+      block-size: 22rem;
     }
-    .poster--wide {
-      display: none;
+    .stage__poster {
+      grid-template-columns: 44% 1fr;
+      gap: 9%;
     }
-    .poster--narrow {
-      display: block;
+    .poster__caps {
+      gap: 0.75rem;
     }
   }
   noscript {

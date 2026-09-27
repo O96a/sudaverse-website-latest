@@ -1,13 +1,17 @@
 /*
  * Hero graph (React Flow). Cards are frosted glass over the stage's colour backdrop (see the glass
- * tokens); wires are neutral hairlines until a capability is active. Sizing comes from the Astro wrapper
- * (HeroStage.astro). The scene is a fixed physical layout: it mirrors for Arabic in code, so this file
- * uses a few physical offsets on purpose.
+ * tokens); wires are neutral hairlines until a capability is active. Every card is sized by its own text:
+ * HeroGraph measures the cards in a hidden layer and lays the scene out at 1:1, so type is always real
+ * size, on phones too. The scene mirrors for Arabic in code, so this file uses a few physical offsets.
  */
 .hg {
   position: absolute;
   inset: 0;
   direction: ltr;
+  font-family: var(--font-sans);
+}
+:root:lang(ar) .hg {
+  font-family: var(--font-sans-ar);
 }
 .hg-flow {
   position: absolute;
@@ -18,15 +22,34 @@
 .hg-flow.is-ready {
   opacity: 1;
 }
+/* Nothing animates while the graph is scrolled away. */
+.hg-flow.is-paused *,
+.hg-flow.is-paused *::after {
+  animation-play-state: paused !important;
+}
+
+/* Hidden measuring layer: the same cards, unconstrained, so their natural sizes can be read. */
+.hg-measure {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inline-size: 100%;
+  visibility: hidden;
+  pointer-events: none;
+  contain: layout style;
+}
+.hg-measure__item {
+  position: absolute;
+  inset-block-start: 0;
+  left: 0;
+}
+
 .hg .react-flow {
   --xy-background-color: transparent;
   --xy-background-color-default: transparent;
   --xy-node-border-default: none;
   background: transparent;
-  font-family: var(--font-sans);
-}
-:root:lang(ar) .hg .react-flow {
-  font-family: var(--font-sans-ar);
+  font-family: inherit;
 }
 .hg .react-flow__pane,
 .hg .react-flow__node {
@@ -60,9 +83,10 @@
   gap: 10px;
   inline-size: 100%;
   block-size: 100%;
-  padding: 0 16px;
+  padding: 14px 16px;
   text-align: start;
   color: var(--ink);
+  font: inherit;
   background: var(--glass-bg);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
@@ -70,7 +94,7 @@
   border-radius: 14px;
   box-shadow: var(--glass-shadow);
   cursor: pointer;
-  transition: box-shadow 0.35s var(--ease-out);
+  transition: box-shadow 0.35s var(--ease-out), background-color 0.35s var(--ease-out);
 }
 .hg-cap__btn:focus-visible {
   outline: 2px solid var(--ink);
@@ -80,9 +104,9 @@
   display: flex;
   align-items: center;
   gap: 9px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 650;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 .hg-cap__dot {
   flex: none;
@@ -101,7 +125,7 @@
 }
 .hg-cap__hint {
   font-size: 13px;
-  line-height: 1.3;
+  line-height: 1.35;
   color: var(--ink-3);
   unicode-bidi: plaintext;
 }
@@ -142,6 +166,35 @@
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.85), 0 0 0 1.5px var(--c), 0 20px 34px -20px color-mix(in srgb, var(--c) 60%, transparent);
 }
 
+/* Compact (phones and narrow columns): one line, a small switch in the capability colour, no hint. */
+.hg-cap--compact .hg-cap__btn {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  font-size: 13.5px;
+  font-weight: 650;
+  line-height: 1.25;
+}
+.hg-switch--mini {
+  --dx: 10px;
+  inline-size: 24px;
+  block-size: 14px;
+  background: color-mix(in srgb, var(--c) 22%, white);
+  box-shadow: inset 0 0 0 1.5px var(--c);
+}
+.hg [dir='rtl'] .hg-switch--mini {
+  --dx: -10px;
+}
+.hg-switch--mini i {
+  inset-block-start: 2px;
+  inset-inline-start: 2px;
+  inline-size: 10px;
+  block-size: 10px;
+}
+
 .hg-handle {
   inline-size: 9px;
   block-size: 9px;
@@ -177,67 +230,170 @@
   padding: 12px 18px;
   font-size: 14px;
   font-weight: 650;
+  line-height: 1.3;
   color: var(--ink);
   border-block-end: 1px solid var(--glass-edge);
   unicode-bidi: plaintext;
 }
+
+/* ---------- canopy: the baobab "leaves", drifting and turning in the logo colours ---------- */
 .hg-canopy {
   position: relative;
   flex: none;
+  block-size: 64px;
+  overflow: hidden;
   border-block-end: 1px solid var(--glass-edge);
+  background:
+    radial-gradient(60% 140% at 15% 50%, color-mix(in srgb, var(--brand-blue) 22%, transparent), transparent 70%),
+    radial-gradient(50% 140% at 55% 50%, color-mix(in srgb, var(--brand-green) 18%, transparent), transparent 70%),
+    radial-gradient(55% 140% at 90% 50%, color-mix(in srgb, var(--viz-gold) 18%, transparent), transparent 70%);
+  background-size: 200% 100%;
+  background-position: 0% 50%;
+}
+/* A soft light passes across the canopy now and then. */
+.hg-canopy::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: 40%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.55), transparent);
+  translate: -120% 0;
+  pointer-events: none;
 }
 .hg-leaf {
   position: absolute;
   display: block;
-  border: 2px solid;
-  border-radius: 2px;
-  background: transparent;
-  transition: border-color 0.6s var(--ease-out);
+  translate: -50% -50%;
 }
+.hg-leaf__svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+  overflow: visible;
+}
+.hg-leaf__svg rect,
+.hg-leaf__svg polygon {
+  fill: color-mix(in srgb, var(--c) 16%, transparent);
+  stroke: var(--c);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+  transition: fill 0.6s var(--ease-out), stroke 0.6s var(--ease-out);
+}
+.hg-leaf__svg circle {
+  fill: var(--c);
+  transition: fill 0.6s var(--ease-out);
+}
+.hg-leaf__pop {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hg-canopy:not(.is-still) {
+    animation: hg-aurora 14s ease-in-out infinite alternate;
+  }
+  .hg-canopy:not(.is-still)::after {
+    animation: hg-sheen 7s var(--ease-in-out) 1.2s infinite;
+  }
+  .hg-canopy:not(.is-still) .hg-leaf {
+    animation: hg-drift var(--dur) ease-in-out var(--delay) infinite alternate;
+  }
+  .hg-canopy:not(.is-still) .hg-leaf--square .hg-leaf__svg,
+  .hg-canopy:not(.is-still) .hg-leaf--diamond .hg-leaf__svg,
+  .hg-canopy:not(.is-still) .hg-leaf--triangle .hg-leaf__svg {
+    animation: hg-spin var(--spin) linear infinite var(--turn);
+  }
+  .hg-canopy:not(.is-still) .hg-leaf--dot .hg-leaf__svg {
+    animation: hg-breathe var(--dur) ease-in-out var(--delay) infinite alternate;
+  }
+  /* When the lit capabilities change, each leaf pops once in its new colour, one after another. */
+  .hg-canopy:not(.is-still) .hg-leaf__pop {
+    animation: hg-pop 0.8s var(--ease-out) calc(var(--i) * 55ms) both;
+  }
+}
+@keyframes hg-aurora {
+  to {
+    background-position: 100% 50%;
+  }
+}
+@keyframes hg-sheen {
+  0% {
+    translate: -120% 0;
+  }
+  55%,
+  100% {
+    translate: 320% 0;
+  }
+}
+@keyframes hg-drift {
+  from {
+    transform: translate(0, 0);
+  }
+  to {
+    transform: translate(var(--dx), var(--dy));
+  }
+}
+@keyframes hg-spin {
+  to {
+    rotate: 360deg;
+  }
+}
+@keyframes hg-breathe {
+  from {
+    scale: 0.7;
+  }
+  to {
+    scale: 1.15;
+  }
+}
+@keyframes hg-pop {
+  0% {
+    scale: 0.35;
+    opacity: 0.2;
+  }
+  60% {
+    scale: 1.2;
+    opacity: 1;
+  }
+  100% {
+    scale: 1;
+  }
+}
+
+/* ---------- sector list ---------- */
 .hg-list {
-  flex: 1;
   display: flex;
   flex-direction: column;
   margin: 0;
-  padding: 4px 8px 8px;
+  padding: 6px 8px 8px;
   list-style: none;
-}
-.hg-list li {
-  flex: 1;
-  min-block-size: 0;
 }
 .hg-list li + li {
   border-block-start: 1px solid var(--glass-edge);
 }
-.hg-row {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  block-size: 100%;
-  padding-inline: 4px 6px;
-  border-radius: 10px;
-  transition: background-color 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
-}
 /* The row is a real selector (button, aria-pressed). */
-.hg-row__pick {
+.hg-row {
   appearance: none;
-  flex: 1;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
-  min-inline-size: 0;
-  block-size: 100%;
-  padding-inline: 10px;
+  gap: 4px 10px;
+  inline-size: 100%;
+  padding: 10px 12px;
   border: 0;
-  border-radius: 8px;
+  border-radius: 10px;
   background: none;
   color: var(--ink);
   font: inherit;
   font-size: 16px;
+  line-height: 1.3;
   text-align: start;
   cursor: pointer;
+  transition: background-color 0.25s var(--ease-out);
 }
-.hg-row__pick:focus-visible {
+.hg-row:focus-visible {
   outline: 2px solid var(--ink);
   outline-offset: -2px;
 }
@@ -251,6 +407,10 @@
 .hg-row__name {
   font-weight: 680;
   letter-spacing: -0.01em;
+  unicode-bidi: plaintext;
+}
+:root:lang(ar) .hg-row__name {
+  letter-spacing: 0;
 }
 /* Chips repeat the capability colours, so the row matches the wires that feed it. */
 .hg-row__chips {
@@ -264,9 +424,33 @@
   background: var(--c);
 }
 /* De-emphasise by colour only; text never drops below AA contrast. */
-.hg-list li.is-dim .hg-row__name {
+.hg-list.is-focused li.is-dim .hg-row__name {
   color: var(--ink-3);
-  font-weight: 600;
+}
+
+/* Compact output card */
+.hg-out--compact {
+  border-radius: 14px;
+}
+.hg-out--compact .hg-out__head {
+  padding: 9px 12px;
+  font-size: 13px;
+}
+.hg-out--compact .hg-canopy {
+  block-size: 44px;
+}
+.hg-out--compact .hg-list {
+  padding: 4px 5px 5px;
+}
+.hg-out--compact .hg-row {
+  gap: 3px 6px;
+  padding: 7px 8px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+.hg-out--compact .hg-row__chips i {
+  inline-size: 7px;
+  block-size: 7px;
 }
 
 /* ---------- wires: each in its capability colour, soft until active ---------- */
@@ -298,7 +482,6 @@
   }
 }
 
-
 @media (prefers-reduced-motion: reduce) {
   .hg-flow,
   .hg-cap__btn,
@@ -308,26 +491,4 @@
   .hg-row {
     transition-duration: 0.01ms;
   }
-}
-
-/* ---------- narrow layout ---------- */
-.hg-flow[data-layout='narrow'] .hg-cap__btn {
-  padding: 0 12px;
-  gap: 8px;
-}
-.hg-flow[data-layout='narrow'] .hg-cap__head {
-  font-size: 13px;
-}
-.hg-flow[data-layout='narrow'] .hg-out__head {
-  padding: 9px 12px;
-  font-size: 13px;
-}
-.hg-flow[data-layout='narrow'] .hg-row__pick {
-  padding-inline: 6px;
-  gap: 6px;
-  font-size: 14px;
-}
-.hg-flow[data-layout='narrow'] .hg-row__chips i {
-  inline-size: 7px;
-  block-size: 7px;
 }

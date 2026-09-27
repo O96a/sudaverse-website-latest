@@ -1,6 +1,5 @@
 ---
 import Icon from '@/components/Icon.astro';
-import StageBadge from '@/components/StageBadge.astro';
 import ProductArt from './ProductArt.astro';
 import type { Product } from '@/data/products';
 import { localePath, t } from '@/i18n/utils';
@@ -21,7 +20,6 @@ const href = localePath(locale, `projects/${product.slug}`);
   <div class="row__body">
     <div class="row__head">
       <h3 class="row__name"><a class="row__link" href={href} translate="no">{product.name}</a></h3>
-      <StageBadge stage={product.stage} locale={locale} />
     </div>
     <p class="row__tag">{pick(product.tagline, locale)}</p>
     {

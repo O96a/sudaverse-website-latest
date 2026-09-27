@@ -46,49 +46,66 @@ export const SECTORS: Sector[] = [
 
 export type LayoutName = 'wide' | 'narrow';
 
-export interface Layout {
-  /** Virtual scene size; the viewport fits this into the container. */
+/** Container width (px) under which the compact layout (pill switches, smaller type) is used. */
+export const NARROW_MAX = 560;
+/** Room around the scene so the glass shadows are not clipped by the React Flow viewport. */
+export const SCENE_PAD = 10;
+
+export interface Box {
+  x: number;
+  y: number;
   w: number;
   h: number;
-  compact: boolean;
-  cap: { w: number; h: number; x: number; y0: number; dy: number };
-  out: { w: number; h: number; x: number; y: number };
-  /** Number of static hollow squares (the baobab "leaves") in the output card. */
-  squares: number;
-  /** Height of the leaf area inside the output card. */
-  canopyH: number;
+}
+export interface Scene {
+  name: LayoutName;
+  w: number;
+  h: number;
+  caps: Box[];
+  out: Box;
+  /** Vertical position of capability i's wire attachment on the output card, relative to its top edge. */
+  handleTops: number[];
 }
 
-export const LAYOUTS: Record<LayoutName, Layout> = {
-  wide: {
-    w: 880,
-    h: 646,
-    compact: false,
-    cap: { w: 236, h: 84, x: 0, y0: 14, dy: 118 },
-    out: { w: 452, h: 600, x: 428, y: 23 },
-    squares: 7,
-    canopyH: 80,
-  },
-  narrow: {
-    w: 360,
-    h: 540,
-    compact: true,
-    cap: { w: 128, h: 66, x: 0, y0: 14, dy: 104 },
-    out: { w: 204, h: 520, x: 156, y: 8 },
-    squares: 5,
-    canopyH: 56,
-  },
-};
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
 
-export const capY = (l: Layout, i: number) => l.cap.y0 + i * l.cap.dy;
+export const layoutFor = (w: number): LayoutName => (w < NARROW_MAX ? 'narrow' : 'wide');
+
+/** Widest a capability card may grow before its text wraps. */
+export const capMaxW = (w: number, name: LayoutName) => Math.round(name === 'wide' ? w * 0.4 : w * 0.46);
+/** Horizontal space the wires cross between the capability column and the output card. */
+export const wireGap = (w: number, name: LayoutName) => Math.round(name === 'wide' ? clamp(w * 0.14, 72, 132) : clamp(w * 0.09, 26, 40));
+export const outWidth = (w: number, capW: number, name: LayoutName) => w - 2 * SCENE_PAD - capW - wireGap(w, name);
+
 /**
- * Vertical position of capability i's wire attachment on the output card, relative to its top edge.
- * The five attachments cluster near the top so the wires fan in and curve, like a real node graph.
+ * Place the measured cards. Every box is sized by its own text (measured in the DOM, see HeroGraph), so
+ * nothing is fixed: the capability column is as wide as its longest card, the output card takes the rest,
+ * the shorter column is spread and centred against the taller one, and the wires fan in across the middle
+ * of the output card. Mirrors for right-to-left reading.
  */
-export const handleTop = (l: Layout, i: number) => (l.compact ? 40 + i * 20 : 58 + i * 30);
+export function buildScene(w: number, name: LayoutName, capW: number, capH: number[], outH: number, rtl: boolean): Scene {
+  const P = SCENE_PAD;
+  const n = capH.length;
+  const sum = capH.reduce((a, b) => a + b, 0);
+  const [minGap, maxGap] = name === 'wide' ? [14, 30] : [8, 20];
+  const gap = clamp((outH - sum) / (n - 1), minGap, maxGap);
+  const capsH = sum + gap * (n - 1);
+  const h = Math.max(capsH, outH);
+  const oW = outWidth(w, capW, name);
+  const mx = (x: number, bw: number) => (rtl ? w - x - bw : x);
 
-/** Mirror a horizontal position inside the scene for right-to-left reading. */
-export const mirrorX = (l: Layout, x: number, w: number, rtl: boolean) => (rtl ? l.w - x - w : x);
+  let y = P + (h - capsH) / 2;
+  const caps = capH.map((ch) => {
+    const b = { x: mx(P, capW), y, w: capW, h: ch };
+    y += ch + gap;
+    return b;
+  });
+  const out = { x: mx(w - P - oW, oW), y: P + (h - outH) / 2, w: oW, h: outH };
+  const top = outH * 0.2;
+  const span = outH * 0.6;
+  const handleTops = capH.map((_, i) => Math.round(top + (span * i) / (n - 1)));
+  return { name, w, h: h + 2 * P, caps, out, handleTops };
+}
 
 export const TEXT: Record<Locale, { group: string; hint: string; out: string; idle: string; uses: string }> = {
   en: {

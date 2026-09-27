@@ -1,6 +1,5 @@
 ---
 import Button from './Button.astro';
-import StageBadge from './StageBadge.astro';
 import Icon from './Icon.astro';
 import type { Product } from '@/data/products';
 import { localePath, t } from '@/i18n/utils';
@@ -22,7 +21,6 @@ const caps = capabilities ? (product.capabilities ?? []) : [];
 <div class="pitch">
   <div class="pitch__head">
     <h3 class="pitch__name" translate="no">{product.name}</h3>
-    <StageBadge stage={product.stage} locale={locale} />
   </div>
   <p class="pitch__tag">{pick(product.tagline, locale)}</p>
   <p class="pitch__sum">{pick(product.summary, locale)}</p>

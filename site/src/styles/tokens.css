@@ -105,10 +105,12 @@
     --color-accent-thread-on-deep: var(--copper-300);
 
     /* ---- Typography ---- */
-    --font-sans: 'Schibsted Grotesk Variable', 'IBM Plex Sans Arabic', ui-sans-serif, system-ui, -apple-system,
-      'Segoe UI', Roboto, sans-serif;
-    --font-sans-ar: 'IBM Plex Sans Arabic', 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, 'Segoe UI',
-      Tahoma, sans-serif;
+    --font-sans: 'Schibsted Grotesk Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+      'Times New Roman', 'Noto Naskh Arabic Variable', sans-serif;
+    /* Arabic pages: Latin runs (brand names, figures) keep the brand face, which has no Arabic glyphs, so
+       Arabic text falls through to Times New Roman where installed, then to self-hosted Noto Naskh Arabic. */
+    --font-sans-ar: 'Schibsted Grotesk Variable', 'Times New Roman', 'Noto Naskh Arabic Variable', 'Noto Naskh Arabic',
+      Times, serif;
     --font-mono: 'JetBrains Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
 
     --fs-100: 0.8125rem; /* 13  technical metadata */

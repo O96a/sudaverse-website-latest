@@ -41,7 +41,7 @@ Open decisions: WhatsApp number (chat launcher is built behind a config value an
 
 ## Restructure (owner direction, 2026-09-26)
 
-Navigation is Projects / Research / About. Services shown under the home hero: infrastructure setup, AI adoption, cybersecurity, IT consulting, training and capacity building, data engineering and analytics (general terms only). Published papers (owner-supplied): *Sudanizer: A Dialect-Specific Byte-Pair Encoding Tokenizer for NLP Arabic* and *AI Cybersecurity in the Maritime Industry: A Comprehensive Review of Threats, Regulations, and Defensive Strategies*, both IEEE FITAT 2026; authors, DOI and links to be supplied. Research directions: Arabic NLP with a focus on Sudanese dialects, adversarial cyberattack prevention, AI cognitive architectures, public sector infrastructure adaptation, geospatial and climate intelligence, adaptive learning for low-resource settings. Artifacts are long technical posts whose charts use only real, cited data. Project problem, approach and user-flow copy is drafted from approved descriptions and awaits owner review; SVG project logos will replace the PNGs.
+Navigation is Projects / Research / About. Services shown under the home hero: infrastructure setup, AI adoption, cybersecurity, IT consulting, training, data and analytics (general terms only). Arabic type: Times New Roman where installed, self-hosted Noto Naskh Arabic otherwise (owner, 2026-09-27). Published papers (owner-supplied): *Sudanizer: A Dialect-Specific Byte-Pair Encoding Tokenizer for NLP Arabic* and *AI Cybersecurity in the Maritime Industry: A Comprehensive Review of Threats, Regulations, and Defensive Strategies*, both IEEE FITAT 2026; authors, DOI and links to be supplied. Research directions: Arabic NLP with a focus on Sudanese dialects, adversarial cyberattack prevention, AI cognitive architectures, public sector infrastructure adaptation, geospatial and climate intelligence, adaptive learning for low-resource settings. Artifacts are long technical posts whose charts use only real, cited data. Project problem, approach and user-flow copy is drafted from approved descriptions and awaits owner review; SVG project logos will replace the PNGs.
 
 ## Brand Commitments
 
@@ -56,7 +56,7 @@ Absent, must not be fabricated: customers, case studies, publications beyond the
 
 1. Specificity over volume: show real capabilities and real outputs; three true things beat twelve placeholders.
 2. One umbrella: every product and solution reads as part of one AI and data body of work built for Sudanese realities.
-3. Evidence before claims: label stage honestly (In Development, Beta, Live) and keep unverified relationships off the page.
+3. Evidence before claims: keep unverified relationships off the page. Product stage (Live, Beta, ...) is not shown publicly, per the owner on 2026-09-26.
 4. Arabic is a first-class language, not a mirror of English.
 5. Commercial clarity: a visitor understands what Sudaverse builds and how to contact it within seconds.
 

@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { memo, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import {
   Handle,
   Position,
@@ -15,7 +15,7 @@ import '@xyflow/react/dist/style.css';
 import './pipeline.css';
 import { t, localePath } from '@/i18n/utils';
 import type { Locale } from '@/i18n/config';
-import { CYCLE_MS, HEAD_MID, buildLayouts, rowMinRem, stepColor, type FlowStepData, type Layout, type LayoutName } from './flow-layout';
+import { CARD_W, CYCLE_MS, HEAD_MID, buildLayouts, rowMinRem, stepColor, type FlowStepData, type Layout, type LayoutName, type MeasuredHeights } from './flow-layout';
 
 /**
  * A step-flow diagram in the Sudaverse style: glass cards joined by dashed wires, one step lit at a time.
@@ -296,7 +296,10 @@ const NO_NAMES: string[] = [];
 
 export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wideCardH }: FlowDiagramProps) {
   const uid = useId();
-  const layouts = useMemo(() => buildLayouts(steps, { wideCardH }), [steps, wideCardH]);
+  const [measured, setMeasured] = useState<MeasuredHeights | null>(null);
+  const [fontsTick, setFontsTick] = useState(0);
+  const measureRef = useRef<HTMLDivElement>(null);
+  const layouts = useMemo(() => buildLayouts(steps, { wideCardH, measured }), [steps, wideCardH, measured]);
   const split = useMemo(() => (names.length ? new RegExp(`(${names.map((n) => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})`) : null), [names]);
   const rowMin = rowMinRem(steps.length);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -342,6 +345,23 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
     };
   }, [rowMin]);
 
+  // Size every card by its real text: render the cards once, unscaled, at each layout's card width, and
+  // read their heights back. Measured again when the web fonts finish loading.
+  useEffect(() => {
+    const bump = () => setFontsTick((n) => n + 1);
+    document.fonts?.ready.then(bump);
+    document.fonts?.addEventListener('loadingdone', bump);
+    return () => document.fonts?.removeEventListener('loadingdone', bump);
+  }, []);
+  useLayoutEffect(() => {
+    const root = measureRef.current;
+    if (!mounted || !root) return;
+    const read = (name: LayoutName) =>
+      Array.from(root.querySelectorAll<HTMLElement>(`[data-m="${name}"]`)).map((el) => Math.ceil(el.getBoundingClientRect().height) + 2);
+    const next = { wide: read('wide'), narrow: read('narrow') };
+    setMeasured((prev) => (prev && JSON.stringify(prev) === JSON.stringify(next) ? prev : next));
+  }, [mounted, fontsTick, steps, locale]);
+
   // React Flow places its viewport a frame after mounting: fade the graph in once it has, and let the
   // placeholder list (identical cards in identical places) fade out and leave the DOM.
   useEffect(() => {
@@ -381,6 +401,17 @@ export default function FlowDiagram({ locale, steps, label, names = NO_NAMES, wi
 
   return (
     <div ref={rootRef} className="pf" data-n={Math.min(7, Math.max(3, steps.length))} data-layout={mounted ? layoutName : undefined} data-motion={motion ? 'on' : 'off'} style={vars as CSSProperties}>
+      {mounted && (
+        <div ref={measureRef} className="pf__measure" aria-hidden="true" inert>
+          {(['wide', 'narrow'] as const).map((name) =>
+            steps.map((step, i) => (
+              <div key={`${name}-${step.id}`} data-m={name} style={{ inlineSize: CARD_W[name] }}>
+                <StepCard step={step} color={stepColor(step, i)} split={split} index={i} locale={locale} uid={`${uid}-m${name}`} />
+              </div>
+            )),
+          )}
+        </div>
+      )}
       <div className="pf__box" role="group" aria-label={label}>
         {mounted && (
           <div className={`pf__flow${ready ? ' is-ready' : ''}`}>

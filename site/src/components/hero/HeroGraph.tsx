@@ -1,11 +1,10 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   Handle,
   Position,
   ReactFlow,
   ReactFlowProvider,
   getBezierPath,
-  useReactFlow,
   type Edge,
   type EdgeProps,
   type Node,
@@ -14,11 +13,25 @@ import {
 import '@xyflow/react/dist/style.css';
 import './hero-graph.css';
 import type { Locale } from '@/i18n/config';
-import { CAPS, LAYOUTS, SECTORS, TEXT, capById, capY, handleTop, mirrorX, type CapId, type Layout, type LayoutName } from './graph-data';
+import {
+  CAPS,
+  SECTORS,
+  TEXT,
+  buildScene,
+  capById,
+  capMaxW,
+  layoutFor,
+  outWidth,
+  type CapId,
+  type LayoutName,
+  type Scene,
+} from './graph-data';
 
 type Level = 'strong' | 'soft' | 'off';
 
-interface CapData extends Record<string, unknown> {
+/* ---------- capability card (input): a real switch, sized by its own text ---------- */
+
+interface CapCardProps {
   id: CapId;
   label: string;
   hint: string;
@@ -27,21 +40,183 @@ interface CapData extends Record<string, unknown> {
   on: boolean;
   compact: boolean;
   rtl: boolean;
-  onToggle: (id: CapId) => void;
-  onHold: (on: boolean) => void;
+  onToggle?: (id: CapId) => void;
+  onHold?: (on: boolean) => void;
+  children?: ReactNode;
 }
-interface OutData extends Record<string, unknown> {
+
+function CapCard({ id, label, hint, color, level, on, compact, rtl, onToggle, onHold, children }: CapCardProps) {
+  return (
+    <div
+      className={`hg-cap hg-cap--${level}${on ? ' is-on' : ''}${compact ? ' hg-cap--compact' : ''}`}
+      dir={rtl ? 'rtl' : 'ltr'}
+      style={{ ['--c' as string]: color }}
+    >
+      <button
+        type="button"
+        className="hg-cap__btn"
+        role="switch"
+        aria-checked={on}
+        onClick={() => onToggle?.(id)}
+        onMouseEnter={() => onHold?.(true)}
+        onMouseLeave={() => onHold?.(false)}
+        onFocus={() => onHold?.(true)}
+        onBlur={() => onHold?.(false)}
+      >
+        {compact ? (
+          <>
+            <span className="hg-switch hg-switch--mini" aria-hidden="true">
+              <i />
+            </span>
+            <span className="hg-cap__label">{label}</span>
+          </>
+        ) : (
+          <>
+            <span className="hg-cap__head">
+              <span className="hg-cap__dot" aria-hidden="true" />
+              <span className="hg-cap__label">{label}</span>
+            </span>
+            <span className="hg-cap__body">
+              <span className="hg-switch" aria-hidden="true">
+                <i />
+              </span>
+              <span className="hg-cap__hint">{hint}</span>
+            </span>
+          </>
+        )}
+      </button>
+      {children}
+    </div>
+  );
+}
+
+/* ---------- canopy: the baobab "leaves", alive in the logo colours ---------- */
+
+type Shape = 'square' | 'diamond' | 'triangle' | 'dot';
+/** Hand-placed leaves (percent of the canopy, px size, spin direction), spread so they never collide. */
+const LEAVES: { x: number; y: number; s: number; shape: Shape; spin: 1 | -1 }[] = [
+  { x: 7, y: 44, s: 17, shape: 'diamond', spin: 1 },
+  { x: 15, y: 74, s: 8, shape: 'dot', spin: 1 },
+  { x: 25, y: 34, s: 24, shape: 'square', spin: -1 },
+  { x: 37, y: 66, s: 15, shape: 'triangle', spin: 1 },
+  { x: 47, y: 30, s: 9, shape: 'dot', spin: -1 },
+  { x: 57, y: 60, s: 19, shape: 'diamond', spin: -1 },
+  { x: 68, y: 30, s: 13, shape: 'triangle', spin: -1 },
+  { x: 79, y: 62, s: 22, shape: 'square', spin: 1 },
+  { x: 92, y: 38, s: 13, shape: 'triangle', spin: 1 },
+];
+const NARROW_LEAVES = [0, 2, 3, 5, 7];
+
+function LeafShape({ shape }: { shape: Shape }) {
+  if (shape === 'dot') return <circle cx="12" cy="12" r="6" />;
+  if (shape === 'triangle') return <polygon points="12,3.5 21,19.5 3,19.5" />;
+  return <rect x="4" y="4" width="16" height="16" rx="2" transform={shape === 'diamond' ? 'rotate(45 12 12)' : undefined} />;
+}
+
+function Canopy({ compact, lit, still }: { compact: boolean; lit: CapId[]; still: boolean }) {
+  // Every leaf wears one of the logo colours. When capabilities light up, alternate leaves take their
+  // colours and all of them pop once, so the canopy answers the wires while staying multicoloured.
+  const pop = lit.join('.');
+  const picked = compact ? NARROW_LEAVES : LEAVES.map((_, i) => i);
+  return (
+    <div className={`hg-canopy${still ? ' is-still' : ''}`} aria-hidden="true">
+      {picked.map((i, k) => {
+        const l = LEAVES[i];
+        // On narrow cards the few leaves are spaced evenly, clear of the rounded edges.
+        const x = compact ? 12 + (k * 76) / (picked.length - 1) : l.x;
+        const size = Math.round(l.s * (compact ? 0.8 : 1));
+        const own = CAPS[i % CAPS.length].id;
+        const color = lit.length && k % 2 === 0 ? lit[(k / 2) % lit.length] : own;
+        return (
+          <span
+            key={i}
+            className={`hg-leaf hg-leaf--${l.shape}`}
+            style={{
+              left: `${x}%`,
+              top: `${l.y}%`,
+              width: size,
+              height: size,
+              ['--c' as string]: capById(color).color,
+              ['--i' as string]: k,
+              ['--dur' as string]: `${4.6 + ((i * 1.7) % 3.4)}s`,
+              ['--delay' as string]: `${-((i * 1.3) % 4)}s`,
+              ['--dx' as string]: `${((i % 3) - 1) * 5}px`,
+              ['--dy' as string]: `${i % 2 ? -7 : 6}px`,
+              ['--spin' as string]: `${12 + ((i * 5) % 11)}s`,
+              ['--turn' as string]: l.spin > 0 ? 'normal' : 'reverse',
+            }}
+          >
+            <svg viewBox="0 0 24 24" className="hg-leaf__svg">
+              <g key={pop} className="hg-leaf__pop">
+                <LeafShape shape={l.shape} />
+              </g>
+            </svg>
+          </span>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ---------- output card: canopy + the sector list ---------- */
+
+interface OutCardProps {
   locale: Locale;
   compact: boolean;
   rtl: boolean;
-  canopyH: number;
-  squares: number;
+  still: boolean;
   lit: CapId[];
   litSlugs: Set<string>;
   selected: string[];
+  onHover?: (slug: string | null) => void;
+  onSelect?: (slug: string) => void;
+  children?: ReactNode;
+}
+
+function OutCard({ locale, compact, rtl, still, lit, litSlugs, selected, onHover, onSelect, children }: OutCardProps) {
+  const t = TEXT[locale];
+  return (
+    <div className={`hg-out${compact ? ' hg-out--compact' : ''}`} dir={rtl ? 'rtl' : 'ltr'}>
+      {children}
+      <div className="hg-out__clip">
+        <div className="hg-out__head">{t.out}</div>
+        <Canopy compact={compact} lit={lit} still={still} />
+        <ul className={`hg-list${lit.length ? ' is-focused' : ''}`} role="list">
+          {SECTORS.map((sec) => {
+            const isLit = litSlugs.has(sec.id);
+            const sel = selected.includes(sec.id);
+            return (
+              <li
+                key={sec.id}
+                className={`${isLit ? 'is-lit' : 'is-dim'}${sel ? ' is-selected' : ''}`}
+                onMouseEnter={() => onHover?.(sec.id)}
+                onMouseLeave={() => onHover?.(null)}
+                onFocus={() => onHover?.(sec.id)}
+                onBlur={() => onHover?.(null)}
+              >
+                <button type="button" className="hg-row" aria-pressed={sel} onClick={() => onSelect?.(sec.id)}>
+                  <span className="hg-row__name">{sec.label[locale]}</span>
+                  <span className="hg-row__chips" aria-hidden="true">
+                    {sec.uses.map((u) => (
+                      <i key={u} style={{ ['--c' as string]: capById(u).color }} />
+                    ))}
+                  </span>
+                  <span className="sr-only">{`${t.uses}: ${sec.uses.map((u) => capById(u).label[locale]).join(', ')}`}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- React Flow nodes and wires ---------- */
+
+interface CapData extends Omit<CapCardProps, 'children'>, Record<string, unknown> {}
+interface OutData extends Omit<OutCardProps, 'children'>, Record<string, unknown> {
   handleTops: number[];
-  onHover: (slug: string | null) => void;
-  onSelect: (slug: string) => void;
 }
 interface WireData extends Record<string, unknown> {
   color: string;
@@ -52,73 +227,18 @@ type CapNode = Node<CapData, 'cap'>;
 type OutNode = Node<OutData, 'out'>;
 type WireEdge = Edge<WireData, 'wire'>;
 
-/* ---------- capability card (input) ---------- */
-
 const CapNodeView = memo(function CapNodeView({ data }: NodeProps<CapNode>) {
   return (
-    <div
-      className={`hg-cap hg-cap--${data.level}${data.on ? ' is-on' : ''}`}
-      dir={data.rtl ? 'rtl' : 'ltr'}
-      style={{ ['--c' as string]: data.color }}
-    >
-      <button
-        type="button"
-        className="hg-cap__btn"
-        role="switch"
-        aria-checked={data.on}
-        onClick={() => data.onToggle(data.id)}
-        onMouseEnter={() => data.onHold(true)}
-        onMouseLeave={() => data.onHold(false)}
-        onFocus={() => data.onHold(true)}
-        onBlur={() => data.onHold(false)}
-      >
-        <span className="hg-cap__head">
-          <span className="hg-cap__dot" aria-hidden="true" />
-          <span className="hg-cap__label">{data.label}</span>
-        </span>
-        <span className="hg-cap__body">
-          <span className="hg-switch" aria-hidden="true">
-            <i />
-          </span>
-          {!data.compact && <span className="hg-cap__hint">{data.hint}</span>}
-        </span>
-      </button>
+    <CapCard {...data}>
       <Handle type="source" position={data.rtl ? Position.Left : Position.Right} isConnectable={false} className="hg-handle" />
-    </div>
+    </CapCard>
   );
 });
 
-/* ---------- output card: a few static leaves + the sector list ---------- */
-
-/** Hand-placed baobab "leaves" (percent of the leaf area, px size, rotation), so they never overlap. */
-const LEAVES = [
-  { x: 6, y: 34, s: 18, r: 45 },
-  { x: 19, y: 62, s: 12, r: 0 },
-  { x: 32, y: 18, s: 26, r: 0 },
-  { x: 49, y: 56, s: 16, r: 45 },
-  { x: 62, y: 20, s: 14, r: 0 },
-  { x: 74, y: 50, s: 24, r: 45 },
-  { x: 90, y: 24, s: 12, r: 0 },
-];
-
 const OutNodeView = memo(function OutNodeView({ data }: NodeProps<OutNode>) {
-  const t = TEXT[data.locale];
-  const litCaps = data.lit.length ? data.lit : CAPS.map((c) => c.id);
-  const leaves = useMemo(
-    () =>
-      LEAVES.slice(0, data.squares).map((l, i) => ({
-        key: i,
-        x: l.x,
-        y: l.y,
-        size: Math.round(l.s * (data.compact ? 0.72 : 1)),
-        rot: l.r,
-        slot: i % 5,
-      })),
-    [data.squares, data.compact],
-  );
-
+  const { handleTops, ...card } = data;
   return (
-    <div className="hg-out" dir={data.rtl ? 'rtl' : 'ltr'}>
+    <OutCard {...card}>
       {CAPS.map((c, i) => (
         <Handle
           key={c.id}
@@ -127,62 +247,14 @@ const OutNodeView = memo(function OutNodeView({ data }: NodeProps<OutNode>) {
           position={data.rtl ? Position.Right : Position.Left}
           isConnectable={false}
           className="hg-handle hg-handle--tgt"
-          style={{ top: data.handleTops[i], ['--c' as string]: c.color }}
+          style={{ top: handleTops[i], ['--c' as string]: c.color }}
         />
       ))}
-      <div className="hg-out__clip">
-        <div className="hg-out__head">{t.out}</div>
-        <div className="hg-canopy" style={{ height: data.canopyH }} aria-hidden="true">
-          {leaves.map((s) => (
-            <i
-              key={s.key}
-              className="hg-leaf"
-              style={{
-                left: `${s.x}%`,
-                top: `${s.y}%`,
-                width: s.size,
-                height: s.size,
-                borderColor: capById(litCaps[s.slot % litCaps.length]).color,
-                rotate: `${s.rot}deg`,
-              }}
-            />
-          ))}
-        </div>
-        <ul className={`hg-list${data.lit.length ? ' is-focused' : ''}`} role="list">
-          {SECTORS.map((sec) => {
-            const lit = data.litSlugs.has(sec.id);
-            const sel = data.selected.includes(sec.id);
-            return (
-              <li
-                key={sec.id}
-                className={`${lit ? 'is-lit' : 'is-dim'}${sel ? ' is-selected' : ''}`}
-                onMouseEnter={() => data.onHover(sec.id)}
-                onMouseLeave={() => data.onHover(null)}
-                onFocus={() => data.onHover(sec.id)}
-                onBlur={() => data.onHover(null)}
-              >
-                <div className="hg-row">
-                  <button type="button" className="hg-row__pick" aria-pressed={sel} onClick={() => data.onSelect(sec.id)}>
-                    <span className="hg-row__name">{sec.label[data.locale]}</span>
-                    <span className="hg-row__chips" aria-hidden="true">
-                      {sec.uses.map((u) => (
-                        <i key={u} style={{ ['--c' as string]: capById(u).color }} />
-                      ))}
-                    </span>
-                    <span className="sr-only">{`${t.uses}: ${sec.uses.map((u) => capById(u).label[data.locale]).join(', ')}`}</span>
-                  </button>
-                </div>
-              </li>
-            );
-          })}
-        </ul>
-      </div>
-    </div>
+    </OutCard>
   );
 });
 
-/* ---------- wire: neutral and dashed; coloured only when its capability is active ---------- */
-
+/* Wires: each in its capability colour, soft until active. */
 const WireEdgeView = memo(function WireEdgeView(props: EdgeProps<WireEdge>) {
   const { sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data } = props;
   if (!data) return null;
@@ -199,21 +271,10 @@ const edgeTypes = { wire: WireEdgeView };
 
 /* ---------- graph ---------- */
 
-function Graph({
-  locale,
-  layout,
-  layoutName,
-  animate,
-  ready,
-}: {
-  locale: Locale;
-  layout: Layout;
-  layoutName: LayoutName;
-  animate: boolean;
-  ready: boolean;
-}) {
+function Graph({ locale, scene, animate, ready }: { locale: Locale; scene: Scene; animate: boolean; ready: boolean }) {
   const t = TEXT[locale];
   const rtl = locale === 'ar';
+  const compact = scene.name === 'narrow';
   const [picked, setPicked] = useState<CapId[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
   const [hoverProd, setHoverProd] = useState<string | null>(null);
@@ -221,7 +282,6 @@ function Graph({
   const [auto, setAuto] = useState<CapId | null>(null);
   const [visible, setVisible] = useState(true);
   const rootRef = useRef<HTMLDivElement>(null);
-  const { fitView } = useReactFlow();
 
   const onToggle = useCallback((id: CapId) => setPicked((p) => (p.includes(id) ? p.filter((x) => x !== id) : [...p, id])), []);
   const onSelect = useCallback((slug: string) => setSelected((p) => (p.includes(slug) ? p.filter((x) => x !== slug) : [...p, slug])), []);
@@ -229,7 +289,7 @@ function Graph({
   const onHold = useCallback((on: boolean) => setHold((n) => Math.max(0, n + (on ? 1 : -1))), []);
 
   // Auto-play: after a still first look, fire one capability at a time. It yields to any interaction, stops
-  // when scrolled out of view or when the tab is hidden, and never runs under reduced motion (the parent passes animate=false).
+  // when scrolled out of view or when the tab is hidden, and never runs under reduced motion (animate=false).
   const acted = picked.length > 0 || selected.length > 0 || hoverProd !== null || hold > 0;
   useEffect(() => {
     if (!animate || !visible || acted) {
@@ -260,24 +320,8 @@ function Graph({
     return () => io.disconnect();
   }, []);
 
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    let raf = 0;
-    const ro = new ResizeObserver(() => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => fitView({ padding: 0.01, duration: 0 }));
-    });
-    ro.observe(el);
-    return () => {
-      ro.disconnect();
-      cancelAnimationFrame(raf);
-    };
-  }, [fitView]);
-
   const { nodes, edges, summary } = useMemo(() => {
-    // Which capabilities light up (wires, switches) and which sector rows are highlighted.
-    // Selecting a sector highlights only that sector; switching a capability highlights the sectors
+    // Selecting a sector lights the capabilities it draws on; switching a capability lights the sectors
     // that use it. Ambient and autoplay states light everything or one capability at a time.
     const usesOf = (ids: string[]) => SECTORS.filter((w) => ids.includes(w.id)).flatMap((w) => w.uses);
     const byCaps = (caps: CapId[]) => SECTORS.filter((w) => w.uses.some((u) => caps.includes(u))).map((w) => w.id);
@@ -298,51 +342,51 @@ function Graph({
       rowSlugs = SECTORS.map((w) => w.id);
       focused = false;
     }
-    const litSlugs = new Set(rowSlugs);
     const levelOf = (c: CapId): Level => (lit.includes(c) ? (focused ? 'strong' : 'soft') : 'off');
-    const tops = CAPS.map((_, i) => handleTop(layout, i));
 
-    const ns: (CapNode | OutNode)[] = CAPS.map((c, i) => ({
-      id: `cap-${c.id}`,
-      type: 'cap' as const,
-      position: { x: mirrorX(layout, layout.cap.x, layout.cap.w, rtl), y: capY(layout, i) },
-      width: layout.cap.w,
-      height: layout.cap.h,
-      draggable: false,
-      selectable: false,
-      focusable: false,
-      data: {
-        id: c.id,
-        label: c.label[locale],
-        hint: c.hint[locale],
-        color: c.color,
-        level: levelOf(c.id),
-        on: picked.includes(c.id),
-        compact: layout.compact,
-        rtl,
-        onToggle,
-        onHold,
-      },
-    }));
+    const ns: (CapNode | OutNode)[] = CAPS.map((c, i) => {
+      const b = scene.caps[i];
+      return {
+        id: `cap-${c.id}`,
+        type: 'cap' as const,
+        position: { x: b.x, y: b.y },
+        width: b.w,
+        height: b.h,
+        draggable: false,
+        selectable: false,
+        focusable: false,
+        data: {
+          id: c.id,
+          label: c.label[locale],
+          hint: c.hint[locale],
+          color: c.color,
+          level: levelOf(c.id),
+          on: picked.includes(c.id),
+          compact,
+          rtl,
+          onToggle,
+          onHold,
+        },
+      };
+    });
     ns.push({
       id: 'out',
       type: 'out',
-      position: { x: mirrorX(layout, layout.out.x, layout.out.w, rtl), y: layout.out.y },
-      width: layout.out.w,
-      height: layout.out.h,
+      position: { x: scene.out.x, y: scene.out.y },
+      width: scene.out.w,
+      height: scene.out.h,
       draggable: false,
       selectable: false,
       focusable: false,
       data: {
         locale,
-        compact: layout.compact,
+        compact,
         rtl,
-        canopyH: layout.canopyH,
-        squares: layout.squares,
+        still: !animate,
         lit: focused ? lit : [],
-        litSlugs,
+        litSlugs: new Set(rowSlugs),
         selected,
-        handleTops: tops,
+        handleTops: scene.handleTops,
         onHover,
         onSelect,
       },
@@ -363,23 +407,22 @@ function Graph({
     let summary = t.idle;
     if (focused && acted) {
       const capNames = lit.map((c) => capById(c).label[locale]).join(', ');
-      const prodNames = (ids: string[]) => ids.map((id) => SECTORS.find((x) => x.id === id)?.label[locale]).filter(Boolean).join(', ');
-      summary = selected.length ? `${prodNames(selected)}: ${capNames}` : `${capNames}: ${prodNames(rowSlugs)}`;
+      const names = (ids: string[]) => ids.map((id) => SECTORS.find((x) => x.id === id)?.label[locale]).filter(Boolean).join(', ');
+      summary = selected.length ? `${names(selected)}: ${capNames}` : `${capNames}: ${names(rowSlugs)}`;
     }
     return { nodes: ns, edges: es, summary };
-  }, [layout, locale, rtl, picked, selected, hoverProd, auto, acted, animate, onToggle, onSelect, onHover, onHold, t]);
+  }, [scene, compact, locale, rtl, picked, selected, hoverProd, auto, acted, animate, onToggle, onSelect, onHover, onHold, t]);
 
   return (
-    <div ref={rootRef} className={`hg-flow${ready ? ' is-ready' : ''}`} data-layout={layoutName}>
+    <div ref={rootRef} className={`hg-flow${ready ? ' is-ready' : ''}${visible ? '' : ' is-paused'}`} data-layout={scene.name}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.01 }}
-        minZoom={0.2}
-        maxZoom={1.25}
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}
+        minZoom={1}
+        maxZoom={1}
         nodesDraggable={false}
         nodesConnectable={false}
         nodesFocusable={false}
@@ -401,43 +444,89 @@ function Graph({
   );
 }
 
-/* ---------- island ---------- */
+/* ---------- island: measure the real text, then lay the scene out at 1:1 ---------- */
+
+const EMPTY = new Set<string>();
 
 export default function HeroGraph({ locale }: { locale: Locale }) {
   const wrapRef = useRef<HTMLDivElement>(null);
-  const [layoutName, setLayoutName] = useState<LayoutName>('wide');
+  const measureRef = useRef<HTMLDivElement>(null);
+  const [width, setWidth] = useState(0);
+  const [fontsTick, setFontsTick] = useState(0);
+  const [scene, setScene] = useState<Scene | null>(null);
   const [motion, setMotion] = useState(false);
   const [ready, setReady] = useState(false);
   const t = TEXT[locale];
+  const rtl = locale === 'ar';
+  const name: LayoutName = layoutFor(width);
+  const compact = name === 'narrow';
 
   useEffect(() => {
     const el = wrapRef.current;
     if (!el) return;
-    const measure = () => setLayoutName(el.getBoundingClientRect().width < 560 ? 'narrow' : 'wide');
-    measure();
-    const ro = new ResizeObserver(measure);
+    const ro = new ResizeObserver(([e]) => setWidth(Math.round(e.contentRect.width)));
     ro.observe(el);
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
     const sync = () => setMotion(!mq.matches);
     sync();
     mq.addEventListener('change', sync);
-    const timer = window.setTimeout(() => {
-      setReady(true);
-      // Hide the loading skeleton behind the (translucent) glass cards once the real graph is up.
-      el.closest('.stage__box')?.setAttribute('data-ready', '');
-    }, 80);
+    // Card sizes depend on the final fonts: measure again once they have loaded.
+    const bump = () => setFontsTick((n) => n + 1);
+    document.fonts?.ready.then(bump);
+    document.fonts?.addEventListener('loadingdone', bump);
     return () => {
       ro.disconnect();
       mq.removeEventListener('change', sync);
-      window.clearTimeout(timer);
+      document.fonts?.removeEventListener('loadingdone', bump);
     };
   }, []);
 
+  // Every card is sized by its own text: the capability column takes the width of its longest card (up to a
+  // cap, then text wraps), the output card takes the rest, and heights are read back from the DOM.
+  useLayoutEffect(() => {
+    const root = measureRef.current;
+    if (!root || !width) return;
+    const caps = Array.from(root.querySelectorAll<HTMLElement>('[data-m="cap"]'));
+    const out = root.querySelector<HTMLElement>('[data-m="out"]');
+    if (!out || !caps.length) return;
+    caps.forEach((el) => (el.style.width = 'max-content'));
+    const natural = Math.ceil(Math.max(...caps.map((el) => el.getBoundingClientRect().width)));
+    const capW = Math.min(natural, capMaxW(width, name));
+    caps.forEach((el) => (el.style.width = `${capW}px`));
+    const capH = caps.map((el) => Math.ceil(el.getBoundingClientRect().height));
+    out.style.width = `${outWidth(width, capW, name)}px`;
+    const outH = Math.ceil(out.getBoundingClientRect().height);
+    setScene(buildScene(width, name, capW, capH, outH, rtl));
+  }, [width, name, rtl, fontsTick]);
+
+  useEffect(() => {
+    const box = wrapRef.current?.closest<HTMLElement>('.stage__box');
+    if (!scene || !box) return;
+    box.style.blockSize = `${scene.h}px`;
+    const timer = window.setTimeout(() => {
+      setReady(true);
+      box.setAttribute('data-ready', '');
+    }, 60);
+    return () => window.clearTimeout(timer);
+  }, [scene]);
+
   return (
-    <div ref={wrapRef} className="hg" role="group" aria-label={t.group} data-rtl={locale === 'ar' ? '' : undefined}>
-      <ReactFlowProvider key={layoutName}>
-        <Graph locale={locale} layout={LAYOUTS[layoutName]} layoutName={layoutName} animate={motion} ready={ready} />
-      </ReactFlowProvider>
+    <div ref={wrapRef} className="hg" role="group" aria-label={t.group} data-rtl={rtl ? '' : undefined}>
+      <div ref={measureRef} className="hg-measure" aria-hidden="true" inert>
+        {CAPS.map((c) => (
+          <div key={c.id} data-m="cap" className="hg-measure__item">
+            <CapCard id={c.id} label={c.label[locale]} hint={c.hint[locale]} color={c.color} level="soft" on={false} compact={compact} rtl={rtl} />
+          </div>
+        ))}
+        <div data-m="out" className="hg-measure__item">
+          <OutCard locale={locale} compact={compact} rtl={rtl} still lit={[]} litSlugs={EMPTY} selected={[]} />
+        </div>
+      </div>
+      {scene && (
+        <ReactFlowProvider key={scene.name}>
+          <Graph locale={locale} scene={scene} animate={motion} ready={ready} />
+        </ReactFlowProvider>
+      )}
     </div>
   );
 }
