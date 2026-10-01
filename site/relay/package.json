@@ -17,6 +17,6 @@
     "nodemailer": "^10.0.10"
   },
   "devDependencies": {
-    "smtp-server": "^3.19.13"
+    "smtp-server": "^3.19.15"
   }
 }
