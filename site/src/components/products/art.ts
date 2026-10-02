@@ -19,6 +19,7 @@ export const productArt: Record<string, ArtSpec> = {
   'sudan-monitor': { seed: 9, tone: 'deep', traces: 8, leaves: 9, graticule: true, plate: 'deep' },
   sudandr: { seed: 23, tone: 'nile', traces: 8, leaves: 8, plate: 'paper' },
   sudaflood: { seed: 31, tone: 'nile', traces: 8, leaves: 8, graticule: true, plate: 'paper' },
+  nodegrid: { seed: 67, tone: 'nile', traces: 11, leaves: 18, plate: 'paper' },
   llmcorpuskit: { seed: 58, tone: 'sage', traces: 12, leaves: 22, plate: 'paper' },
 };
 

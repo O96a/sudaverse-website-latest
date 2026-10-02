@@ -8,6 +8,7 @@ import urriLogo from '@/assets/products/urri-logo.png';
 import sudataLogo from '@/assets/products/sudata-logo.png';
 import sudanMonitorLogo from '@/assets/products/sudan-monitor-logo.png';
 import sudanizerLogo from '@/assets/products/sudanizer-logo.png';
+import nodegridLogo from '@/assets/products/nodegrid-logo.png';
 
 /**
  * Product registry: the single source of truth for menus, product pages, the ecosystem
@@ -176,6 +177,68 @@ export const products: Product[] = [
       {
         en: 'Speaks with farmers in their local dialect.',
         ar: 'يتحدث مع المزارع باللهجة المحلية.',
+      },
+    ],
+  },
+  {
+    slug: 'nodegrid',
+    name: 'NodeGrid',
+    category: 'ai-products',
+    stage: 'live',
+    logo: nodegridLogo,
+    // Owner added this project on 2026-10-02. Source: the NodeGrid v1.0 release notes; its technology
+    // stack, model vendors and protocols are left out per the content rules. No public URL yet.
+    tagline: {
+      en: 'Self-hosted control plane for AI agents.',
+      ar: 'منصة تحكم مستضافة ذاتيًا لوكلاء الذكاء الاصطناعي.',
+    },
+    summary: {
+      en: 'NodeGrid is a self-hosted platform for building, running and supervising AI agents from the browser. Teams configure agents, connect them to their own documents and tools, and chain them into workflows, all inside their own environment.',
+      ar: 'NodeGrid منصة مستضافة ذاتيًا لبناء وكلاء الذكاء الاصطناعي وتشغيلهم والإشراف عليهم من المتصفح. تُعِدّ الفرق وكلاءها، وتربطهم بمستنداتها وأدواتها، وتسلسلهم في مسارات عمل، كل ذلك داخل بيئتها الخاصة.',
+    },
+    problem: {
+      en: 'Running AI agents in production takes more than a prompt. Teams need to control who can do what, keep their data in their own environment, and see what every agent did and why.',
+      ar: 'تشغيل وكلاء الذكاء الاصطناعي في بيئة الإنتاج يتطلب أكثر من مجرد تعليمات. تحتاج الفرق إلى التحكم في الصلاحيات، وإبقاء بياناتها داخل بيئتها، ومعرفة ما فعله كل وكيل ولماذا.',
+    },
+    approach: {
+      en: 'NodeGrid brings agents, models, documents, tools and workflows into one browser-based control plane that runs on your own infrastructure, with separate workspaces, role-based access and an activity record for every run.',
+      ar: 'يجمع NodeGrid الوكلاء والنماذج والمستندات والأدوات ومسارات العمل في منصة تحكم واحدة تعمل من المتصفح على بنيتك التحتية الخاصة، مع مساحات عمل منفصلة، وصلاحيات حسب الدور، وسجل نشاط لكل تشغيل.',
+    },
+    flow: [
+      { id: 'connect', title: { en: 'Connect', ar: 'الربط' }, desc: { en: 'Add the language models your team uses, hosted or local.', ar: 'أضف النماذج اللغوية التي يستخدمها فريقك، سحابية أو محلية.' } },
+      { id: 'configure', title: { en: 'Configure', ar: 'الإعداد' }, desc: { en: 'Define an agent: its instructions, model, tools and memory.', ar: 'عرّف الوكيل: تعليماته ونموذجه وأدواته وذاكرته.' } },
+      { id: 'ground', title: { en: 'Ground', ar: 'الإسناد' }, desc: { en: 'Upload documents so answers draw on your own material.', ar: 'ارفع المستندات لتستند الإجابات إلى موادك الخاصة.' } },
+      { id: 'orchestrate', title: { en: 'Orchestrate', ar: 'التنسيق' }, desc: { en: 'Chain agents into pipelines and workflows.', ar: 'اربط الوكلاء في سلاسل ومسارات عمل.' } },
+      { id: 'supervise', title: { en: 'Supervise', ar: 'الإشراف' }, desc: { en: 'Follow each run, its cost and its alerts from one dashboard.', ar: 'تابع كل تشغيل وتكلفته وتنبيهاته من لوحة واحدة.' } },
+    ],
+    audience: {
+      en: 'Organizations and engineering teams that run AI agents on their own infrastructure.',
+      ar: 'المؤسسات والفرق الهندسية التي تشغّل وكلاء الذكاء الاصطناعي على بنيتها التحتية الخاصة.',
+    },
+    capabilities: [
+      {
+        en: 'Self-hosted: agents, data and history stay on your own infrastructure.',
+        ar: 'استضافة ذاتية: يبقى الوكلاء والبيانات والسجل على بنيتك التحتية.',
+      },
+      {
+        en: 'Works with multiple language models, and falls back automatically when one is unavailable.',
+        ar: 'يعمل مع نماذج لغوية متعددة، وينتقل تلقائيًا إلى بديل عند تعذّر أحدها.',
+      },
+      {
+        en: 'Answers grounded in your own documents, with custom tools and shared memory.',
+        ar: 'إجابات مستندة إلى مستنداتك، مع أدوات مخصصة وذاكرة مشتركة.',
+      },
+      {
+        en: 'Pipelines and versioned workflows for unattended, multi-step work.',
+        ar: 'سلاسل ومسارات عمل ذات إصدارات للمهام متعددة الخطوات دون تدخل.',
+      },
+      {
+        en: 'Separate workspaces per organization, role-based access, usage and cost tracking, and alerts.',
+        ar: 'مساحات عمل منفصلة لكل جهة، وصلاحيات حسب الدور، وتتبّع للاستخدام والتكلفة، وتنبيهات.',
+      },
+      {
+        en: 'Remote edge agents that run jobs on machines across your network.',
+        ar: 'وكلاء طرفيون يشغّلون المهام على الأجهزة عبر شبكتك.',
       },
     ],
   },
