@@ -1,0 +1,595 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leading projects | Sudaverse</title>
+<meta name="description" content="SudaTutor, NodeGrid and SmartSelect: Sudaverse's leading projects in applied AI and digital systems, built for Sudan.">
+<link rel="canonical" href="https://www.sudaverse.com/profile/">
+<link rel="alternate" hreflang="en" href="https://www.sudaverse.com/profile/">
+<link rel="alternate" hreflang="ar" href="https://www.sudaverse.com/ar/">
+<link rel="icon" href="/favicon.ico">
+<meta property="og:title" content="Sudaverse leading projects">
+<meta property="og:description" content="SudaTutor, NodeGrid and SmartSelect: applied AI, built for Sudan.">
+<meta property="og:image" content="https://www.sudaverse.com/profile/img/khartoum.jpg">
+<style>
+@font-face { font-family: "Schibsted Grotesk"; src: url(fonts/schibsted-grotesk-latin-wght-normal.woff2) format("woff2"); font-weight: 400 900; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url(fonts/jetbrains-mono-latin-wght-normal.woff2) format("woff2"); font-weight: 100 800; font-display: swap; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; }
+html, body { height: 100%; background: #04121f; overflow: hidden; }
+body { font-family: "Schibsted Grotesk", Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+ul, ol { padding: 0; list-style: none; }
+img { display: block; }
+.stage { position: fixed; inset: 0 0 64px 0; overflow: hidden; }
+.deck { width: 1920px; height: 1080px; position: absolute; left: 50%; top: 50%; transform-origin: center center; }
+.slide { position: absolute !important; inset: 0; width: 1920px; height: 1080px; overflow: hidden; opacity: 0; visibility: hidden; transition: opacity .35s ease, visibility 0s linear .35s; }
+.slide.is-active { opacity: 1; visibility: visible; transition: opacity .35s ease; }
+.bar { position: fixed; left: 0; right: 0; bottom: 0; height: 64px; display: flex; align-items: center; gap: 12px; padding: 0 20px; background: #061a2c; border-top: 1px solid #1b3550; color: #dce8f1; font-size: 15px; }
+.bar a, .bar button { font: inherit; color: inherit; background: none; border: 1px solid #2a4a66; border-radius: 999px; padding: 8px 16px; min-height: 40px; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
+.bar a:hover, .bar button:hover { border-color: #30a8d8; color: #ffffff; }
+.bar a:focus-visible, .bar button:focus-visible { outline: 2px solid #30a8d8; outline-offset: 2px; }
+.bar .primary { background: #30a8d8; color: #061a2c; border-color: #30a8d8; font-weight: 600; }
+.bar .primary:hover { background: #5cc0e6; color: #061a2c; }
+.bar .count { font-family: "JetBrains Mono", monospace; min-width: 72px; text-align: center; color: #b4cbde; }
+.bar .home { margin-inline-end: auto; border: none; padding-inline: 4px; }
+.bar .home img { height: 18px; width: auto; }
+@media (max-width: 640px) { .bar .hide-sm { display: none; } .bar { gap: 8px; padding: 0 10px; } }
+@media (prefers-reduced-motion: reduce) { .slide, .slide.is-active { transition: none; } }
+@media print {
+  @page { size: 1920px 1080px; margin: 0; }
+  html, body { overflow: visible; height: auto; background: none; }
+  .bar { display: none; }
+  .stage { position: static; }
+  .deck { transform: none !important; position: static; width: auto; height: auto; }
+  .slide { position: relative !important; opacity: 1; visibility: visible; page-break-after: always; break-after: page; }
+}
+</style>
+</head>
+<body>
+<main class="stage" aria-roledescription="slide deck" aria-label="Sudaverse leading projects">
+<div class="deck" id="deck">
+<section class="slide" id="cover" style="background:#061a2c;color:#f3f4ef;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:0;display:flex;flex-direction:row">
+<div style="width:1000px;height:1080px;padding:112px 80px 96px 128px;display:flex;flex-direction:column;justify-content:space-between">
+<img src="img/sv-word-rev.png" alt="Sudaverse" style="width:370px;height:36px;object-fit:contain">
+<div style="display:flex;flex-direction:column;gap:36px">
+<h1 style="font-size:112px;font-weight:700;line-height:1.02;letter-spacing:-2px;color:#f3f4ef">Applied AI, built for Sudan.</h1>
+<p style="font-size:36px;line-height:1.35;color:#b4cbde">Our leading projects: SudaTutor, NodeGrid and SmartSelect. Three platforms, live today, designed around Sudanese realities.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px;border-top:1px solid #2a4a66;padding:32px 0 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:44px;font-weight:700;color:#30a8d8;line-height:1.1">3 live</p>
+<p style="font-size:24px;color:#b4cbde;line-height:1.35">platforms in this profile</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:44px;font-weight:700;color:#4caf50;line-height:1.1">AR + EN</p>
+<p style="font-size:24px;color:#b4cbde;line-height:1.35">Arabic-first, bilingual by design</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<p style="font-size:44px;font-weight:700;color:#e3a27f;line-height:1.1">Your servers</p>
+<p style="font-size:24px;color:#b4cbde;line-height:1.35">self-hosted options for sensitive data</p>
+</div>
+</div>
+</div>
+<div style="width:920px;height:1080px;position:relative;overflow:hidden">
+<img src="img/khartoum.jpg" alt="Khartoum and the Nile from above, with a suspension bridge" style="position:absolute;left:0;top:0;width:920px;height:1080px;object-fit:cover">
+<div style="position:absolute;left:0;top:0;width:920px;height:1080px;background:linear-gradient(90deg, #061a2c 0%, rgba(6,26,44,0.35) 30%, rgba(6,26,44,0) 60%)"></div>
+<p style="position:absolute;right:48px;bottom:40px;width:620px;text-align:right;font-size:24px;color:#dce8f1">Photo: Christopher Michel, CC BY 2.0</p>
+</div>
+
+</section>
+<section class="slide" id="about" style="background:#f3f4ef;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:64px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d;max-width:1400px">Sudanese engineers and researchers building applied AI and digital systems.</h2>
+<div style="display:flex;flex-direction:row;gap:96px;flex:1">
+<div style="flex:1;display:flex;flex-direction:column;gap:32px">
+<p style="font-size:32px;line-height:1.45;color:#37444c">We help institutions and companies adopt AI, secure their systems and build reliable digital infrastructure. One engineering team works from the network up to the model, in Arabic and English.</p>
+<div style="display:flex;flex-direction:row;flex-wrap:wrap;gap:12px">
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">Infrastructure setup</p>
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">AI adoption</p>
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">Cybersecurity</p>
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">IT consulting</p>
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">Training</p>
+<p style="font-size:24px;padding:10px 22px;border:1px solid #a9b0a5;border-radius:999px;color:#12191d">Data and analytics</p>
+</div>
+</div>
+<div style="width:760px;display:grid;grid-template-columns:1fr 1fr;gap:40px 48px">
+<div style="display:flex;flex-direction:column;gap:8px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<p style="font-size:72px;font-weight:700;line-height:1;color:#1873ad">10</p>
+<p style="font-size:24px;line-height:1.35;color:#37444c">projects across education, agriculture, geospatial, security and language</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<p style="font-size:72px;font-weight:700;line-height:1;color:#2f7d36">7</p>
+<p style="font-size:24px;line-height:1.35;color:#37444c">engineers and researchers in the core team</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<p style="font-size:72px;font-weight:700;line-height:1;color:#ab5426">2</p>
+<p style="font-size:24px;line-height:1.35;color:#37444c">peer-reviewed papers at IEEE FITAT 2026</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<p style="font-size:72px;font-weight:700;line-height:1;color:#155386">6</p>
+<p style="font-size:24px;line-height:1.35;color:#37444c">research directions feeding the products</p>
+</div>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  Leading projects</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">02</p>
+</div>
+
+</section>
+<section class="slide" id="challenge" style="background:#e8ebe4;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;justify-content:space-between;gap:56px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d;max-width:1300px">Global AI tools are not built around Sudan.</h2>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;border-top:3px solid #1873ad;padding:32px 0 0 0">
+<h3 style="font-size:44px;font-weight:700;color:#12191d">Language</h3>
+<p style="font-size:30px;line-height:1.45;color:#37444c">Sudanese Arabic is a low-resource dialect. General-purpose models and tokenizers break its words apart and miss its vocabulary.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;border-top:3px solid #2f7d36;padding:32px 0 0 0">
+<h3 style="font-size:44px;font-weight:700;color:#12191d">Context</h3>
+<p style="font-size:30px;line-height:1.45;color:#37444c">Curricula, admission policies and institutions are local. Tools designed elsewhere do not follow them.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;border-top:3px solid #ab5426;padding:32px 0 0 0">
+<h3 style="font-size:44px;font-weight:700;color:#12191d">Control</h3>
+<p style="font-size:30px;line-height:1.45;color:#37444c">Institutions need AI they can run in their own environment, with decisions they can explain and audit.</p>
+</div>
+</div>
+<div style="background:#0a2a47;padding:40px 48px;border-radius:2px">
+<p style="font-size:36px;font-weight:600;line-height:1.35;color:#f3f4ef">Sudaverse builds the missing layer: Arabic-first products that follow local rules and can run where the data lives.</p>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  Leading projects</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">03</p>
+</div>
+
+</section>
+<section class="slide" id="portfolio" style="background:#061a2c;color:#f3f4ef;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:64px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#f3f4ef">Three leading projects</h2>
+<div style="display:flex;flex-direction:row;gap:40px;flex:1">
+<div style="flex:1;display:flex;flex-direction:column;gap:24px;border-top:1px solid #2a4a66;padding:40px 0 0 0">
+<div style="width:160px;height:160px;background:rgba(243,244,239,0.94);border-radius:2px;display:flex;align-items:center;justify-content:center">
+<img src="img/sudatutor-logo.png" alt="SudaTutor logo" style="width:124px;height:100px;object-fit:contain">
+</div>
+<h3 style="font-size:44px;font-weight:700;color:#f3f4ef">SudaTutor</h3>
+<p style="font-size:24px;font-weight:600;color:#30a8d8">Education</p>
+<p style="font-size:28px;line-height:1.45;color:#b4cbde">AI tutoring that follows the Sudanese national curriculum, adapted to each learner's level and age.</p>
+<p style="font-size:24px;color:#dce8f1;font-family:'JetBrains Mono', monospace">sudatutor.sudaverse.com</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px;border-top:1px solid #2a4a66;padding:40px 0 0 0">
+<div style="width:160px;height:160px;background:rgba(243,244,239,0.06);border:1px solid #2a4a66;border-radius:2px;display:flex;align-items:center;justify-content:center">
+<img src="img/nodegrid-logo.png" alt="NodeGrid logo" style="width:112px;height:112px;object-fit:contain">
+</div>
+<h3 style="font-size:44px;font-weight:700;color:#f3f4ef">NodeGrid</h3>
+<p style="font-size:24px;font-weight:600;color:#4caf50">AI infrastructure</p>
+<p style="font-size:28px;line-height:1.45;color:#b4cbde">A self-hosted control plane to build, run and supervise AI agents from the browser.</p>
+<p style="font-size:24px;color:#dce8f1;font-family:'JetBrains Mono', monospace">nodegrid.sudaverse.com</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:24px;border-top:1px solid #2a4a66;padding:40px 0 0 0">
+<div style="width:160px;height:160px;background:rgba(243,244,239,0.06);border:1px solid #2a4a66;border-radius:2px;display:flex;align-items:center;justify-content:center">
+<img src="img/smartselect-logo.png" alt="SmartSelect logo" style="width:112px;height:112px;object-fit:contain">
+</div>
+<h3 style="font-size:44px;font-weight:700;color:#f3f4ef">SmartSelect</h3>
+<p style="font-size:24px;font-weight:600;color:#e3a27f">Selection decisions</p>
+<p style="font-size:28px;line-height:1.45;color:#b4cbde">Explainable decision support for admission, hiring, promotion and scholarships.</p>
+<p style="font-size:24px;color:#dce8f1;font-family:'JetBrains Mono', monospace">smartselect.sudaverse.com</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#b4cbde">Sudaverse  |  Leading projects</p>
+<p style="font-size:24px;color:#b4cbde;font-family:'JetBrains Mono', monospace">04</p>
+</div>
+
+</section>
+<section class="slide" id="sudatutor" style="background:#f3f4ef;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:row;gap:80px;align-items:center">
+<div style="width:760px;display:flex;flex-direction:column;gap:28px">
+<img src="img/sudatutor-logo.png" alt="SudaTutor logo" style="width:120px;height:96px;object-fit:contain">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">Learn the Sudanese curriculum with AI assistance.</h2>
+<p style="font-size:28px;line-height:1.5;color:#37444c">Learners need explanations that match their grade, their books and their context. SudaTutor is built around the curriculum itself and adapts each explanation to the learner's level and age.</p>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:64px;font-weight:700;line-height:1;color:#1873ad">12</p>
+<p style="font-size:24px;color:#37444c">grade levels</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:64px;font-weight:700;line-height:1;color:#1873ad">117</p>
+<p style="font-size:24px;color:#37444c">curriculum books</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:64px;font-weight:700;line-height:1;color:#1873ad">24/7</p>
+<p style="font-size:24px;color:#37444c">available</p>
+</div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<img src="img/sudatutor.png" alt="SudaTutor home page in Arabic: learn the Sudanese curriculum with AI assistance" style="width:824px;height:515px;object-fit:cover;border:1px solid #a9b0a5;border-radius:2px;box-shadow:0 24px 64px rgba(10,42,71,0.18)">
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">sudatutor.sudaverse.com  |  Live</p>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  SudaTutor</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">05</p>
+</div>
+
+</section>
+<section class="slide" id="sudatutor-flow" style="background:#e8ebe4;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:0;display:flex;flex-direction:row">
+<div style="width:760px;height:1080px;position:relative;overflow:hidden">
+<img src="img/classroom.jpg" alt="Students writing an exam in a classroom" style="position:absolute;left:0;top:0;width:760px;height:1080px;object-fit:cover">
+<p style="position:absolute;left:40px;bottom:40px;width:680px;font-size:24px;color:#f3f4ef;text-shadow:0 2px 8px rgba(0,0,0,0.6)">Photo: African Union Mission in Somalia, public domain</p>
+</div>
+<div style="flex:1;padding:128px 128px 160px 112px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">How a learner uses it</h2>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;gap:32px;align-items:baseline;border-top:1px solid #a9b0a5;padding:20px 0">
+<p style="width:64px;font-size:28px;color:#1873ad;font-family:'JetBrains Mono', monospace">01</p>
+<p style="width:220px;font-size:32px;font-weight:700">Start</p>
+<p style="flex:1;font-size:28px;color:#37444c">Begin as a guest, or create a free account.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:baseline;border-top:1px solid #a9b0a5;padding:20px 0">
+<p style="width:64px;font-size:28px;color:#1873ad;font-family:'JetBrains Mono', monospace">02</p>
+<p style="width:220px;font-size:32px;font-weight:700">Choose</p>
+<p style="flex:1;font-size:28px;color:#37444c">Pick your grade and the book you are studying.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:baseline;border-top:1px solid #a9b0a5;padding:20px 0">
+<p style="width:64px;font-size:28px;color:#1873ad;font-family:'JetBrains Mono', monospace">03</p>
+<p style="width:220px;font-size:32px;font-weight:700">Ask</p>
+<p style="flex:1;font-size:28px;color:#37444c">Ask about a lesson, in Arabic.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:baseline;border-top:1px solid #a9b0a5;padding:20px 0">
+<p style="width:64px;font-size:28px;color:#1873ad;font-family:'JetBrains Mono', monospace">04</p>
+<p style="width:220px;font-size:32px;font-weight:700">Learn</p>
+<p style="flex:1;font-size:28px;color:#37444c">Get an explanation adapted to your level and age.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;align-items:baseline;border-top:1px solid #a9b0a5;border-bottom:1px solid #a9b0a5;padding:20px 0">
+<p style="width:64px;font-size:28px;color:#1873ad;font-family:'JetBrains Mono', monospace">05</p>
+<p style="width:220px;font-size:32px;font-weight:700">Track</p>
+<p style="flex:1;font-size:28px;color:#37444c">Follow progress through continuous assessment.</p>
+</div>
+</div>
+<p style="font-size:28px;line-height:1.45;color:#37444c"><b>Built for</b> learners studying the Sudanese national curriculum, and the schools and families supporting them.</p>
+</div>
+<div style="position:absolute;left:888px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  SudaTutor</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">06</p>
+</div>
+
+</section>
+<section class="slide" id="nodegrid" style="background:#061a2c;color:#f3f4ef;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:0;display:flex;flex-direction:row">
+<div style="width:1100px;height:1080px;padding:128px 96px 160px 128px;display:flex;flex-direction:column;gap:32px;justify-content:center">
+<img src="img/nodegrid-logo.png" alt="NodeGrid logo" style="width:112px;height:112px;object-fit:contain">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#f3f4ef">A self-hosted control plane for AI agents.</h2>
+<p style="font-size:28px;line-height:1.5;color:#b4cbde">Running AI agents in production takes more than a prompt. Teams need to control who can do what, keep their data in their own environment, and see what every agent did and why. NodeGrid brings agents, models, documents, tools and workflows into one browser-based control plane on your own infrastructure.</p>
+<div style="display:flex;flex-direction:row;gap:40px;border-top:1px solid #2a4a66;padding:28px 0 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#4caf50">v1.0</p>
+<p style="font-size:24px;color:#b4cbde">first tagged release, live</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#30a8d8">Multi-tenant</p>
+<p style="font-size:24px;color:#b4cbde">with role-based access</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#e3a27f">Edge-ready</p>
+<p style="font-size:24px;color:#b4cbde">agents on machines across your network</p>
+</div>
+</div>
+</div>
+<div style="width:820px;height:1080px;position:relative;overflow:hidden">
+<img src="img/servers.jpg" alt="Rows of server racks lit in blue" style="position:absolute;left:0;top:0;width:820px;height:1080px;object-fit:cover">
+<div style="position:absolute;left:0;top:0;width:820px;height:1080px;background:linear-gradient(90deg, #061a2c 0%, rgba(6,26,44,0.2) 35%, rgba(6,26,44,0) 70%)"></div>
+<p style="position:absolute;left:48px;bottom:64px;width:724px;text-align:right;font-size:24px;color:#b4cbde;font-family:'JetBrains Mono', monospace">nodegrid.sudaverse.com</p>
+</div>
+
+</section>
+<section class="slide" id="nodegrid-arch" style="background:#f3f4ef;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">How NodeGrid is put together</h2>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:0">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#e8ebe4;border-top:3px solid #1873ad;padding:36px">
+<h3 style="font-size:40px;font-weight:700;color:#12191d">Operators</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">A browser dashboard: agents, chat, pipelines, workflows, usage and alerts.</p>
+</div>
+<div style="width:96px;display:flex;align-items:center;justify-content:center" aria-hidden="true"><svg width="72" height="24" viewBox="0 0 72 24"><path d="M0 12H64" stroke="#56656e" stroke-width="3"/><path d="M56 3l10 9-10 9" fill="none" stroke="#56656e" stroke-width="3"/></svg></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#0a2a47;border-top:3px solid #4caf50;padding:36px">
+<h3 style="font-size:40px;font-weight:700;color:#f3f4ef">Control plane</h3>
+<p style="font-size:26px;line-height:1.45;color:#b4cbde">Sign-in, tenants and roles, workflow engine, activity record, cost tracking.</p>
+</div>
+<div style="width:96px;display:flex;align-items:center;justify-content:center" aria-hidden="true"><svg width="72" height="24" viewBox="0 0 72 24"><path d="M0 12H64" stroke="#56656e" stroke-width="3"/><path d="M56 3l10 9-10 9" fill="none" stroke="#56656e" stroke-width="3"/></svg></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;background:#e8ebe4;border-top:3px solid #ab5426;padding:36px">
+<h3 style="font-size:40px;font-weight:700;color:#12191d">Execution</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Language models, hosted or local; documents and memory; tools; remote edge agents.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;border-top:1px solid #a9b0a5;padding:24px 0 0 0">
+<p style="font-size:28px;font-weight:700">Your infrastructure</p>
+<p style="font-size:26px;line-height:1.45;color:#37444c">The whole stack runs on the customer's servers, in containers.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;border-top:1px solid #a9b0a5;padding:24px 0 0 0">
+<p style="font-size:28px;font-weight:700">Isolated by design</p>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Every query is scoped to its tenant; one tenant cannot see another's data.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;border-top:1px solid #a9b0a5;padding:24px 0 0 0">
+<p style="font-size:28px;font-weight:700">Secure at the edge</p>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Edge agents connect over mutual TLS to run jobs across the network.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  NodeGrid</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">08</p>
+</div>
+
+</section>
+<section class="slide" id="nodegrid-caps" style="background:#e8ebe4;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">What teams get with NodeGrid</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:48px 56px">
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Self-hosted</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Agents, data and history stay on your own infrastructure.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Many models</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Works with multiple language models and falls back automatically when one is unavailable.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Grounded answers</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Answers drawn from your own documents, with custom tools and shared memory.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Workflows</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Pipelines and versioned workflows for unattended, multi-step work.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Governance</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Separate workspaces per organisation, role-based access, usage and cost tracking, alerts.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:14px;border-top:2px solid #12191d;padding:28px 0 0 0">
+<h3 style="font-size:36px;font-weight:700;color:#12191d">Edge agents</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Run jobs on machines across your network, with installers for Windows and Linux.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  NodeGrid</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">09</p>
+</div>
+
+</section>
+<section class="slide" id="smartselect" style="background:#f3f4ef;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:row;gap:80px;align-items:center">
+<div style="width:760px;display:flex;flex-direction:column;gap:28px">
+<img src="img/smartselect-logo.png" alt="SmartSelect logo" style="width:96px;height:96px;object-fit:contain">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">It screens, scores, ranks and explains. People decide.</h2>
+<p style="font-size:28px;line-height:1.5;color:#37444c">Explainable decision support for selection: admission, hiring, promotion, clinical residency, scholarships and grants. The organisation's panel decides and its approving authority approves.</p>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:2px solid #12191d;padding:24px 0 0 0">
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#ab5426">AR + EN</p>
+<p style="font-size:24px;color:#37444c">Arabic by default</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#ab5426">Audited</p>
+<p style="font-size:24px;color:#37444c">every rule, versioned</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:4px">
+<p style="font-size:44px;font-weight:700;line-height:1.1;color:#ab5426">Configured</p>
+<p style="font-size:24px;color:#37444c">per industry, not coded</p>
+</div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<img src="img/smartselect-en.png" alt="SmartSelect applicant page: open programmes, seats and the fuzzy score bands" style="width:824px;height:515px;object-fit:cover;border:1px solid #a9b0a5;border-radius:2px;box-shadow:0 24px 64px rgba(10,42,71,0.18)">
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">smartselect.sudaverse.com  |  Live demo</p>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  SmartSelect</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">10</p>
+</div>
+
+</section>
+<section class="slide" id="smartselect-flow" style="background:#e8ebe4;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">From application to approved decision</h2>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f3f4ef;border-top:3px solid #1873ad;padding:28px">
+<h3 style="font-size:32px;font-weight:700">Eligibility</h3>
+<p style="font-size:24px;line-height:1.45;color:#37444c">A rules engine checks each application against policy. Every rule cites its source.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f3f4ef;border-top:3px solid #1873ad;padding:28px">
+<h3 style="font-size:32px;font-weight:700">Scorecard</h3>
+<p style="font-size:24px;line-height:1.45;color:#37444c">The official score: weighted criteria, out of 100.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f3f4ef;border-top:3px solid #2f7d36;padding:28px">
+<h3 style="font-size:32px;font-weight:700">Fuzzy advice</h3>
+<p style="font-size:24px;line-height:1.45;color:#37444c">A recommendation band and the rules that fired. Advisory only.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#f3f4ef;border-top:3px solid #1873ad;padding:28px">
+<h3 style="font-size:32px;font-weight:700">Ranking</h3>
+<p style="font-size:24px;line-height:1.45;color:#37444c">The official score orders the cohort; capacity sets the cut-off.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#0a2a47;border-top:3px solid #e3a27f;padding:28px">
+<h3 style="font-size:32px;font-weight:700;color:#f3f4ef">Governance</h3>
+<p style="font-size:24px;line-height:1.45;color:#b4cbde">Panel decision, sign-offs and an approval chain with separation of duties.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px;align-items:center;flex:1">
+<img src="img/uofk.jpg" alt="The main gate of the University of Khartoum Library" style="width:520px;height:290px;object-fit:cover;border-radius:2px">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<p style="font-size:32px;font-weight:700;line-height:1.35">Two tracks, kept apart on purpose.</p>
+<p style="font-size:26px;line-height:1.5;color:#37444c">The scorecard is the number the panel signs and publishes. The fuzzy layer never changes it, and when the two disagree beyond a set threshold, the file goes to manual review instead of being quietly resolved.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  SmartSelect  |  Photo: Evon2023, CC0</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">11</p>
+</div>
+
+</section>
+<section class="slide" id="sectors" style="background:#061a2c;color:#f3f4ef;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#f3f4ef">The sectors we serve</h2>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<img src="img/classroom.jpg" alt="Students in a classroom" style="width:392px;height:300px;object-fit:cover;border-radius:2px">
+<h3 style="font-size:32px;font-weight:700;color:#f3f4ef">Education</h3>
+<p style="font-size:24px;line-height:1.45;color:#b4cbde">Learners, schools and families following the national curriculum.</p>
+<p style="font-size:24px;font-weight:600;color:#30a8d8">SudaTutor</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<img src="img/servers.jpg" alt="Server racks in a data centre" style="width:392px;height:300px;object-fit:cover;border-radius:2px">
+<h3 style="font-size:32px;font-weight:700;color:#f3f4ef">Enterprise and tech</h3>
+<p style="font-size:24px;line-height:1.45;color:#b4cbde">Teams running AI agents on their own infrastructure.</p>
+<p style="font-size:24px;font-weight:600;color:#4caf50">NodeGrid</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<img src="img/uofk.jpg" alt="University of Khartoum Library gate" style="width:392px;height:300px;object-fit:cover;border-radius:2px">
+<h3 style="font-size:32px;font-weight:700;color:#f3f4ef">Universities</h3>
+<p style="font-size:24px;line-height:1.45;color:#b4cbde">Admission committees, scholarships and grants.</p>
+<p style="font-size:24px;font-weight:600;color:#e3a27f">SmartSelect</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<img src="img/interview.jpg" alt="A hiring panel interviewing a candidate" style="width:392px;height:300px;object-fit:cover;border-radius:2px">
+<h3 style="font-size:32px;font-weight:700;color:#f3f4ef">Public sector and HR</h3>
+<p style="font-size:24px;line-height:1.45;color:#b4cbde">Hiring, promotion and clinical residency.</p>
+<p style="font-size:24px;font-weight:600;color:#e3a27f">SmartSelect</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#b4cbde">Photos: AMISOM (public domain), rawpixel (CC0), Evon2023 (CC0), Alan Cleaver (CC BY 2.0)</p>
+<p style="font-size:24px;color:#b4cbde;font-family:'JetBrains Mono', monospace">12</p>
+</div>
+
+</section>
+<section class="slide" id="principles" style="background:#f3f4ef;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">What every platform shares</h2>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;gap:56px;border-top:2px solid #12191d;padding:36px 0">
+<div style="width:520px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:44px;font-weight:700;color:#1873ad">Built for Sudan</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Arabic-first, designed around local realities.</p>
+</div>
+<p style="flex:1;font-size:28px;line-height:1.5;color:#12191d">SudaTutor follows the Sudanese national curriculum. SmartSelect opens in Arabic, right to left, by default.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px;border-top:1px solid #a9b0a5;padding:36px 0">
+<div style="width:520px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:44px;font-weight:700;color:#2f7d36">Secure by design</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Protected from the first decision.</p>
+</div>
+<p style="flex:1;font-size:28px;line-height:1.5;color:#12191d">NodeGrid isolates every tenant and enforces roles. SmartSelect separates duties along its approval chain and audits every change.</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:56px;border-top:1px solid #a9b0a5;border-bottom:1px solid #a9b0a5;padding:36px 0">
+<div style="width:520px;display:flex;flex-direction:column;gap:10px">
+<h3 style="font-size:44px;font-weight:700;color:#ab5426">Yours to run</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Your environment, your data.</p>
+</div>
+<p style="flex:1;font-size:28px;line-height:1.5;color:#12191d">NodeGrid and SmartSelect deploy inside the customer's own environment. Training and documentation leave the team owning what we deliver.</p>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  Leading projects</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">13</p>
+</div>
+
+</section>
+<section class="slide" id="how-we-work" style="background:#e8ebe4;color:#12191d;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:64px">
+<h2 style="font-size:72px;font-weight:700;line-height:1.08;letter-spacing:-1px;color:#12191d">A clear path from first conversation to a system your team owns</h2>
+<div style="display:flex;flex-direction:row;gap:0;position:relative">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #ab5426;padding:36px 48px 0 0">
+<p style="font-size:24px;color:#ab5426;font-family:'JetBrains Mono', monospace">01</p>
+<h3 style="font-size:40px;font-weight:700">Understand</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Every engagement starts with a conversation about the problem, the people and the constraints.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #a9b0a5;padding:36px 48px 0 0">
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">02</p>
+<h3 style="font-size:40px;font-weight:700">Plan</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">We recommend the architecture and technology before anything is bought or built.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #a9b0a5;padding:36px 48px 0 0">
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">03</p>
+<h3 style="font-size:40px;font-weight:700">Build and secure</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">We deliver inside your environment, cloud or on-premises, tested, secured and documented.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:16px;border-top:3px solid #a9b0a5;padding:36px 0 0 0">
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">04</p>
+<h3 style="font-size:40px;font-weight:700">Hand over</h3>
+<p style="font-size:26px;line-height:1.45;color:#37444c">Training and documentation leave your team confident to run and extend what we built.</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px;align-items:center;border-top:1px solid #a9b0a5;padding:32px 0 0 0">
+<p style="font-size:30px;line-height:1.45;color:#12191d"><b>Partnering with us:</b> pilots, institutional deployments, research collaboration and technical integration.</p>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between;align-items:center">
+<p style="font-size:24px;color:#56656e">Sudaverse  |  Leading projects</p>
+<p style="font-size:24px;color:#56656e;font-family:'JetBrains Mono', monospace">14</p>
+</div>
+
+</section>
+<section class="slide" id="contact" style="background:#061a2c;color:#f3f4ef;font-family:'Schibsted Grotesk', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:row;gap:96px;align-items:center">
+<div style="flex:1;display:flex;flex-direction:column;gap:48px">
+<h2 style="font-size:112px;font-weight:700;line-height:1.02;letter-spacing:-2px;color:#f3f4ef">Build with Sudaverse.</h2>
+<p style="font-size:32px;line-height:1.45;color:#b4cbde">Tell us what you are working on, and our engineering team will reply.</p>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;gap:32px;border-top:1px solid #2a4a66;padding:18px 0">
+<p style="width:240px;font-size:26px;color:#b4cbde">Email</p>
+<p style="flex:1;font-size:28px;color:#f3f4ef;font-family:'JetBrains Mono', monospace">info@sudaverse.com</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:1px solid #2a4a66;padding:18px 0">
+<p style="width:240px;font-size:26px;color:#b4cbde">Website</p>
+<p style="flex:1;font-size:28px;color:#f3f4ef;font-family:'JetBrains Mono', monospace">www.sudaverse.com</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:1px solid #2a4a66;padding:18px 0">
+<p style="width:240px;font-size:26px;color:#30a8d8">SudaTutor</p>
+<p style="flex:1;font-size:28px;color:#f3f4ef;font-family:'JetBrains Mono', monospace">sudatutor.sudaverse.com</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:1px solid #2a4a66;padding:18px 0">
+<p style="width:240px;font-size:26px;color:#4caf50">NodeGrid</p>
+<p style="flex:1;font-size:28px;color:#f3f4ef;font-family:'JetBrains Mono', monospace">nodegrid.sudaverse.com</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px;border-top:1px solid #2a4a66;border-bottom:1px solid #2a4a66;padding:18px 0">
+<p style="width:240px;font-size:26px;color:#e3a27f">SmartSelect</p>
+<p style="flex:1;font-size:28px;color:#f3f4ef;font-family:'JetBrains Mono', monospace">smartselect.sudaverse.com</p>
+</div>
+</div>
+</div>
+<img src="img/sv-full-rev.png" alt="Sudaverse logo: a baobab tree grown from circuit traces over the Sudaverse wordmark" style="width:560px;height:417px;object-fit:contain">
+
+</section>
+</div>
+</main>
+<nav class="bar" aria-label="Deck controls">
+<a class="home" href="/en/" aria-label="Sudaverse home"><img src="img/sv-word-rev.png" alt="Sudaverse"></a>
+<button type="button" id="prev" aria-label="Previous slide">&#8592;</button>
+<span class="count" id="count" aria-live="polite">1 / 15</span>
+<button type="button" id="next" aria-label="Next slide">&#8594;</button>
+<button type="button" id="print" class="hide-sm">Save as PDF</button>
+<a class="primary" href="sudaverse-leading-projects.pptx" download>Download PowerPoint</a>
+</nav>
+<script>
+(function () {
+  var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+  var deck = document.getElementById("deck"), count = document.getElementById("count");
+  var i = 0;
+  function fit() {
+    var w = window.innerWidth, h = window.innerHeight - 64;
+    deck.style.transform = "translate(-50%, -50%) scale(" + Math.min(w / 1920, h / 1080) + ")";
+  }
+  function show(n) {
+    i = Math.max(0, Math.min(slides.length - 1, n));
+    slides.forEach(function (s, k) { s.classList.toggle("is-active", k === i); s.setAttribute("aria-hidden", k === i ? "false" : "true"); });
+    count.textContent = (i + 1) + " / " + slides.length;
+    if (location.hash !== "#" + (i + 1)) history.replaceState(null, "", "#" + (i + 1));
+  }
+  document.getElementById("prev").onclick = function () { show(i - 1); };
+  document.getElementById("next").onclick = function () { show(i + 1); };
+  document.getElementById("print").onclick = function () { window.print(); };
+  document.addEventListener("keydown", function (e) {
+    if (["ArrowRight", "PageDown", " "].indexOf(e.key) >= 0) { e.preventDefault(); show(i + 1); }
+    else if (["ArrowLeft", "PageUp"].indexOf(e.key) >= 0) { e.preventDefault(); show(i - 1); }
+    else if (e.key === "Home") show(0); else if (e.key === "End") show(slides.length - 1);
+  });
+  document.querySelector(".stage").addEventListener("click", function (e) {
+    if (e.target.closest("a")) return;
+    show(e.clientX > window.innerWidth / 2 ? i + 1 : i - 1);
+  });
+  var x0 = null;
+  document.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener("touchend", function (e) {
+    if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40) show(dx < 0 ? i + 1 : i - 1);
+  });
+  window.addEventListener("resize", fit);
+  fit(); show((parseInt(location.hash.slice(1), 10) || 1) - 1);
+})();
+</script>
+</body>
+</html>
