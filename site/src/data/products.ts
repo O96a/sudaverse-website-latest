@@ -2,8 +2,8 @@ import type { ImageMetadata } from 'astro';
 import type { Localized } from '@/i18n/config';
 import sudatutorLogo from '@/assets/products/sudatutor-logo.png';
 import terabLogo from '@/assets/products/terab-logo.png';
-import sudandrLogo from '@/assets/products/sudandr-logo.png';
-import sudafloodLogo from '@/assets/products/sudaflood-logo.png';
+import aegisndrLogo from '@/assets/products/aegisndr-logo.png';
+import floodwatchLogo from '@/assets/products/floodwatch-logo.png';
 import urriLogo from '@/assets/products/urri-logo.png';
 import sudataLogo from '@/assets/products/sudata-logo.png';
 import sudanMonitorLogo from '@/assets/products/sudan-monitor-logo.png';
@@ -296,27 +296,29 @@ export const products: Product[] = [
     ],
   },
   {
-    slug: 'sudandr',
-    name: 'SudaNDR',
+    slug: 'aegisndr',
+    name: 'AegisNDR',
     category: 'secure-ai',
     stage: 'live',
     flagship: true,
-    logo: sudandrLogo,
+    logo: aegisndrLogo,
+    // Renamed from SudaNDR on 2026-10-03 (owner request): an international product, not Sudan-specific.
+    url: 'https://ndr.sudaverse.com/',
     tagline: {
       en: 'AI-assisted network detection and response.',
       ar: 'كشف الشبكات والاستجابة لها بمساعدة الذكاء الاصطناعي.',
     },
     summary: {
-      en: 'A smart cyber-defense platform that detects attacks and protects network traffic. Its AI engine analyzes network traffic in real time and recommends immediate protection measures.',
-      ar: 'منصة دفاع سيبراني ذكية لرصد الهجمات وحماية حركة الشبكة، مدعومة بمحرك ذكاء اصطناعي يحلل حركة الشبكة لحظيًا ويقدّم تدابير الحماية المباشرة.',
+      en: 'A smart cyber-defense platform that detects attacks and protects network traffic for organizations in any country. Its AI engine analyzes network traffic in real time and recommends immediate protection measures.',
+      ar: 'منصة دفاع سيبراني ذكية لرصد الهجمات وحماية حركة الشبكة للمؤسسات في أي بلد، مدعومة بمحرك ذكاء اصطناعي يحلل حركة الشبكة لحظيًا ويقدّم تدابير الحماية المباشرة.',
     },
     problem: {
       en: 'Advanced attacks hide inside normal network traffic. Security teams have to spot them and respond before the damage spreads across servers and connection points.',
       ar: 'تختبئ الهجمات المتقدمة داخل حركة الشبكة العادية، وعلى فرق الأمن أن تكتشفها وتستجيب لها قبل أن ينتشر الضرر عبر الخوادم ونقاط الاتصال.',
     },
     approach: {
-      en: 'SudaNDR’s AI engine analyzes network traffic in real time, flags attack patterns and abnormal behavior, and recommends immediate protection, including isolating suspicious devices.',
-      ar: 'يحلّل محرك الذكاء الاصطناعي في SudaNDR حركة الشبكة لحظيًا، ويرصد أنماط الهجوم والسلوك الشاذ، ويقترح تدابير حماية فورية منها عزل الأجهزة المشبوهة.',
+      en: 'AegisNDR’s AI engine analyzes network traffic in real time, flags attack patterns and abnormal behavior, and recommends immediate protection, including isolating suspicious devices.',
+      ar: 'يحلّل محرك الذكاء الاصطناعي في AegisNDR حركة الشبكة لحظيًا، ويرصد أنماط الهجوم والسلوك الشاذ، ويقترح تدابير حماية فورية منها عزل الأجهزة المشبوهة.',
     },
     flow: [
       { id: 'observe', title: { en: 'Observe', ar: 'المراقبة' }, desc: { en: 'Traffic in and out of servers and connection points is followed.', ar: 'تُتابَع الحركة الواردة والصادرة عبر الخوادم ونقاط الاتصال.' } },
@@ -345,23 +347,25 @@ export const products: Product[] = [
     ],
   },
   {
-    slug: 'sudaflood',
-    name: 'SudaFlood',
+    slug: 'floodwatch',
+    name: 'FloodWatch',
     category: 'data-intelligence',
     stage: 'live',
-    logo: sudafloodLogo,
+    logo: floodwatchLogo,
+    // Renamed from SudaFlood on 2026-10-03 (owner request): an international product, not Sudan-specific.
+    url: 'https://fload.sudaverse.com/',
     tagline: { en: 'Flood monitoring and early warning.', ar: 'رصد الفيضانات والإنذار المبكر.' },
     summary: {
-      en: 'An early-warning platform that helps monitor floods and torrents in Sudan interactively. Its AI analyzes satellite data and sends safety alerts directly to citizens.',
-      ar: 'منصة ذكية للإنذار المبكر تساعد في رصد فيضانات وسيول السودان بطريقة تفاعلية، مدعومة بذكاء اصطناعي يحلل بيانات الأقمار الصناعية ويقدّم تنبيهات السلامة المباشرة للمواطنين.',
+      en: 'An early-warning platform that helps communities anywhere monitor floods and torrents interactively. Its AI analyzes satellite data and sends safety alerts directly to citizens.',
+      ar: 'منصة ذكية للإنذار المبكر تساعد المجتمعات أينما كانت على رصد الفيضانات والسيول بطريقة تفاعلية، مدعومة بذكاء اصطناعي يحلل بيانات الأقمار الصناعية ويقدّم تنبيهات السلامة المباشرة للمواطنين.',
     },
     problem: {
-      en: 'Floods and torrents along Sudan’s rivers can rise quickly. Communities need warning, and a safe place to go, before the water arrives.',
-      ar: 'قد ترتفع الفيضانات والسيول على مجاري أنهار السودان بسرعة، وتحتاج المجتمعات إلى إنذار ومكان آمن تلجأ إليه قبل وصول المياه.',
+      en: 'Floods and torrents along rivers and seasonal valleys can rise quickly, in many countries. Communities need warning, and a safe place to go, before the water arrives.',
+      ar: 'قد ترتفع الفيضانات والسيول بسرعة على مجاري الأنهار والأودية الموسمية في بلدان كثيرة، وتحتاج المجتمعات إلى إنذار ومكان آمن تلجأ إليه قبل وصول المياه.',
     },
     approach: {
-      en: 'SudaFlood analyzes satellite data with AI to forecast rising water ahead of time, then sends safety alerts, with the nearest safe areas, directly to citizens.',
-      ar: 'يحلّل SudaFlood بيانات الأقمار الصناعية بالذكاء الاصطناعي ليتوقع ارتفاع المياه مسبقًا، ثم يرسل تنبيهات السلامة مع أقرب المناطق الآمنة مباشرة إلى المواطنين.',
+      en: 'FloodWatch analyzes satellite data with AI to forecast rising water ahead of time, then sends safety alerts, with the nearest safe areas, directly to citizens.',
+      ar: 'يحلّل FloodWatch بيانات الأقمار الصناعية بالذكاء الاصطناعي ليتوقع ارتفاع المياه مسبقًا، ثم يرسل تنبيهات السلامة مع أقرب المناطق الآمنة مباشرة إلى المواطنين.',
     },
     flow: [
       { id: 'observe', title: { en: 'Observe', ar: 'الرصد' }, desc: { en: 'Satellite data covers river courses and hazard areas.', ar: 'تغطي بيانات الأقمار الصناعية مجاري الأنهار ومناطق الخطر.' } },
@@ -379,8 +383,8 @@ export const products: Product[] = [
         ar: 'تنبّؤ هيدرولوجي ذكي: يتوقع مسار مناسيب المياه وارتفاعها مسبقًا.',
       },
       {
-        en: 'Coverage of Sudan: focuses on river courses and critical hazard areas.',
-        ar: 'تغطية جغرافية سودانية: تركّز على مجاري الأنهار ومناطق الخطر الحيوية في السودان.',
+        en: 'Regional coverage: each region focuses on its own river courses and critical hazard areas.',
+        ar: 'تغطية إقليمية: تركّز كل منطقة على مجاري أنهارها ومناطق الخطر الحيوية فيها.',
       },
       {
         en: 'Shelter guidance and alerts: identifies the nearest safe areas and issues evacuation alerts.',

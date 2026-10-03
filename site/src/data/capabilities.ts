@@ -83,8 +83,8 @@ export const capabilities: Capability[] = [
       ar: 'وعي بالموقف وإنذار مبكر مبنيان على البيانات المكانية.',
     },
     evidence: {
-      en: 'Sudan Monitor and SudaFlood are live.',
-      ar: 'سودان مونيتور وسودا فلود متاحان.',
+      en: 'Sudan Monitor and FloodWatch are live.',
+      ar: 'سودان مونيتور وFloodWatch متاحان.',
     },
   },
   {
@@ -95,8 +95,8 @@ export const capabilities: Capability[] = [
       ar: 'بنية آمنة وكشف للتهديدات وحماية للبنية التحتية الحيوية للبيانات.',
     },
     evidence: {
-      en: 'The team includes a SIEM and cybersecurity engineer and a CISSP-certified information systems expert. SudaNDR is live.',
-      ar: 'يضم الفريق مهندس SIEM وأمن سيبراني وخبير نظم معلومات حاصلًا على شهادة CISSP. وSudaNDR متاح.',
+      en: 'The team includes a SIEM and cybersecurity engineer and a CISSP-certified information systems expert. AegisNDR is live.',
+      ar: 'يضم الفريق مهندس SIEM وأمن سيبراني وخبير نظم معلومات حاصلًا على شهادة CISSP. وAegisNDR متاح.',
     },
   },
   {

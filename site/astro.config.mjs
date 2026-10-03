@@ -37,7 +37,12 @@ export default defineConfig({
       [`/${l}/resources/documentation`, `/${l}/projects/`],
       [`/${l}/resources/faq`, `/${l}/about/`],
       [`/${l}/products`, `/${l}/projects/`],
-      ...['sudatutor', 'terab', 'sudan-monitor', 'sudandr', 'sudaflood', 'sudata', 'urri', 'sudanizer', 'llmcorpuskit'].map((p) => [`/${l}/products/${p}`, `/${l}/projects/${p}/`]),
+      ...['sudatutor', 'terab', 'sudan-monitor', 'sudata', 'urri', 'sudanizer', 'llmcorpuskit'].map((p) => [`/${l}/products/${p}`, `/${l}/projects/${p}/`]),
+      // SudaNDR and SudaFlood were renamed AegisNDR and FloodWatch on 2026-10-03.
+      ...[['sudandr', 'aegisndr'], ['sudaflood', 'floodwatch']].flatMap(([o, n]) => [
+        [`/${l}/products/${o}`, `/${l}/projects/${n}/`],
+        [`/${l}/projects/${o}`, `/${l}/projects/${n}/`],
+      ]),
     ]),
   ),
   integrations: [

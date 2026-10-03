@@ -170,7 +170,7 @@ export const directions: Direction[] = [
       { en: 'Threats to AI in critical sectors such as maritime', ar: 'التهديدات التي تواجه الذكاء الاصطناعي في القطاعات الحيوية كالقطاع البحري' },
       { en: 'Security requirements for locally deployed models', ar: 'متطلبات الأمان للنماذج المنشورة محليًا' },
     ],
-    projects: ['sudandr'],
+    projects: ['aegisndr'],
   },
   {
     id: 'cognitive-architectures',
@@ -224,7 +224,7 @@ export const directions: Direction[] = [
       { en: 'Weather-aware irrigation planning', ar: 'تخطيط الري المراعي للطقس' },
       { en: 'Multi-layer situational maps', ar: 'خرائط متعددة الطبقات للوعي بالموقف' },
     ],
-    projects: ['sudaflood', 'terab', 'sudan-monitor'],
+    projects: ['floodwatch', 'terab', 'sudan-monitor'],
   },
   {
     id: 'adaptive-learning',
